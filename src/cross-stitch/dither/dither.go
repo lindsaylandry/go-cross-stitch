@@ -5,6 +5,7 @@ import (
   "image"
   "image/png"
   "image/jpeg"
+  "csv"
 )
 
 type Dither struct {
@@ -35,14 +36,37 @@ func Greyscale(img image.Image, outputLoc string) (*image.Gray, error) {
       greyImg.Set(x, y, pix)
     }
   }
-  
+
   place, err := os.Create(outputLoc)
   if err != nil {
     return greyImg, err
   }
   defer place.Close()
-  
+
   err = png.Encode(place, greyImg)
 
   return greyImg, err
+}
+
+func ConvertToDMC(img image.Image, output string) (image.Image, error {
+  file, err := os.Open("palette/dmc-floss.csv")
+  if err != nil {
+     return nil, err
+  }
+  defer file.Close()
+
+  // convert dmc data to csv hash
+  reader := csv.NewReader(file)
+  reader.Comma = ','
+
+  bounds := img.Bounds()
+  dmcImg = image.NewRGBA(bounds)
+
+  for x := bounds.Min.X; x < bounds.Dx(); x++ {
+    for y := bounds.Min.Y; y < bounds.Dy(); y++ {
+      // Euclidean distance
+    }
+  }
+
+  return dmcImg, nil
 }
