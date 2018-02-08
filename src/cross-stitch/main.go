@@ -4,7 +4,7 @@ import (
   "fmt"
   "os"
 
-  "cross-stitch/dither"
+  "cross-stitch/convert"
 )
 
 func main() {
@@ -14,14 +14,15 @@ func main() {
   }
   args := os.Args[1:]
 
-  img, err := dither.Open(args[0])
+  img, err := convert.Open(args[0])
   if err != nil {
     panic(err)
   }
   
-  grey, err := dither.Greyscale(img, "output.png")
-  if err != nil {
-    panic(err)
-  }
-  fmt.Println(grey)
+  //grey, err := convert.Greyscale(img, "output.png")
+  //if err != nil {
+  //  panic(err)
+  //}
+  
+  _, _ = convert.DMC(img)
 }

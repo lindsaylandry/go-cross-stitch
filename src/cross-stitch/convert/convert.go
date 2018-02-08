@@ -1,11 +1,14 @@
-package dither
+package convert
 
 import (
   "os"
   "image"
   "image/png"
   "image/jpeg"
-  "csv"
+  "image/color"
+  "encoding/csv"
+  "strconv"
+  "fmt"
 )
 
 type Dither struct {
@@ -48,8 +51,12 @@ func Greyscale(img image.Image, outputLoc string) (*image.Gray, error) {
   return greyImg, err
 }
 
-func ConvertToDMC(img image.Image, output string) (image.Image, error {
-  file, err := os.Open("palette/dmc-floss.csv")
+func DMC(img image.Image) (image.Image, error) {
+
+  // TODO: Many color palettes in the future?
+  //file, err := os.Open("palette/dmc-floss.csv")
+  file, err := os.Open("palette/black-white-grey.csv")
+
   if err != nil {
      return nil, err
   }
@@ -58,13 +65,32 @@ func ConvertToDMC(img image.Image, output string) (image.Image, error {
   // convert dmc data to csv hash
   reader := csv.NewReader(file)
   reader.Comma = ','
+  record, err := reader.ReadAll()
+  if err != nil {
+    return nil, err
+  }
+
+  // Record: [["Floss#","Description","Red","Green","Blue"],...]
 
   bounds := img.Bounds()
-  dmcImg = image.NewRGBA(bounds)
+  dmcImg := image.NewRGBA(bounds)
 
   for x := bounds.Min.X; x < bounds.Dx(); x++ {
     for y := bounds.Min.Y; y < bounds.Dy(); y++ {
       // Euclidean distance
+      r,g,b,a := img.At(x, y).RGBA()
+
+      dist := make([]int, len(record))
+      for c := 0; c < len(record); c++ {
+        rr, _ := strconv.Atoi(record[c][2])
+        rg, _ := strconv.Atoi(record[c][3])
+        rb, _ := strconv.Atoi(record[c][4])
+        dist[c] = (rr - int(r))^2 + (rg - int(g))^2 + (rb - int(b))^2
+      }
+
+      fmt.Println(dist)
+
+      dmcImg.Set(x, y, color.RGBA{uint8(r),uint8(g),uint8(b),uint8(a)})
     }
   }
 
