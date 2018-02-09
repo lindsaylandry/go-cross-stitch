@@ -8,7 +8,9 @@ import (
   "image/color"
   "encoding/csv"
   "strconv"
-  "fmt"
+  "math"
+
+  //"fmt"
 )
 
 type Dither struct {
@@ -52,10 +54,9 @@ func Greyscale(img image.Image, outputLoc string) (*image.Gray, error) {
 }
 
 func DMC(img image.Image) (image.Image, error) {
-
   // TODO: Many color palettes in the future?
   //file, err := os.Open("palette/dmc-floss.csv")
-  file, err := os.Open("palette/black-white-grey.csv")
+  file, err := os.Open("../../palette/black-white-grey.csv")
 
   if err != nil {
      return nil, err
@@ -78,21 +79,33 @@ func DMC(img image.Image) (image.Image, error) {
   for x := bounds.Min.X; x < bounds.Dx(); x++ {
     for y := bounds.Min.Y; y < bounds.Dy(); y++ {
       // Euclidean distance
-      r,g,b,a := img.At(x, y).RGBA()
+      r32,g32,b32,a := img.At(x, y).RGBA()
+      r, g, b := float64(uint8(r32)), float64(uint8(g32)), float64(uint8(b32))
+      //fmt.Println(r, " ", g, " ", b)
 
-      dist := make([]int, len(record))
+      min := [2]float64 {0, math.MaxFloat64}
       for c := 0; c < len(record); c++ {
         rr, _ := strconv.Atoi(record[c][2])
         rg, _ := strconv.Atoi(record[c][3])
         rb, _ := strconv.Atoi(record[c][4])
-        dist[c] = (rr - int(r))^2 + (rg - int(g))^2 + (rb - int(b))^2
+        dist := math.Pow((float64(rr) - r), 2) + math.Pow((float64(rg) - g), 2) + math.Pow((float64(rb) - b), 2)
+        if dist < min[1] {
+          min[1] = dist
+          min[0] = float64(c)
+        }
       }
 
-      fmt.Println(dist)
-
-      dmcImg.Set(x, y, color.RGBA{uint8(r),uint8(g),uint8(b),uint8(a)})
+      dmcImg.Set(x, y, color.RGBA{uint8(strconv.Atoi(record[int(min[0])][2])),uint8(strconv.Atoi(record[int(min[0])][3])),uint8(strconv.Atoi(record[int(min[0])][4])),uint8(a)})
     }
   }
+
+  place, err := os.Create("dmcoutput.png")
+  if err != nil {
+    return dmcImg, err
+  }
+  defer place.Close()
+
+  err = png.Encode(place, dmcImg)
 
   return dmcImg, nil
 }
