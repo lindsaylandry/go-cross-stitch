@@ -6,16 +6,11 @@ import (
   "image/png"
   "image/jpeg"
   "image/color"
-  "encoding/csv"
-  "strconv"
   "math"
 
   //"fmt"
+  "cross-stitch/palette"
 )
-
-type Dither struct {
-  Filter [][] float32
-}
 
 func Open(filename string) (image.Image, error) {
   file, err := os.Open(filename)
@@ -54,24 +49,8 @@ func Greyscale(img image.Image, outputLoc string) (*image.Gray, error) {
 }
 
 func DMC(img image.Image) (image.Image, error) {
-  // TODO: Many color palettes in the future?
-  //file, err := os.Open("palette/dmc-floss.csv")
-  file, err := os.Open("../../palette/black-white-grey.csv")
-
-  if err != nil {
-     return nil, err
-  }
-  defer file.Close()
-
-  // convert dmc data to csv hash
-  reader := csv.NewReader(file)
-  reader.Comma = ','
-  record, err := reader.ReadAll()
-  if err != nil {
-    return nil, err
-  }
-
-  // Record: [["Floss#","Description","Red","Green","Blue"],...]
+  t, err := palette.DMCPalette()
+  if err != nil { panic(err) }
 
   bounds := img.Bounds()
   dmcImg := image.NewRGBA(bounds)
@@ -83,19 +62,17 @@ func DMC(img image.Image) (image.Image, error) {
       r, g, b := float64(uint8(r32)), float64(uint8(g32)), float64(uint8(b32))
       //fmt.Println(r, " ", g, " ", b)
 
-      min := [2]float64 {0, math.MaxFloat64}
-      for c := 0; c < len(record); c++ {
-        rr, _ := strconv.Atoi(record[c][2])
-        rg, _ := strconv.Atoi(record[c][3])
-        rb, _ := strconv.Atoi(record[c][4])
-        dist := math.Pow((float64(rr) - r), 2) + math.Pow((float64(rg) - g), 2) + math.Pow((float64(rb) - b), 2)
-        if dist < min[1] {
-          min[1] = dist
-          min[0] = float64(c)
+      minLen := math.MaxFloat64
+      minIndex := 0
+      for c := 0; c < len(t); c++ {
+        dist := math.Pow((float64(t[c].R) - r), 2) + math.Pow((float64(t[c].G) - g), 2) + math.Pow((float64(t[c].B) - b), 2)
+        if dist < minLen {
+          minLen = dist
+          minIndex = c
         }
       }
 
-      dmcImg.Set(x, y, color.RGBA{uint8(strconv.Atoi(record[int(min[0])][2])),uint8(strconv.Atoi(record[int(min[0])][3])),uint8(strconv.Atoi(record[int(min[0])][4])),uint8(a)})
+      dmcImg.Set(x, y, color.RGBA{t[minIndex].R, t[minIndex].G, t[minIndex].B, uint8(a)})
     }
   }
 
