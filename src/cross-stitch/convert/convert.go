@@ -8,7 +8,7 @@ import (
   "image/color"
   "math"
 
-  //"fmt"
+  "fmt"
   "cross-stitch/palette"
 )
 
@@ -55,6 +55,7 @@ func DMC(img image.Image) (image.Image, error) {
   bounds := img.Bounds()
   dmcImg := image.NewRGBA(bounds)
 
+  legend := make(map[palette.Thread]int)
   for x := bounds.Min.X; x < bounds.Dx(); x++ {
     for y := bounds.Min.Y; y < bounds.Dy(); y++ {
       // Euclidean distance
@@ -72,9 +73,16 @@ func DMC(img image.Image) (image.Image, error) {
         }
       }
 
+      if _, ok := legend[t[minIndex]]; ok {
+        legend[t[minIndex]] += 1
+      } else {
+        legend[t[minIndex]] = 0
+      }
       dmcImg.Set(x, y, color.RGBA{t[minIndex].R, t[minIndex].G, t[minIndex].B, uint8(a)})
     }
   }
+
+  fmt.Println(legend)
 
   place, err := os.Create("dmcoutput.png")
   if err != nil {
