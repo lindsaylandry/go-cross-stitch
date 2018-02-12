@@ -3,6 +3,7 @@ package main
 import (
   "fmt"
   "os"
+  "flag"
 
   "cross-stitch/convert"
 )
@@ -11,23 +12,14 @@ import (
 
 func main() {
   if len(os.Args) < 2 {
-    fmt.Println("Hello world!")
+    fmt.Println("No input image provided")
     os.Exit(0)
   }
   args := os.Args[1:]
 
-  img, err := convert.Open(args[0])
-  if err != nil {
-    panic(err)
-  }
-  
-  //grey, err := convert.Greyscale(img, "output.png")
-  //if err != nil {
-  //  panic(err)
-  //}
-  
-  _, err = convert.DMC(img)
-  if err != nil {
-    panic(err)
-  }
+  num := flag.Int("ncolor", 500, "number of colors to use")
+  flag.Parse()
+
+  _, err := convert.DMC(args[0], *num)
+  if err != nil { panic(err) }
 }

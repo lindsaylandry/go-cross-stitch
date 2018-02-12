@@ -2,27 +2,28 @@ package convert
 
 import (
   "os"
+  "io/ioutil"
+  "bytes"
   "image"
   "image/png"
   "image/jpeg"
   "image/color"
   "math"
+  "path/filepath"
+  "strings"
 
   "fmt"
   "cross-stitch/palette"
 )
 
-func Open(filename string) (image.Image, error) {
-  file, err := os.Open(filename)
-  if err != nil {
-     return nil, err
-  }
-  defer file.Close()
+func open(filename string) (image.Image, error) {
+  data, err := ioutil.ReadFile(filename)
+  if err != nil { return nil, err }
 
   image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
-  image.RegisterFormat("jpg", "jpg", jpeg.Decode, jpeg.DecodeConfig)
+  image.RegisterFormat("jpeg", "jpeg", jpeg.Decode, jpeg.DecodeConfig)
 
-  img, _, err := image.Decode(file)
+  img, _, err := image.Decode(bytes.NewReader(data))
   return img, err
 }
 
@@ -48,25 +49,55 @@ func Greyscale(img image.Image, outputLoc string) (*image.Gray, error) {
   return greyImg, err
 }
 
-func DMC(img image.Image) (image.Image, error) {
+func DMC(path string, limit int) (image.Image, error) {
   t, err := palette.DMCPalette()
   if err != nil { panic(err) }
 
-  bounds := img.Bounds()
-  dmcImg := image.NewRGBA(bounds)
+  img, err := open(path)
+  if err != nil { panic(err) }
 
+
+  dmcImg, legend := convertColors(img, t)
+
+  fmt.Println(legend)
+  fmt.Println("Colors: ", len(legend))
+
+  // Write new image to png file
+  absPath, err := filepath.Abs(path)
+  absSplit := strings.Split(absPath, ".")
+  newPath := absSplit[0] + "-dmc.png"
+  place, err := os.Create(newPath)
+
+  if err != nil { return dmcImg, err }
+  defer place.Close()
+
+  err = png.Encode(place, dmcImg)
+
+  return dmcImg, nil
+}
+
+func convertColors(img image.Image, t []palette.Thread) (image.Image, map[palette.Thread]int) {
   legend := make(map[palette.Thread]int)
+  bounds := img.Bounds()
+  newImg := image.NewRGBA(bounds)
+
+  for x := bounds.Min.X; x < bounds.Dx(); x++ {
+    for y := bounds.Min.Y; y < bounds.Dy(); y++ {
+      pixel := img.At(x, y)
+      newImg.Set(x, y, pixel)
+    }
+  }
+
   for x := bounds.Min.X; x < bounds.Dx(); x++ {
     for y := bounds.Min.Y; y < bounds.Dy(); y++ {
       // Euclidean distance
-      r32,g32,b32,a := img.At(x, y).RGBA()
+      r32,g32,b32,a := newImg.At(x, y).RGBA()
       r, g, b := float64(uint8(r32)), float64(uint8(g32)), float64(uint8(b32))
-      //fmt.Println(r, " ", g, " ", b)
 
       minLen := math.MaxFloat64
       minIndex := 0
       for c := 0; c < len(t); c++ {
-        dist := math.Pow((float64(t[c].R) - r), 2) + math.Pow((float64(t[c].G) - g), 2) + math.Pow((float64(t[c].B) - b), 2)
+        dist := 2*math.Pow((float64(t[c].R) - r), 2) + 4*math.Pow((float64(t[c].G) - g), 2) + 3*math.Pow((float64(t[c].B) - b), 2) + (float64(t[c].R) + r)/2*(math.Pow((float64(t[c].R) - r), 2)-math.Pow((float64(t[c].B) - b), 2))/256
         if dist < minLen {
           minLen = dist
           minIndex = c
@@ -76,21 +107,11 @@ func DMC(img image.Image) (image.Image, error) {
       if _, ok := legend[t[minIndex]]; ok {
         legend[t[minIndex]] += 1
       } else {
-        legend[t[minIndex]] = 0
+        legend[t[minIndex]] = 1
       }
-      dmcImg.Set(x, y, color.RGBA{t[minIndex].R, t[minIndex].G, t[minIndex].B, uint8(a)})
+      newImg.Set(x, y, color.RGBA{t[minIndex].R, t[minIndex].G, t[minIndex].B, uint8(a)})
     }
   }
 
-  fmt.Println(legend)
-
-  place, err := os.Create("dmcoutput.png")
-  if err != nil {
-    return dmcImg, err
-  }
-  defer place.Close()
-
-  err = png.Encode(place, dmcImg)
-
-  return dmcImg, nil
+  return newImg, legend
 }
