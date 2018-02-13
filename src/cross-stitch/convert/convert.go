@@ -11,6 +11,7 @@ import (
   "math"
   "path/filepath"
   "strings"
+  "text/template"
 
   "fmt"
   "cross-stitch/palette"
@@ -39,9 +40,7 @@ func Greyscale(img image.Image, outputLoc string) (*image.Gray, error) {
   }
 
   place, err := os.Create(outputLoc)
-  if err != nil {
-    return greyImg, err
-  }
+  if err != nil { return greyImg, err }
   defer place.Close()
 
   err = png.Encode(place, greyImg)
@@ -56,22 +55,37 @@ func DMC(path string, limit int) (image.Image, error) {
   img, err := open(path)
   if err != nil { panic(err) }
 
-
   dmcImg, legend := convertColors(img, t)
 
   fmt.Println(legend)
   fmt.Println("Colors: ", len(legend))
+
+  // array of utf-8 decimal codes
+  a := make([]int, 9983-9728)
+  for i := range a {
+    a[i] = 9728 + i
+  }
+
+  type AA struct {
+    A []int
+  }
 
   // Write new image to png file
   absPath, err := filepath.Abs(path)
   absSplit := strings.Split(absPath, ".")
   newPath := absSplit[0] + "-dmc.png"
   place, err := os.Create(newPath)
-
   if err != nil { return dmcImg, err }
   defer place.Close()
 
   err = png.Encode(place, dmcImg)
+
+  // Write HTML instructions
+  htmlPath := absSplit[0] + "-dmc.html"
+  htmlFile, err := os.Create(htmlPath)
+  if err != nil { return dmcImg, err }
+  templates := template.Must(template.ParseFiles("../../templates/instructions.html"))
+  if err := templates.Execute(htmlFile, AA{A: a}); err != nil { panic(err) }
 
   return dmcImg, nil
 }
