@@ -1,10 +1,15 @@
+{{ $bounds := .Img.Bounds }}
 <html>
   <head>
     <title>Instructions</title>
   </head>
   <body>
-    {{ range $i :=  .A }}
-    <p>&#{{$i}};</p>
+    {{ range $i := forloop $bounds.Min.Y $bounds.Dy }}
+    <p>
+    {{ range $j := forloop $bounds.Min.X $bounds.Dx }}
+    &#9824
+    {{ end }}
+    </p>
     {{ end }}
   </body>
 </html>

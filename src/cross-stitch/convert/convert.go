@@ -9,12 +9,10 @@ import (
   "image/jpeg"
   "image/color"
   "math"
-  "path/filepath"
-  "strings"
-  "text/template"
 
   "fmt"
   "cross-stitch/palette"
+  "cross-stitch/filewriter"
 )
 
 func open(filename string) (image.Image, error) {
@@ -60,32 +58,10 @@ func DMC(path string, limit int) (image.Image, error) {
   fmt.Println(legend)
   fmt.Println("Colors: ", len(legend))
 
-  // array of utf-8 decimal codes
-  a := make([]int, 9983-9728)
-  for i := range a {
-    a[i] = 9728 + i
-  }
-
-  type AA struct {
-    A []int
-  }
-
-  // Write new image to png file
-  absPath, err := filepath.Abs(path)
-  absSplit := strings.Split(absPath, ".")
-  newPath := absSplit[0] + "-dmc.png"
-  place, err := os.Create(newPath)
-  if err != nil { return dmcImg, err }
-  defer place.Close()
-
-  err = png.Encode(place, dmcImg)
-
-  // Write HTML instructions
-  htmlPath := absSplit[0] + "-dmc.html"
-  htmlFile, err := os.Create(htmlPath)
-  if err != nil { return dmcImg, err }
-  templates := template.Must(template.ParseFiles("../../templates/instructions.html"))
-  if err := templates.Execute(htmlFile, AA{A: a}); err != nil { panic(err) }
+  err = filewriter.WriteHTML(dmcImg, path)
+  if err != nil { panic(err) }
+  err = filewriter.WritePNG(dmcImg, path)
+  if err != nil { panic(err) }
 
   return dmcImg, nil
 }
