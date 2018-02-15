@@ -12,6 +12,7 @@ type Thread struct {
   R uint8
   G uint8
   B uint8
+  UTFDec int
 }
 
 func GreyPalette () ([]Thread, error) {
@@ -43,7 +44,8 @@ func palette (path string) ([]Thread, error) {
     tr, _ := strconv.Atoi(record[i][2])
     tg, _ := strconv.Atoi(record[i][3])
     tb, _ := strconv.Atoi(record[i][4])
-    thread := Thread{id, record[i][1], uint8(tr), uint8(tg), uint8(tb)}
+    utf, _ := strconv.Atoi(record[i][5])
+    thread := Thread{id, record[i][1], uint8(tr), uint8(tg), uint8(tb), utf}
 
     t = append(t, thread)
   }

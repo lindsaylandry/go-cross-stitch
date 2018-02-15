@@ -1,15 +1,25 @@
-{{ $bounds := .Img.Bounds }}
 <html>
   <head>
     <title>Instructions</title>
+    <style>
+table td > div {
+  overflow:hidden;
+  height:20px;
+}
+table td:nth-child(5n) {
+  border-bottom: 3px;
+}
+    </style>
   </head>
   <body>
-    {{ range $i := forloop $bounds.Min.Y $bounds.Dy }}
-    <p>
-    {{ range $j := forloop $bounds.Min.X $bounds.Dx }}
-    &#9824
-    {{ end }}
-    </p>
-    {{ end }}
+    <table border="1" cellspacing="0" cellpadding="0" style="border: 1px; table-layout:fixed; width: 100%; border-collapse:collapse;">
+      {{ range $i := .Symbols }}
+      <tr>
+        {{ range $j := $i }}
+        <td width="20" height="20" align="center" valign="middle"><div>&#{{ $j }}</div></td>
+        {{ end }}
+      </tr>
+      {{ end }}
+    </table>
   </body>
 </html>

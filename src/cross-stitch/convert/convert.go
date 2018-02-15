@@ -53,12 +53,12 @@ func DMC(path string, limit int) (image.Image, error) {
   img, err := open(path)
   if err != nil { panic(err) }
 
-  dmcImg, legend := convertColors(img, t)
+  dmcImg, legend, symbols := convertColors(img, t)
 
   fmt.Println(legend)
   fmt.Println("Colors: ", len(legend))
 
-  err = filewriter.WriteHTML(dmcImg, path)
+  err = filewriter.WriteHTML(dmcImg, legend, symbols, path)
   if err != nil { panic(err) }
   err = filewriter.WritePNG(dmcImg, path)
   if err != nil { panic(err) }
@@ -66,7 +66,7 @@ func DMC(path string, limit int) (image.Image, error) {
   return dmcImg, nil
 }
 
-func convertColors(img image.Image, t []palette.Thread) (image.Image, map[palette.Thread]int) {
+func convertColors(img image.Image, t []palette.Thread) (image.Image, map[palette.Thread]int, [][]int) {
   legend := make(map[palette.Thread]int)
   bounds := img.Bounds()
   newImg := image.NewRGBA(bounds)
@@ -78,8 +78,10 @@ func convertColors(img image.Image, t []palette.Thread) (image.Image, map[palett
     }
   }
 
-  for x := bounds.Min.X; x < bounds.Dx(); x++ {
-    for y := bounds.Min.Y; y < bounds.Dy(); y++ {
+  symbols := make([][]int, bounds.Dy() - bounds.Min.Y)
+  for y := bounds.Min.Y; y < bounds.Dy(); y++ {
+    symbols[y] = make([]int, bounds.Dx() - bounds.Min.X)
+    for x := bounds.Min.X; x < bounds.Dx(); x++ {
       // Euclidean distance
       r32,g32,b32,a := newImg.At(x, y).RGBA()
       r, g, b := float64(uint8(r32)), float64(uint8(g32)), float64(uint8(b32))
@@ -99,9 +101,11 @@ func convertColors(img image.Image, t []palette.Thread) (image.Image, map[palett
       } else {
         legend[t[minIndex]] = 1
       }
+
+      symbols[y][x] = t[minIndex].UTFDec
       newImg.Set(x, y, color.RGBA{t[minIndex].R, t[minIndex].G, t[minIndex].B, uint8(a)})
     }
   }
 
-  return newImg, legend
+  return newImg, legend, symbols
 }
