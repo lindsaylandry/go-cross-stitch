@@ -2,24 +2,69 @@
   <head>
     <title>Instructions</title>
     <style>
-table td > div {
-  overflow:hidden;
-  height:20px;
+table.instructions {
+  border: 3px solid black; 
+  table-layout: fixed; 
+  width: 100%;
+  padding: 0;
 }
-table td:nth-child(5n) {
-  border-bottom: 3px;
+table.instructions tr, table.instructions td {
+  border-bottom: 1px solid black;
+  border-right: 1px solid black;
+}
+table.instructions td > div {
+  overflow: hidden;
+  height: 20px;
+}
+table.instructions tr td:nth-child(5n) {
+    border-right: 3px solid black;
+  }
+  table.instructions tr:nth-child(5n) td {
+      border-bottom: 3px solid black;
+    }
+table.instructions tr td:nth-child(10n) {
+  border-right: 4px solid black;
+}
+table.instructions tr:nth-child(10n) td {
+  border-bottom: 4px solid black;
+}
+table.legend td, table.legend th {
+  padding-right: 20px;
+}
+table.legend tr th {
+  border-bottom: 3px solid black;
 }
     </style>
   </head>
   <body>
-    <table border="1" cellspacing="0" cellpadding="0" style="border: 1px; table-layout:fixed; width: 100%; border-collapse:collapse;">
+    <h1>Legend</h1>
+    <table class="legend">
+      <tr>
+        <th align="right">Symbols</th>
+        <th align="right">Color</th>
+        <th align="right">Count</th>
+        <th align="left">Color Description</th>
+      </tr>
+      {{ range $color, $num := .Legend }}
+      <tr>
+        <td align="right">&#{{ $color.UTFDec }}</td>
+        <td align="right">{{ $color.ID }}</td>
+        <td align="right">{{ $num }} </td>
+        <td align="left">{{ $color.Name }}</td>
+      </tr>
+      {{ end }}
+    </table>
+    <h1>Pattern</h1>
+    <div style="padding: 20px">
+    <table class="instructions">
       {{ range $i := .Symbols }}
       <tr>
         {{ range $j := $i }}
-        <td width="20" height="20" align="center" valign="middle"><div>&#{{ $j }}</div></td>
+        <td width="20" align="center" valign="middle"><div>&#{{ $j }}</div></td>
         {{ end }}
       </tr>
       {{ end }}
     </table>
+  </div>
   </body>
 </html>
