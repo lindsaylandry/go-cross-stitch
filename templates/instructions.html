@@ -7,32 +7,39 @@ table.instructions {
   table-layout: fixed; 
   width: 100%;
   padding: 0;
+  border-collapse: collapse;
 }
 table.instructions tr, table.instructions td {
   border-bottom: 1px solid black;
   border-right: 1px solid black;
 }
-table.instructions td > div {
+table.instructions td > div, table.instructions th > div {
   overflow: hidden;
   height: 20px;
 }
-table.instructions tr td:nth-child(5n) {
-    border-right: 3px solid black;
-  }
-  table.instructions tr:nth-child(5n) td {
-      border-bottom: 3px solid black;
-    }
-table.instructions tr td:nth-child(10n) {
+table.instructions tr td:nth-child(5n), table.instructions tr th:nth-child(5n) {
+  border-right: 3px solid black;
+}
+table.instructions tr:nth-child(5n+1) td {
+  border-bottom: 3px solid black;
+}
+table.instructions tr td:nth-child(10n), table.instructions tr th:nth-child(10n) {
   border-right: 4px solid black;
 }
-table.instructions tr:nth-child(10n) td {
+table.instructions tr:nth-child(10n+1) td {
   border-bottom: 4px solid black;
+}
+table.legend {
+  border-collapse: collapse;
 }
 table.legend td, table.legend th {
   padding-right: 20px;
 }
 table.legend tr th {
   border-bottom: 3px solid black;
+}
+table.legend tr:nth-child(2n) td {
+  background-color: lightgray;
 }
     </style>
   </head>
@@ -56,15 +63,24 @@ table.legend tr th {
     </table>
     <h1>Pattern</h1>
     <div style="padding: 20px">
-    <table class="instructions">
-      {{ range $i := .Symbols }}
-      <tr>
-        {{ range $j := $i }}
-        <td width="20" align="center" valign="middle"><div>&#{{ $j }}</div></td>
+      <table class="instructions">
+        <tr>
+          {{ range $x := forloop 1 $Xlen }}
+          <th width="20" align="right" style="direction:rtl;">
+            {{ if mod $x 10 }}
+            {{ $x }}
+            {{ end }}
+          </th>
+          {{ end }}
+        </tr>
+        {{ range $i := .Symbols }}
+        <tr>
+          {{ range $j := $i }}
+          <td width="20" align="center" valign="middle"><div>&#{{ $j }}</div></td>
+          {{ end }}
+        </tr>
         {{ end }}
-      </tr>
-      {{ end }}
-    </table>
-  </div>
+      </table>
+    </div>
   </body>
 </html>

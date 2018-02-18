@@ -22,6 +22,8 @@ func forloop (start, end int) (stream chan int) {
     return
 }
 
+func mod (i, j int) bool { return i%j == 0 }
+
 func WriteHTML(img image.Image, legend map[palette.Thread]int, symbols [][]int, path string) (error){
   // array of utf-8 decimal codes
   a := make([]int, 9983-9728)
@@ -34,11 +36,13 @@ func WriteHTML(img image.Image, legend map[palette.Thread]int, symbols [][]int, 
     Img image.Image
     Symbols [][]int
     Legend map[palette.Thread]int
+    Xlen, Ylen int
   }
 
   // funcs to use in html template
   fmap := template.FuncMap{
     "forloop": forloop,
+    "mod": mod,
   }
 
   // Write new image to png file
@@ -50,7 +54,7 @@ func WriteHTML(img image.Image, legend map[palette.Thread]int, symbols [][]int, 
   htmlFile, err := os.Create(htmlPath)
   if err != nil { return err }
   t := template.Must(template.New("instructions").Funcs(fmap).ParseFiles("../../templates/instructions.html"))
-  if err := t.ExecuteTemplate(htmlFile, "instructions.html", AA{Img: img, Symbols: symbols, Legend: legend}); err != nil { return err }
+  if err := t.ExecuteTemplate(htmlFile, "instructions.html", AA{Img: img, Symbols: symbols, Legend: legend, Xlen: len(symbols[0]), Ylen: len(symbols)}); err != nil { return err }
 
   return nil
 }
