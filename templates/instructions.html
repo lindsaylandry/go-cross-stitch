@@ -3,13 +3,13 @@
     <title>Instructions</title>
     <style>
 table.instructions {
-  border: 3px solid black; 
+  border: 4px solid black; 
   table-layout: fixed; 
   width: 100%;
   padding: 0;
   border-collapse: collapse;
 }
-table.instructions tr, table.instructions td {
+table.instructions tr, table.instructions td, table.instructions th {
   border-bottom: 1px solid black;
   border-right: 1px solid black;
 }
@@ -17,17 +17,24 @@ table.instructions td > div, table.instructions th > div {
   overflow: hidden;
   height: 20px;
 }
-table.instructions tr td:nth-child(5n), table.instructions tr th:nth-child(5n) {
+table.instructions tr td:nth-child(5n+1), table.instructions tr th:nth-child(5n+1) {
   border-right: 3px solid black;
 }
 table.instructions tr:nth-child(5n+1) td {
   border-bottom: 3px solid black;
 }
-table.instructions tr td:nth-child(10n), table.instructions tr th:nth-child(10n) {
+table.instructions tr td:nth-child(10n+1), table.instructions tr th:nth-child(10n+1) {
   border-right: 4px solid black;
 }
-table.instructions tr:nth-child(10n+1) td {
+table.instructions tr:nth-child(10n+1) td, table.instructions th {
   border-bottom: 4px solid black;
+}
+td.indexes, th.indexes {
+  direction:rtl;
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 10pt;
+  background-color: lightgray;
 }
 table.legend {
   border-collapse: collapse;
@@ -40,10 +47,17 @@ table.legend tr th {
 }
 table.legend tr:nth-child(2n) td {
   background-color: lightgray;
+  text-align: "right"
+}
+@media print {
+  table { page-break-inside:auto }
+  tr    { page-break-inside:avoid; page-break-after:auto }
+  table.legend { page-break-after: always }
 }
     </style>
   </head>
   <body>
+    <img src="data:image/png;base64,{{ .Img }}" width="600" align="middle" style="image-rendering: pixelated;" alt="Image">
     <h1>Legend</h1>
     <table class="legend">
       <tr>
@@ -62,25 +76,29 @@ table.legend tr:nth-child(2n) td {
       {{ end }}
     </table>
     <h1>Pattern</h1>
-    <div style="padding: 20px">
       <table class="instructions">
         <tr>
-          {{ range $x := forloop 1 $Xlen }}
-          <th width="20" align="right" style="direction:rtl;">
+          {{ range $x := forloop 0 .Xlen }}
+          <th width="20" class="indexes">
             {{ if mod $x 10 }}
             {{ $x }}
             {{ end }}
           </th>
           {{ end }}
         </tr>
-        {{ range $i := .Symbols }}
+        {{ range $y := forloop 1 (len $.Symbols) }}
         <tr>
-          {{ range $j := $i }}
+          <td width="20" class="indexes">
+            {{ if mod $y 10 }}
+            {{ $y }}
+            {{ end }}
+          </td>
+          {{ $i := minus $y 1 }}
+          {{ range $j := index $.Symbols $i }}
           <td width="20" align="center" valign="middle"><div>&#{{ $j }}</div></td>
           {{ end }}
         </tr>
         {{ end }}
       </table>
-    </div>
   </body>
 </html>

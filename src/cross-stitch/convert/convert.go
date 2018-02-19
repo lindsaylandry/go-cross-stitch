@@ -58,9 +58,9 @@ func DMC(path string, limit int) (image.Image, error) {
   fmt.Println(legend)
   fmt.Println("Colors: ", len(legend))
 
+  newpath, nerr := filewriter.WritePNG(dmcImg, path)
+  if nerr != nil { panic(nerr) }
   err = filewriter.WriteHTML(dmcImg, legend, symbols, path)
-  if err != nil { panic(err) }
-  err = filewriter.WritePNG(dmcImg, path)
   if err != nil { panic(err) }
 
   return dmcImg, nil
