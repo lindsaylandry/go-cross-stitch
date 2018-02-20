@@ -20,6 +20,6 @@ func main() {
   num := flag.Int("ncolor", 500, "number of colors to use")
   flag.Parse()
 
-  _, err := convert.DMC(args[0], *num)
+  err := convert.DMC(args[0], *num)
   if err != nil { panic(err) }
 }
