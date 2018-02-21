@@ -1,12 +1,12 @@
-# Go Cross Stitch Pattern Generator
+# Go Cross-Stitch Pattern Generator
 Do you love GoLang? Do you also love cross-stitching? Congratulations, you are a very rare cross-section of people!
 
 This is a project that will take an image and convert it to a png and html of DMC thread colors and instructions.
 ![alt text][moon] 
 ![alt_text][moon-dmc]
 
-[moon]: https://github.com/lindsaylandry/go-cross-stitch/examples/test_images/FullMoon150px.jpg
-[moon-dmc]: https://github.com/lindsaylandry/go-cross-stitch/examples/test_images/FullMoon150px-dmc.png
+[moon]: https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/FullMoon150px.jpg
+[moon-dmc]: https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/FullMoon150px-dmc.png
 
 ## Build From Scratch
 Currently go get does not work. Docker is your best bet.
