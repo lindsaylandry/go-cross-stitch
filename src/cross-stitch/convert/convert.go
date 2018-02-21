@@ -53,13 +53,14 @@ func DMC(path string, limit int) (error) {
   img, err := open(path)
   if err != nil { panic(err) }
 
-  //bcrgb := colorQuant(img)
+  bcrgb := colorQuant(img, limit)
 
   // Convert best-colors to thread palette
-  //bt := convertPalette(bcrgb, t)
-  //fmt.Println(bt)
+  bt := convertPalette(bcrgb, t)
+  fmt.Println(bt)
 
-  dmcImg, legend, symbols := convertImage(img, t)
+  //dmcImg, legend, symbols := convertImage(img, t)
+  dmcImg, legend, symbols := convertImage(img, bt)
 
   _, nerr := filewriter.WritePNG(dmcImg, path)
   if nerr != nil { panic(nerr) }
@@ -70,8 +71,9 @@ func DMC(path string, limit int) (error) {
 }
 
 // convert best-color palette to match available threads
-func convertPalette(colors [][]uint8, t []palette.Thread) (map[palette.Thread]int) {
-  legend := make(map[palette.Thread]int)
+func convertPalette(colors [][]uint8, t []palette.Thread) ([]palette.Thread) {
+  dict := make(map[palette.Thread]int)
+  var legend []palette.Thread
   for i := 0; i < len(colors); i++ {
     minLen := math.MaxFloat64
     minIndex := 0
@@ -84,8 +86,9 @@ func convertPalette(colors [][]uint8, t []palette.Thread) (map[palette.Thread]in
       }
     }
 
-    if _, ok := legend[t[minIndex]]; !ok {
-      legend[t[minIndex]] = 0
+    if _, ok := dict[t[minIndex]]; !ok {
+      dict[t[minIndex]] = 0
+      legend = append(legend, t[minIndex])
     }
   }
 
@@ -136,8 +139,8 @@ func convertImage(img image.Image, t []palette.Thread) (image.Image, map[palette
   return newImg, legend, symbols
 }
 
-// start with 16 colors
-func colorQuant (img image.Image) ([][]uint8) {
+// start with 32 colors
+func colorQuant (img image.Image, n int) ([][]uint8) {
   bounds := img.Bounds()
   newImg := image.NewRGBA(bounds)
 
@@ -159,7 +162,7 @@ func colorQuant (img image.Image) ([][]uint8) {
   // 1 2 4 8 16
   slices := []int {0, len(allcolors)-1}
 
-  for i := 0; i < 4; i++ {
+  for i := 0; i < n; i++ {
     for j := 0; j < len(slices)-1; j++ {
       // get a slice of allcolors
       s := allcolors[slices[j]:slices[j+1]]

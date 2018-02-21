@@ -15,11 +15,10 @@ func main() {
     fmt.Println("No input image provided")
     os.Exit(0)
   }
-  args := os.Args[1:]
-
-  num := flag.Int("ncolor", 500, "number of colors to use")
+ 
+  num := flag.Int("n", 6, "number of colors to use (2^n)")
   flag.Parse()
 
-  err := convert.DMC(args[0], *num)
+  err := convert.DMC(flag.Args()[0], *num)
   if err != nil { panic(err) }
 }
