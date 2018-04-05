@@ -12,9 +12,13 @@ import (
 
   "fmt"
   "cross-stitch/palette"
-  "cross-stitch/filewriter"
-  "cross-stitch/sorter"
 )
+
+type Legend struct {
+  Thread palette.Thread
+  Stitches int
+  Symbol int
+}
 
 func open(filename string) (image.Image, error) {
   data, err := ioutil.ReadFile(filename)
@@ -61,11 +65,11 @@ func DMC(path string, limit int) (error) {
   fmt.Println(bt)
 
   //dmcImg, legend, symbols := convertImage(img, t)
-  dmcImg, legend, symbols := convertImage(img, bt)
+  dmcImg, legend, symbolMatrix := convertImage(img, bt)
 
-  _, nerr := filewriter.WritePNG(dmcImg, path)
+  _, nerr := WritePNG(dmcImg, path)
   if nerr != nil { panic(nerr) }
-  err = filewriter.WriteHTML(dmcImg, legend, symbols, path)
+  err = WriteHTML(dmcImg, legend, symbolMatrix, path)
   if err != nil { panic(err) }
 
   return nil
@@ -96,8 +100,8 @@ func convertPalette(colors [][]uint8, t []palette.Thread) ([]palette.Thread) {
   return legend
 }
 
-func convertImage(img image.Image, t []palette.Thread) (image.Image, map[palette.Thread]int, [][]int) {
-  legend := make(map[palette.Thread]int)
+func convertImage(img image.Image, t []palette.Thread) (image.Image, []Legend, [][]int) {
+  count := make(map[palette.Thread]int)
   bounds := img.Bounds()
   newImg := image.NewRGBA(bounds)
 
@@ -126,16 +130,23 @@ func convertImage(img image.Image, t []palette.Thread) (image.Image, map[palette
         }
       }
 
-      if _, ok := legend[t[minIndex]]; ok {
-        legend[t[minIndex]] += 1
+      if _, ok := count[t[minIndex]]; ok {
+        count[t[minIndex]] += 1
       } else {
-        legend[t[minIndex]] = 1
+        count[t[minIndex]] = 1
       }
 
-      symbols[y][x] = t[minIndex].UTFDec
+      symbols[y][x] = palette.Symbols[minIndex]
       newImg.Set(x, y, color.RGBA{t[minIndex].R, t[minIndex].G, t[minIndex].B, uint8(a)})
     }
   }
+
+  var legend []Legend
+  for i, v := range t {
+    l := Legend{v,count[v],palette.Symbols[i]}
+    legend = append(legend, l)
+  }
+  quickSortLegend(legend)
 
   return newImg, legend, symbols
 }
@@ -217,6 +228,5 @@ func colorQuant (img image.Image, n int) ([][]uint8) {
     bestcolors[i] = []uint8 {uint8(math.Sqrt(avgR/float64(len(s)))), uint8(math.Sqrt(avgG/float64(len(s)))), uint8(math.Sqrt(avgB/float64(len(s))))}
   }
 
-  fmt.Println(bestcolors)
   return bestcolors
 }

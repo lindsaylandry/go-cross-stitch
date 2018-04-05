@@ -3,7 +3,7 @@
     <title>Instructions</title>
     <style>
 table.instructions {
-  border: 4px solid black; 
+  border: 3px solid black; 
   table-layout: fixed; 
   width: 100%;
   padding: 0;
@@ -15,19 +15,19 @@ table.instructions tr, table.instructions td, table.instructions th {
 }
 table.instructions td > div, table.instructions th > div {
   overflow: hidden;
-  height: 20px;
+  height: 18px;
 }
 table.instructions tr td:nth-child(5n+1), table.instructions tr th:nth-child(5n+1) {
-  border-right: 3px solid black;
+  border-right: 2px solid black;
 }
 table.instructions tr:nth-child(5n+1) td {
-  border-bottom: 3px solid black;
+  border-bottom: 2px solid black;
 }
 table.instructions tr td:nth-child(10n+1), table.instructions tr th:nth-child(10n+1) {
-  border-right: 4px solid black;
+  border-right: 3px solid black;
 }
 table.instructions tr:nth-child(10n+1) td, table.instructions th {
-  border-bottom: 4px solid black;
+  border-bottom: 3px solid black;
 }
 td.indexes, th.indexes {
   direction:rtl;
@@ -40,7 +40,7 @@ table.legend {
   border-collapse: collapse;
 }
 table.legend td, table.legend th {
-  padding-right: 20px;
+  padding-right: 18px;
 }
 table.legend tr th {
   border-bottom: 3px solid black;
@@ -66,12 +66,12 @@ table.legend tr:nth-child(2n) td {
         <th align="right">Count</th>
         <th align="left">Color Description</th>
       </tr>
-      {{ range $color, $num := .Legend }}
+      {{ range $color := .Legend }}
       <tr>
-        <td align="right">&#{{ $color.UTFDec }}</td>
-        <td align="right">{{ $color.ID }}</td>
-        <td align="right">{{ $num }} </td>
-        <td align="left">{{ $color.Name }}</td>
+        <td align="right">&#{{ $color.Symbol }}</td>
+        <td align="right">{{ $color.Thread.ID }}</td>
+        <td align="right">{{ $color.Stitches }} </td>
+        <td align="left">{{ $color.Thread.Name }}</td>
       </tr>
       {{ end }}
     </table>
@@ -79,7 +79,7 @@ table.legend tr:nth-child(2n) td {
       <table class="instructions">
         <tr>
           {{ range $x := forloop 0 .Xlen }}
-          <th width="20" class="indexes">
+          <th width="18" class="indexes">
             {{ if mod $x 10 }}
             {{ $x }}
             {{ end }}
@@ -88,14 +88,14 @@ table.legend tr:nth-child(2n) td {
         </tr>
         {{ range $y := forloop 1 (len $.Symbols) }}
         <tr>
-          <td width="20" class="indexes">
+          <td width="18" class="indexes">
             {{ if mod $y 10 }}
             {{ $y }}
             {{ end }}
           </td>
           {{ $i := minus $y 1 }}
           {{ range $j := index $.Symbols $i }}
-          <td width="20" align="center" valign="middle"><div>&#{{ $j }}</div></td>
+          <td width="18" align="center" valign="middle"><div>&#{{ $j }}</div></td>
           {{ end }}
         </tr>
         {{ end }}
