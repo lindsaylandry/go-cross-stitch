@@ -13,6 +13,7 @@ import (
   "fmt"
   "cross-stitch/palette"
   "cross-stitch/filewriter"
+  "cross-stitch/sorter"
 )
 
 func open(filename string) (image.Image, error) {
@@ -189,7 +190,7 @@ func colorQuant (img image.Image, n int) ([][]uint8) {
       } else if yr > xr && yr > zr { 
         index = 1 
       } else { index = 2 }
-      quickSortColors(s, index)
+      sorter.QuickSortColors(s, index)
     }
 
     // insert 2^n more slice indexes
@@ -197,7 +198,7 @@ func colorQuant (img image.Image, n int) ([][]uint8) {
     for k := 0; k < max; k++ {
       slices = append(slices, (slices[k+1]+slices[k])/2)
     }
-    quickSort(slices)
+    sorter.QuickSort(slices)
   }
 
   // Average all sliced colors and insert into bestcolors
