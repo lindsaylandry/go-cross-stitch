@@ -1,6 +1,6 @@
-package sorter
+package convert
 
-func QuickSort(c []int) {
+func quickSort(c []int) {
   if len(c) <= 1 { return }
 
   p := len(c)/2
@@ -26,8 +26,8 @@ func QuickSort(c []int) {
   c[piv] = c[len(c)-1]
   c[len(c)-1] = tmp
 
-  QuickSort(c[0:piv])
-  if piv+1 <= len(c)-1 {QuickSort(c[piv+1:len(c)])}
+  quickSort(c[0:piv])
+  if piv+1 <= len(c)-1 {quickSort(c[piv+1:len(c)])}
 }
 
 func quickSortLegend(c []Legend) {
@@ -86,6 +86,6 @@ func quickSortColors(c [][]uint8, index int) {
   c[piv] = c[len(c)-1]
   c[len(c)-1] = tmp
 
-  QuickSortColors(c[0:piv], index)
-  if piv+1 <= len(c)-1 {QuickSortColors(c[piv+1:len(c)], index)}
+  quickSortColors(c[0:piv], index)
+  if piv+1 <= len(c)-1 {quickSortColors(c[piv+1:len(c)], index)}
 }

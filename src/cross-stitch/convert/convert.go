@@ -201,7 +201,7 @@ func colorQuant (img image.Image, n int) ([][]uint8) {
       } else if yr > xr && yr > zr { 
         index = 1 
       } else { index = 2 }
-      sorter.QuickSortColors(s, index)
+      quickSortColors(s, index)
     }
 
     // insert 2^n more slice indexes
@@ -209,7 +209,7 @@ func colorQuant (img image.Image, n int) ([][]uint8) {
     for k := 0; k < max; k++ {
       slices = append(slices, (slices[k+1]+slices[k])/2)
     }
-    sorter.QuickSort(slices)
+    quickSort(slices)
   }
 
   // Average all sliced colors and insert into bestcolors
