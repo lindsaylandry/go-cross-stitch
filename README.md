@@ -9,13 +9,7 @@ This is a project that will take an image and convert it to a png and html of DM
 [moon-dmc]: https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/FullMoon150px-dmc.png
 
 ## Build From Scratch
-Currently go get does not work. Docker is your best bet.
-
-### Using Docker
-change GOOS and GOARCH to your preferred architecture
-```
-docker run --rm -i -t -v `pwd`:/go -e GOOS=darwin -e GOARCH=amd64 golang:1.9-alpine go install cross-stitch
-```
+```make build```
 
 ## Usage
 Once the binary is compiled, use as follows:

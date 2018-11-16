@@ -11,7 +11,7 @@ import (
   "math"
 
   "fmt"
-  "cross-stitch/palette"
+  "github.com/lindsaylandry/go-cross-stitch/src/palette"
 )
 
 type Legend struct {
