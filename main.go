@@ -19,6 +19,8 @@ func main() {
   num := flag.Int("n", 6, "number of colors to use (2^n)")
   flag.Parse()
 
-  err := convert.DMC(flag.Args()[0], *num)
-  if err != nil { panic(err) }
+	c, err := convert.NewConverter(flag.Args()[0], *num)
+	if err != nil { panic(err) }
+
+  if err := c.DMC(); err != nil { panic(err) }
 }
