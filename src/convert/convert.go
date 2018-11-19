@@ -11,6 +11,7 @@ import (
 	"os"
 
 	"fmt"
+	"github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
 	"github.com/lindsaylandry/go-cross-stitch/src/palette"
 )
 
@@ -25,6 +26,7 @@ type Converter struct {
 	path    string
 	symbols []int
 	limit   int
+	rgb     bool
 	pc      []palette.Thread
 }
 
@@ -41,21 +43,21 @@ func (c *Converter) getImage() error {
 	return err
 }
 
-func NewConverter(filename string, num int) (*Converter, error) {
+func NewConverter(filename string, num int, rgb bool) (*Converter, error) {
 	c := Converter{}
 
 	c.path = filename
 
-	err := c.getImage()
-	if err != nil {
+	if err := c.getImage(); err != nil {
 		return &c, err
 	}
 
 	c.symbols = palette.GetSymbols()
 	c.limit = num
-	c.pc, err = palette.DMCPalette()
+	c.rgb = rgb
+	c.pc = palette.GetDMCColors()
 
-	return &c, err
+	return &c, nil
 }
 
 func Greyscale(img image.Image, outputLoc string) (*image.Gray, error) {
@@ -107,7 +109,7 @@ func (c *Converter) DMC() error {
 }
 
 // convert best-color palette to match available threads
-func (c *Converter) convertPalette(colors [][]uint8) []palette.Thread {
+func (c *Converter) convertPalette(colors []colorConverter.SRGB) []palette.Thread {
 	dict := make(map[palette.Thread]int)
 	var legend []palette.Thread
 	for i := 0; i < len(colors); i++ {
@@ -115,7 +117,13 @@ func (c *Converter) convertPalette(colors [][]uint8) []palette.Thread {
 		minIndex := 0
 
 		for x := 0; x < len(c.pc); x++ {
-			dist := rgbDistance(float64(c.pc[x].R), float64(c.pc[x].G), float64(c.pc[x].B), float64(colors[i][0]), float64(colors[i][1]), float64(colors[i][2]))
+			var dist float64
+			if c.rgb {
+				dist = rgbDistance(float64(c.pc[x].RGB.R), float64(c.pc[x].RGB.G), float64(c.pc[x].RGB.B), float64(colors[i].R), float64(colors[i].G), float64(colors[i].B))
+			} else {
+				cie := colorConverter.SRGBToCIELab(colors[i])
+				dist = labDistance(c.pc[x].LAB.L, c.pc[x].LAB.A, c.pc[x].LAB.B, cie.L, cie.A, cie.B)
+			}
 			if dist < minLen {
 				minLen = dist
 				minIndex = x
@@ -149,15 +157,21 @@ func (c *Converter) convertImage(t []palette.Thread) (image.Image, []Legend, [][
 		for x := bounds.Min.X; x < bounds.Dx(); x++ {
 			// Euclidean distance
 			r32, g32, b32, a := newImg.At(x, y).RGBA()
-			r, g, b := float64(uint8(r32)), float64(uint8(g32)), float64(uint8(b32))
+			r, g, b := uint8(r32), uint8(g32), uint8(b32)
 
 			minLen := math.MaxFloat64
 			minIndex := 0
-			for c := 0; c < len(t); c++ {
-				dist := rgbDistance(r, g, b, float64(t[c].R), float64(t[c].G), float64(t[c].B))
+			for i := 0; i < len(t); i++ {
+				var dist float64
+				if c.rgb {
+					dist = rgbDistance(float64(r), float64(g), float64(b), float64(t[i].RGB.R), float64(t[i].RGB.G), float64(t[i].RGB.B))
+				} else {
+					cie := colorConverter.SRGBToCIELab(colorConverter.SRGB{r, g, b})
+					dist = labDistance(t[i].LAB.L, t[i].LAB.A, t[i].LAB.B, cie.L, cie.A, cie.B)
+				}
 				if dist < minLen {
 					minLen = dist
-					minIndex = c
+					minIndex = i
 				}
 			}
 
@@ -168,7 +182,7 @@ func (c *Converter) convertImage(t []palette.Thread) (image.Image, []Legend, [][
 			}
 
 			symbols[y][x] = c.symbols[minIndex]
-			newImg.Set(x, y, color.RGBA{t[minIndex].R, t[minIndex].G, t[minIndex].B, uint8(a)})
+			newImg.Set(x, y, color.RGBA{uint8(t[minIndex].RGB.R), uint8(t[minIndex].RGB.G), uint8(t[minIndex].RGB.B), uint8(a)})
 		}
 	}
 
@@ -183,7 +197,7 @@ func (c *Converter) convertImage(t []palette.Thread) (image.Image, []Legend, [][
 }
 
 // start with 32 colors
-func (c *Converter) colorQuant() [][]uint8 {
+func (c *Converter) colorQuant() []colorConverter.SRGB {
 	bounds := c.image.Bounds()
 	newImg := image.NewRGBA(bounds)
 
@@ -258,7 +272,7 @@ func (c *Converter) colorQuant() [][]uint8 {
 	}
 
 	// Average all sliced colors and insert into bestcolors
-	bestcolors := make([][]uint8, len(slices)-1)
+	bestColors := make([]colorConverter.SRGB, len(slices)-1)
 	for i := 0; i < len(slices)-1; i++ {
 		s := allcolors[slices[i]:slices[i+1]]
 		avgR := float64(0)
@@ -270,10 +284,14 @@ func (c *Converter) colorQuant() [][]uint8 {
 			avgB = avgB + math.Pow(float64(s[c][2]), 2)
 		}
 
-		bestcolors[i] = []uint8{uint8(math.Sqrt(avgR / float64(len(s)))), uint8(math.Sqrt(avgG / float64(len(s)))), uint8(math.Sqrt(avgB / float64(len(s))))}
+		bestColors[i] = colorConverter.SRGB{uint8(math.Sqrt(avgR / float64(len(s)))), uint8(math.Sqrt(avgG / float64(len(s)))), uint8(math.Sqrt(avgB / float64(len(s))))}
 	}
 
-	return bestcolors
+	return bestColors
+}
+
+func labDistance(l1, a1, b1, l2, a2, b2 float64) float64 {
+	return math.Pow((l2-l1), 2) + math.Pow((a2-a1), 2) + math.Pow((b2-b1), 2)
 }
 
 func rgbDistance(r1, g1, b1, r2, g2, b2 float64) float64 {
