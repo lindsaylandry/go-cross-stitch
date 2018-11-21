@@ -2,17 +2,19 @@
 Do you love GoLang? Do you also love cross-stitching? Congratulations, you are a very rare cross-section of people!
 
 This is a project that will take an image and convert it to a png and html of DMC thread colors and instructions.
-![alt text][moon] 
-![alt_text][moon-dmc]
 
 ## Example Image Conversions
 
 ### Moon (greyscale)
-
+| Original | RGB Distance | CIELAb Distance |
+|:--:|:--:|:--:|
 [moon]: https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/FullMoon150px.jpg
 [moon-dmc]: https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/FullMoon150px-dmc.png
 
 ### Mars (reds)
+| Original | RGB Distance | CIELAb Distance |
+|:--:|:--:|:--:|
+| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/mars.jpg" height="250"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/mars-dmc-rgb.png" height="250"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/mars-dmc-lab.png" height="250">
 
 ### Earth (blues and greens)
 | Original | RGB Distance | CIELAb Distance |
