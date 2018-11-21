@@ -5,8 +5,19 @@ This is a project that will take an image and convert it to a png and html of DM
 ![alt text][moon] 
 ![alt_text][moon-dmc]
 
+## Example Image Conversions
+
+### Moon (greyscale)
+
 [moon]: https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/FullMoon150px.jpg
 [moon-dmc]: https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/FullMoon150px-dmc.png
+
+### Mars (reds)
+
+### Earth (blues and greens)
+| Original | RGB Distance | CIELAb Distance |
+|:--:|:--:|:--:|
+| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth200.jpg" height="200"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth200-dmc-rgb.png" height="200"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth200-dmc-lab.png" height="200">
 
 ## Build From Scratch
 ```make build```
