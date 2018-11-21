@@ -291,8 +291,35 @@ func (c *Converter) colorQuant() []colorConverter.SRGB {
 	return bestColors
 }
 
-func labDistance(l1, a1, b1, l2, a2, b2 float64) float64 {
+func labDistance76(l1, a1, b1, l2, a2, b2 float64) float64 {
 	return math.Pow((l2-l1), 2) + math.Pow((a2-a1), 2) + math.Pow((b2-b1), 2)
+}
+
+func labDistance(l1, a1, b1, l2, a2, b2 float64) float64 {
+	dL := l1 - l2
+	dA := a1 - a2
+	dB := b1 - b2
+
+	c1 := math.Sqrt(math.Pow(a1, 2) + math.Pow(b1, 2))
+	c2 := math.Sqrt(math.Pow(a2, 2) + math.Pow(b2, 2))
+	dCab := c1 - c2
+
+	dHab := math.Sqrt(math.Pow(dA, 2) + math.Pow(dB, 2) - math.Pow(dCab, 2))
+
+	// constants for textiles
+	kL := 2.0
+	k1 := 0.048
+	k2 := 0.014
+
+	kH := 1.0
+	kC := 1.0
+
+	sL := 1.0
+	sC := 1.0 + k1*c1
+	sH := 1.0 + k2*c1
+
+	e := math.Sqrt(math.Pow(dL/(kL*sL), 2) + math.Pow(dCab/(kC*sC), 2) + math.Pow(dHab/(kH*sH), 2))
+	return e
 }
 
 func rgbDistance(r1, g1, b1, r2, g2, b2 float64) float64 {
