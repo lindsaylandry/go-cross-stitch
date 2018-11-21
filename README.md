@@ -8,17 +8,17 @@ This is a project that will take an image and convert it to a png and html of DM
 ### Mars (reds)
 | Original | RGB Distance | CIELab Distance |
 |:--:|:--:|:--:|
-| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/mars.jpg" height="250"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/mars-dmc-rgb.png" height="250"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/mars-dmc-lab.png" height="250">
+| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/mars.jpg" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/mars-dmc-rgb.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/mars-dmc-lab.png" height="250" style="image-rendering: pixelated;">
 
 ### Earth (blues and greens)
 | Original | RGB Distance | CIELab Distance |
 |:--:|:--:|:--:|
-| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth200.jpg" height="250"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth200-dmc-rgb.png" height="250"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth200-dmc-lab.png" height="250">
+| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth200.jpg" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth200-dmc-rgb.png" height="250"style=" image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth200-dmc-lab.png" height="250" style="image-rendering: pixelated;">
 
 ### Pluto (greyscale/reds)
 | Original | RGB Distance | CIELab Distance |
 |:--:|:--:|:--:|
-| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/pluto150.jpg" height="250"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/pluto150-dmc-rgb.png" height="250"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/pluto150-dmc-lab.png" height="250">
+| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/pluto150.jpg" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/pluto150-dmc-rgb.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/pluto150-dmc-lab.png" height="250" style="image-rendering: pixelated;">
 
 ## Build From Scratch
 ```make build```
