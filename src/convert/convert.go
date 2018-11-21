@@ -94,10 +94,11 @@ func (c *Converter) DMC() error {
 	dmcImg, legend, symbolMatrix := c.convertImage(bt)
 
 	// write new image file
-	_, err := WritePNG(dmcImg, c.path)
+	path, err := WritePNG(dmcImg, c.path)
 	if err != nil {
 		return err
 	}
+	fmt.Printf("Wrote new PNG to %s\n", path)
 
 	// write HTML instructions
 	err = WriteHTML(dmcImg, legend, symbolMatrix, c.path)
