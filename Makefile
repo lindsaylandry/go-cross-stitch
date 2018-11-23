@@ -11,3 +11,12 @@ fmt:
 clean:
 	go clean
 	rm -f bin/
+examples: build
+	./bin/cross-stitch -rgb=true -n=10 examples/test_images/FullMoon150px.jpg
+	./bin/cross-stitch -rgb=false -n=10 examples/test_images/FullMoon150px.jpg
+	./bin/cross-stitch -rgb=false -n=10 examples/test_images/colors.jpg
+	./bin/cross-stitch -rgb=true -n=10 examples/test_images/colors.jpg
+	./bin/cross-stitch -rgb=true -n=10 examples/test_images/mars.jpg
+	./bin/cross-stitch -rgb=false -n=10 examples/test_images/mars.jpg
+	./bin/cross-stitch -rgb=true -n=10 examples/test_images/earth200.jpg
+	./bin/cross-stitch -rgb=false -n=10 examples/test_images/earth200.jpg

@@ -66,12 +66,18 @@ func WriteHTML(img image.Image, legend []Legend, symbols [][]int, path string) e
 	return nil
 }
 
-func WritePNG(img image.Image, path string) (string, error) {
+func WritePNG(img image.Image, path string, isRGB bool) (string, error) {
 	// Write new image to png file
-	absPath, err := filepath.Abs(path)
-	absSplit := strings.Split(absPath, ".")
+	//absPath, err := filepath.Abs(path)
+	//absSplit := strings.Split(absPath, ".")
+	split := strings.Split(path, ".")
 
-	newPath := absSplit[0] + "-dmc.png"
+	var newPath string
+	if isRGB {
+		newPath = split[0] + "-dmc-rgb.png"
+	} else {
+		newPath = split[0] + "-dmc-lab.png"
+	}
 	place, err := os.Create(newPath)
 	if err != nil {
 		return "", err

@@ -15,25 +15,37 @@ This is a project that will take an image and convert it to a png and html of DM
 |:--:|:--:|:--:|
 | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth200.jpg" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth200-dmc-rgb.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth200-dmc-lab.png" height="250" style="image-rendering: pixelated;">
 
-### Pluto (greyscale/reds)
+### Moon (greyscale)
 | Original | RGB Distance | CIELab Distance |
 |:--:|:--:|:--:|
-| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/pluto150.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/pluto150-dmc-rgb.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/pluto150-dmc-lab.png" height="250" style="image-rendering: pixelated;">
+| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/FullMoon150px.jpg" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/FullMoon150px-dmc-rgb.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/FullMoon150px-dmc-lab.png" height="250" style="image-rendering: pixelated;">
 
-## Build From Scratch
+### Full Color Spectrum
+| Original | RGB Distance | CIELab Distance |
+|:--:|:--:|:--:|
+| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/colors.jpg" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/colors-dmc-rgb.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/colors-dmc-lab.png" height="250" style="image-rendering: pixelated;">
+
+## How To Use
+
+### Build From Scratch
 ```make build```
 
-## Usage
+### Render all test images
+```make examples```
+
+### General Usage
 Once the binary is compiled, use as follows:
 ```
-./cross-stitch -n 10 ~/Pictures/FullMoon150px.jpg
+./cross-stitch -n 10 -rgb=false examples/test_images/FullMoon150px.jpg
 ```
-This will make two files in ~/Pictures
+This will make two files in examples/test_images:
 ```
-~/Pictures/FullMoon150px-dmc.png
-~/Pictures/FullMoon150px-dmc.html
+FullMoon150px-dmc-lab.png
+FullMoon150px-dmc.html
 ```
 the png is the image converted to cross-stitch DMC thread colors.
 the HTML is the instructions to stitch the pattern, with the DMC image included.
 
-TODO: Currently the html instructions are not printer friendly. Will work on this.
+## References
+Color distance formulas: https://en.wikipedia.org/wiki/Color_difference
+Color quantization: https://en.wikipedia.org/wiki/Color_quantization

@@ -88,13 +88,13 @@ func (c *Converter) DMC() error {
 
 	// Convert best-colors to thread palette
 	bt := c.convertPalette(bcrgb)
-	fmt.Println(bt)
+	//fmt.Println(bt)
 
 	// convert image to best colors
 	dmcImg, legend, symbolMatrix := c.convertImage(bt)
 
 	// write new image file
-	path, err := WritePNG(dmcImg, c.path)
+	path, err := WritePNG(dmcImg, c.path, c.rgb)
 	if err != nil {
 		return err
 	}
