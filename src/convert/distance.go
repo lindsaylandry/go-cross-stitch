@@ -82,9 +82,9 @@ func labDistance(l1, a1, b1, l2, a2, b2 float64) float64 {
 		lHp = (h1p + h2p - 2.0*math.Pi) / 2.0
 	}
 
-	t := 1.0 - 0.17*math.Cos(lHp-math.Pi/6.0) + 0.24*math.Cos(2.0*lHp) + 0.32*math.Cos(3.0*lHp+math.Pi/30.0) - 0.20*math.Cos(4.0*lHp-math.Pi*21.0/60.0)
+	t := 1.0 - 0.17*math.Cos(lHp-math.Pi/6.0) + 0.24*math.Cos(2.0*lHp) + 0.32*math.Cos(3.0*lHp+math.Pi/30.0) - 0.20*math.Cos(4.0*lHp-math.Pi*7.0/20.0)
 
-	sL := 1.0 + (0.015 * math.Pow(lL-50.0, 2) / math.Sqrt(20.0+math.Pow(lL-50.0, 2)))
+	sL := 1.0 + (0.015 * math.Pow(lL-50.0, 2) / math.Sqrt(20.0 + math.Pow(lL-50.0, 2)))
 	sC := 1.0 + 0.045*lCp
 	sH := 1.0 + 0.015*lCp*t
 

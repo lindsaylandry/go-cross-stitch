@@ -48,4 +48,7 @@ the HTML is the instructions to stitch the pattern, with the DMC image included.
 
 ## References
 Color distance formulas: https://en.wikipedia.org/wiki/Color_difference
+
 Color quantization: https://en.wikipedia.org/wiki/Color_quantization
+
+CIELab color space: https://en.wikipedia.org/wiki/CIELAB_color_space 
