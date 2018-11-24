@@ -7,7 +7,6 @@ import (
 	"image"
 	"image/png"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -49,11 +48,10 @@ func WriteHTML(img image.Image, legend []Legend, symbols [][]int, path string) e
 	}
 
 	// Write new image to png file
-	absPath, err := filepath.Abs(path)
-	absSplit := strings.Split(absPath, ".")
+	split := strings.Split(path, ".")
 
 	// Write HTML instructions
-	htmlPath := absSplit[0] + "-dmc.html"
+	htmlPath := split[0] + "-dmc.html"
 	htmlFile, err := os.Create(htmlPath)
 	if err != nil {
 		return err
@@ -68,8 +66,6 @@ func WriteHTML(img image.Image, legend []Legend, symbols [][]int, path string) e
 
 func WritePNG(img image.Image, path string, isRGB bool) (string, error) {
 	// Write new image to png file
-	//absPath, err := filepath.Abs(path)
-	//absSplit := strings.Split(absPath, ".")
 	split := strings.Split(path, ".")
 
 	var newPath string

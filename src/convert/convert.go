@@ -22,7 +22,13 @@ type Legend struct {
 }
 
 type Converter struct {
-	image   image.Image
+	image    image.Image
+	newImage struct {
+		image   *image.RGBA
+		count   map[palette.Thread]int
+		legend  []Legend
+		symbols [][]int
+	}
 	path    string
 	symbols []int
 	limit   int
@@ -57,6 +63,20 @@ func NewConverter(filename string, num int, rgb bool) (*Converter, error) {
 	c.rgb = rgb
 	c.pc = palette.GetDMCColors()
 
+	c.newImage.count = make(map[palette.Thread]int)
+
+	bounds := c.image.Bounds()
+	c.newImage.image = image.NewRGBA(bounds)
+
+	c.newImage.symbols = make([][]int, bounds.Dy()-bounds.Min.Y)
+	for y := bounds.Min.Y; y < bounds.Dy(); y++ {
+		c.newImage.symbols[y] = make([]int, bounds.Dx()-bounds.Min.X)
+		for x := bounds.Min.X; x < bounds.Dx(); x++ {
+			pixel := c.image.At(x, y)
+			c.newImage.image.Set(x, y, pixel)
+		}
+	}
+
 	return &c, nil
 }
 
@@ -88,20 +108,22 @@ func (c *Converter) DMC() error {
 
 	// Convert best-colors to thread palette
 	bt := c.convertPalette(bcrgb)
-	//fmt.Println(bt)
 
 	// convert image to best colors
-	dmcImg, legend, symbolMatrix := c.convertImage(bt)
+	err := c.convertImage(bt)
+	if err != nil {
+		return err
+	}
 
 	// write new image file
-	path, err := WritePNG(dmcImg, c.path, c.rgb)
+	path, err := WritePNG(c.newImage.image, c.path, c.rgb)
 	if err != nil {
 		return err
 	}
 	fmt.Printf("Wrote new PNG to %s\n", path)
 
 	// write HTML instructions
-	err = WriteHTML(dmcImg, legend, symbolMatrix, c.path)
+	err = WriteHTML(c.newImage.image, c.newImage.legend, c.newImage.symbols, c.path)
 	if err != nil {
 		return err
 	}
@@ -140,24 +162,60 @@ func (c *Converter) convertPalette(colors []colorConverter.SRGB) []palette.Threa
 	return legend
 }
 
-func (c *Converter) convertImage(t []palette.Thread) (image.Image, []Legend, [][]int) {
-	count := make(map[palette.Thread]int)
-	bounds := c.image.Bounds()
-	newImg := image.NewRGBA(bounds)
+func (c *Converter) convertImage(t []palette.Thread) error {
+	var countChans [4]chan map[palette.Thread]int
+	for i := range countChans {
+		countChans[i] = make(chan map[palette.Thread]int)
+	}
 
-	for y := bounds.Min.Y; y < bounds.Dy(); y++ {
-		for x := bounds.Min.X; x < bounds.Dx(); x++ {
-			pixel := c.image.At(x, y)
-			newImg.Set(x, y, pixel)
+	bounds := c.image.Bounds()
+
+	// TODO: make this into goroutines
+	go func() {
+		count := c.convertImageChunk(bounds.Min.X, bounds.Dx()/2, bounds.Min.Y, bounds.Dy()/2, t)
+		countChans[0] <- count
+	}()
+
+	go func() {
+		count := c.convertImageChunk(bounds.Min.X, bounds.Dx()/2, bounds.Dy()/2+1, bounds.Dy(), t)
+		countChans[1] <- count
+	}()
+
+	go func() {
+		count := c.convertImageChunk(bounds.Dx()/2+1, bounds.Dx(), bounds.Min.Y, bounds.Dy()/2, t)
+		countChans[2] <- count
+	}()
+
+	go func() {
+		count := c.convertImageChunk(bounds.Dx()/2+1, bounds.Dx(), bounds.Dy()/2+1, bounds.Dy(), t)
+		countChans[3] <- count
+	}()
+
+	for i := range countChans {
+		count := <-countChans[i]
+		for k, v := range count {
+			if _, ok := c.newImage.count[k]; ok {
+				c.newImage.count[k] += v
+			} else {
+				c.newImage.count[k] = v
+			}
 		}
 	}
 
-	symbols := make([][]int, bounds.Dy()-bounds.Min.Y)
-	for y := bounds.Min.Y; y < bounds.Dy(); y++ {
-		symbols[y] = make([]int, bounds.Dx()-bounds.Min.X)
-		for x := bounds.Min.X; x < bounds.Dx(); x++ {
+	for i, v := range t {
+		l := Legend{v, c.newImage.count[v], c.symbols[i]}
+		c.newImage.legend = append(c.newImage.legend, l)
+	}
+	quickSortLegend(c.newImage.legend)
+	return nil
+}
+
+func (c *Converter) convertImageChunk(xlow, xhigh, ylow, yhigh int, t []palette.Thread) map[palette.Thread]int {
+	count := make(map[palette.Thread]int)
+	for y := ylow; y < yhigh; y++ {
+		for x := xlow; x < xhigh; x++ {
 			// Euclidean distance
-			r32, g32, b32, a := newImg.At(x, y).RGBA()
+			r32, g32, b32, a := c.image.At(x, y).RGBA()
 			r, g, b := uint8(r32), uint8(g32), uint8(b32)
 
 			minLen := math.MaxFloat64
@@ -182,19 +240,11 @@ func (c *Converter) convertImage(t []palette.Thread) (image.Image, []Legend, [][
 				count[t[minIndex]] = 1
 			}
 
-			symbols[y][x] = c.symbols[minIndex]
-			newImg.Set(x, y, color.RGBA{uint8(t[minIndex].RGB.R), uint8(t[minIndex].RGB.G), uint8(t[minIndex].RGB.B), uint8(a)})
+			c.newImage.symbols[y][x] = c.symbols[minIndex]
+			c.newImage.image.Set(x, y, color.RGBA{uint8(t[minIndex].RGB.R), uint8(t[minIndex].RGB.G), uint8(t[minIndex].RGB.B), uint8(a)})
 		}
 	}
-
-	var legend []Legend
-	for i, v := range t {
-		l := Legend{v, count[v], c.symbols[i]}
-		legend = append(legend, l)
-	}
-	quickSortLegend(legend)
-
-	return newImg, legend, symbols
+	return count
 }
 
 // start with 32 colors
