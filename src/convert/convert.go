@@ -169,22 +169,16 @@ func (c *Converter) convertPalette(colors []colorConverter.SRGB) []palette.Threa
 func (c *Converter) convertImage(t []palette.Thread) error {
 	bounds := c.image.Bounds()
 
-	n := 1
+	n := 4
 	countChan := make(chan map[palette.Thread]int, n*n)
 
 	for m := 0; m < n; m++ {
-		ylow := bounds.Min.Y
-		if m > 0 {
-			ylow += bounds.Dy()/m
-		}
-		yhigh := bounds.Dy()/(n-m)
+		ylow := bounds.Min.Y + m*bounds.Dy()/n
+		yhigh := (m+1)*bounds.Dy()/n
 
 		for p := 0; p < n; p++ {
-			xlow := bounds.Min.X
-			if p > 0 {
-				xlow += bounds.Dx()/p
-			}
-			xhigh := bounds.Dx()/(n-p)
+			xlow := bounds.Min.X + p*bounds.Dx()/n
+			xhigh := (p+1)*bounds.Dx()/n
 
 			go func () {
 				count := c.convertImageChunk(xlow, xhigh, ylow, yhigh, t)
