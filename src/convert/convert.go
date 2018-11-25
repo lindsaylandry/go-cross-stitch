@@ -33,6 +33,7 @@ type Converter struct {
 	symbols []int
 	limit   int
 	rgb     bool
+	all     bool
 	pc      []palette.Thread
 }
 
@@ -49,7 +50,7 @@ func (c *Converter) getImage() error {
 	return err
 }
 
-func NewConverter(filename string, num int, rgb bool) (*Converter, error) {
+func NewConverter(filename string, num int, rgb, all bool) (*Converter, error) {
 	c := Converter{}
 
 	c.path = filename
@@ -61,6 +62,7 @@ func NewConverter(filename string, num int, rgb bool) (*Converter, error) {
 	c.symbols = palette.GetSymbols()
 	c.limit = num
 	c.rgb = rgb
+	c.all = all
 	c.pc = palette.GetDMCColors()
 
 	//for _, p := range c.pc {
@@ -110,8 +112,13 @@ func (c *Converter) DMC() error {
 	//best colors rgb
 	bcrgb := c.colorQuant()
 
-	// Convert best-colors to thread palette
-	bt := c.convertPalette(bcrgb)
+	var bt []palette.Thread
+	if !c.all {
+		// Convert best-colors to thread palette
+		bt = c.convertPalette(bcrgb)
+	} else {
+		bt = c.pc
+	}
 
 	// convert image to best colors
 	err := c.convertImage(bt)
@@ -247,20 +254,12 @@ func (c *Converter) convertImageChunk(xlow, xhigh, ylow, yhigh int, t []palette.
 // start with 32 colors
 func (c *Converter) colorQuant() []colorConverter.SRGB {
 	bounds := c.image.Bounds()
-	newImg := image.NewRGBA(bounds)
 
+	allcolors := make([]colorConverter.SRGB, (bounds.Dy()-bounds.Min.Y)*(bounds.Dx()-bounds.Min.X))
 	for y := bounds.Min.Y; y < bounds.Dy(); y++ {
 		for x := bounds.Min.X; x < bounds.Dx(); x++ {
-			pixel := c.image.At(x, y)
-			newImg.Set(x, y, pixel)
-		}
-	}
-
-	allcolors := make([][]uint8, (bounds.Dy()-bounds.Min.Y)*(bounds.Dx()-bounds.Min.X))
-	for y := bounds.Min.Y; y < bounds.Dy(); y++ {
-		for x := bounds.Min.X; x < bounds.Dx(); x++ {
-			r32, g32, b32, a := newImg.At(x, y).RGBA()
-			allcolors[y*(bounds.Dx()-bounds.Min.X)+x] = []uint8{uint8(r32), uint8(g32), uint8(b32), uint8(a)}
+			r32, g32, b32, _ := c.newImage.image.At(x, y).RGBA()
+			allcolors[y*(bounds.Dx()-bounds.Min.X)+x] = colorConverter.SRGB{uint8(r32), uint8(g32), uint8(b32)}
 		}
 	}
 
@@ -275,40 +274,38 @@ func (c *Converter) colorQuant() []colorConverter.SRGB {
 			colorRanges := [][]uint8{{math.MaxUint8, 0}, {math.MaxUint8, 0}, {math.MaxUint8, 0}}
 			for c := 0; c < len(s); c++ {
 				//R
-				if s[c][0] < colorRanges[0][0] {
-					colorRanges[0][0] = s[c][0]
+				if s[c].R < colorRanges[0][0] {
+					colorRanges[0][0] = s[c].R
 				}
-				if s[c][0] > colorRanges[0][1] {
-					colorRanges[0][1] = s[c][0]
+				if s[c].R > colorRanges[0][1] {
+					colorRanges[0][1] = s[c].R
 				}
 				//G
-				if s[c][1] < colorRanges[1][0] {
-					colorRanges[1][0] = s[c][1]
+				if s[c].G < colorRanges[1][0] {
+					colorRanges[1][0] = s[c].G
 				}
-				if s[c][1] > colorRanges[1][1] {
-					colorRanges[1][1] = s[c][1]
+				if s[c].G > colorRanges[1][1] {
+					colorRanges[1][1] = s[c].G
 				}
 				//B
-				if s[c][2] < colorRanges[2][0] {
-					colorRanges[2][0] = s[c][2]
+				if s[c].B < colorRanges[2][0] {
+					colorRanges[2][0] = s[c].B
 				}
-				if s[c][2] > colorRanges[2][1] {
-					colorRanges[2][1] = s[c][2]
+				if s[c].B > colorRanges[2][1] {
+					colorRanges[2][1] = s[c].B
 				}
 			}
-			var index int
 			xr := colorRanges[0][1] - colorRanges[0][0]
 			yr := colorRanges[1][1] - colorRanges[1][0]
 			zr := colorRanges[2][1] - colorRanges[2][0]
 
 			if xr > yr && xr > zr {
-				index = 0
+				quickSortRed(s)
 			} else if yr > xr && yr > zr {
-				index = 1
+				quickSortGreen(s)
 			} else {
-				index = 2
+				quickSortBlue(s)
 			}
-			quickSortColors(s, index)
 		}
 
 		// insert 2^n more slice indexes
@@ -323,13 +320,11 @@ func (c *Converter) colorQuant() []colorConverter.SRGB {
 	bestColors := make([]colorConverter.SRGB, len(slices)-1)
 	for i := 0; i < len(slices)-1; i++ {
 		s := allcolors[slices[i]:slices[i+1]]
-		avgR := float64(0)
-		avgG := float64(0)
-		avgB := float64(0)
+		var avgR, avgG, avgB float64
 		for c := 0; c < len(s); c++ {
-			avgR = avgR + math.Pow(float64(s[c][0]), 2)
-			avgG = avgG + math.Pow(float64(s[c][1]), 2)
-			avgB = avgB + math.Pow(float64(s[c][2]), 2)
+			avgR = avgR + math.Pow(float64(s[c].R), 2)
+			avgG = avgG + math.Pow(float64(s[c].G), 2)
+			avgB = avgB + math.Pow(float64(s[c].B), 2)
 		}
 
 		bestColors[i] = colorConverter.SRGB{uint8(math.Sqrt(avgR / float64(len(s)))), uint8(math.Sqrt(avgG / float64(len(s)))), uint8(math.Sqrt(avgB / float64(len(s))))}

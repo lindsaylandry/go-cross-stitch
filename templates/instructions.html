@@ -61,14 +61,16 @@ table.legend tr:nth-child(2n) td {
     <h1>Legend</h1>
     <table class="legend">
       <tr>
-        <th align="right">Symbols</th>
-        <th align="right">Color</th>
+				<th align="right">Color</th>
+				<th align="right">Symbols</th>
+        <th align="right">Number</th>
         <th align="right">Count</th>
         <th align="left">Color Description</th>
       </tr>
       {{ range $color := .Legend }}
       <tr>
-        <td align="right">&#{{ $color.Symbol }}</td>
+				<td align="right" style="background-color:rgb({{ $color.Thread.RGB.R }},{{ $color.Thread.RGB.G }},{{ $color.Thread.RGB.B }})"></td>
+        <td align="center">&#{{ $color.Symbol }}</td>
         <td align="right">{{ $color.Thread.ID }}</td>
         <td align="right">{{ $color.Stitches }} </td>
         <td align="left">{{ $color.Thread.Name }}</td>

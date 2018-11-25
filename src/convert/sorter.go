@@ -1,5 +1,9 @@
 package convert
 
+import (
+	"github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
+)
+
 func quickSort(c []int) {
 	if len(c) <= 1 {
 		return
@@ -68,7 +72,7 @@ func quickSortLegend(c []Legend) {
 	}
 }
 
-func quickSortColors(c [][]uint8, index int) {
+func quickSortRed(c []colorConverter.SRGB) {
 	if len(c) <= 1 {
 		return
 	}
@@ -82,7 +86,7 @@ func quickSortColors(c [][]uint8, index int) {
 	piv := 0
 	for i := 0; i < len(c); i++ {
 		// switch c with pivot point if less than pivot
-		if c[i][index] < c[len(c)-1][index] {
+		if c[i].R < c[len(c)-1].R {
 			tmp = c[i]
 			c[i] = c[piv]
 			c[piv] = tmp
@@ -96,8 +100,76 @@ func quickSortColors(c [][]uint8, index int) {
 	c[piv] = c[len(c)-1]
 	c[len(c)-1] = tmp
 
-	quickSortColors(c[0:piv], index)
+	quickSortRed(c[0:piv])
 	if piv+1 <= len(c)-1 {
-		quickSortColors(c[piv+1:len(c)], index)
+		quickSortRed(c[piv+1:len(c)])
 	}
+}
+
+func quickSortGreen(c []colorConverter.SRGB) {
+  if len(c) <= 1 {
+    return
+  }
+
+  p := len(c) / 2
+  // switch pivot with end
+  tmp := c[p]
+  c[p] = c[len(c)-1]
+  c[len(c)-1] = tmp
+
+  piv := 0
+  for i := 0; i < len(c); i++ {
+    // switch c with pivot point if less than pivot
+    if c[i].G < c[len(c)-1].G {
+      tmp = c[i]
+      c[i] = c[piv]
+      c[piv] = tmp
+
+      piv++
+    }
+  }
+
+  // put pivot point back where it was
+  tmp = c[piv]
+  c[piv] = c[len(c)-1]
+  c[len(c)-1] = tmp
+
+  quickSortGreen(c[0:piv])
+  if piv+1 <= len(c)-1 {
+    quickSortGreen(c[piv+1:len(c)])
+  }
+}
+
+func quickSortBlue(c []colorConverter.SRGB) {
+  if len(c) <= 1 {
+    return
+  }
+
+  p := len(c) / 2
+  // switch pivot with end
+  tmp := c[p]
+  c[p] = c[len(c)-1]
+  c[len(c)-1] = tmp
+
+  piv := 0
+  for i := 0; i < len(c); i++ {
+    // switch c with pivot point if less than pivot
+    if c[i].B < c[len(c)-1].B {
+      tmp = c[i]
+      c[i] = c[piv]
+      c[piv] = tmp
+
+      piv++
+    }
+  }
+
+  // put pivot point back where it was
+  tmp = c[piv]
+  c[piv] = c[len(c)-1]
+  c[len(c)-1] = tmp
+
+  quickSortBlue(c[0:piv])
+  if piv+1 <= len(c)-1 {
+    quickSortBlue(c[piv+1:len(c)])
+  }
 }
