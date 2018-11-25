@@ -63,6 +63,10 @@ func NewConverter(filename string, num int, rgb bool) (*Converter, error) {
 	c.rgb = rgb
 	c.pc = palette.GetDMCColors()
 
+	//for _, p := range c.pc {
+	//	fmt.Println(p)
+	//}
+
 	c.newImage.count = make(map[palette.Thread]int)
 
 	bounds := c.image.Bounds()
@@ -163,36 +167,35 @@ func (c *Converter) convertPalette(colors []colorConverter.SRGB) []palette.Threa
 }
 
 func (c *Converter) convertImage(t []palette.Thread) error {
-	var countChans [4]chan map[palette.Thread]int
-	for i := range countChans {
-		countChans[i] = make(chan map[palette.Thread]int)
-	}
-
 	bounds := c.image.Bounds()
 
-	// TODO: make this into goroutines
-	go func() {
-		count := c.convertImageChunk(bounds.Min.X, bounds.Dx()/2, bounds.Min.Y, bounds.Dy()/2, t)
-		countChans[0] <- count
-	}()
+	n := 1
+	countChan := make(chan map[palette.Thread]int, n*n)
 
-	go func() {
-		count := c.convertImageChunk(bounds.Min.X, bounds.Dx()/2, bounds.Dy()/2+1, bounds.Dy(), t)
-		countChans[1] <- count
-	}()
+	for m := 0; m < n; m++ {
+		ylow := bounds.Min.Y
+		if m > 0 {
+			ylow += bounds.Dy()/m
+		}
+		yhigh := bounds.Dy()/(n-m)
 
-	go func() {
-		count := c.convertImageChunk(bounds.Dx()/2+1, bounds.Dx(), bounds.Min.Y, bounds.Dy()/2, t)
-		countChans[2] <- count
-	}()
+		for p := 0; p < n; p++ {
+			xlow := bounds.Min.X
+			if p > 0 {
+				xlow += bounds.Dx()/p
+			}
+			xhigh := bounds.Dx()/(n-p)
 
-	go func() {
-		count := c.convertImageChunk(bounds.Dx()/2+1, bounds.Dx(), bounds.Dy()/2+1, bounds.Dy(), t)
-		countChans[3] <- count
-	}()
+			go func () {
+				count := c.convertImageChunk(xlow, xhigh, ylow, yhigh, t)
+				countChan <- count
+			}()
+		}
+	}
 
-	for i := range countChans {
-		count := <-countChans[i]
+
+	for i := 0; i < n*n; i++ {
+		count := <-countChan
 		for k, v := range count {
 			if _, ok := c.newImage.count[k]; ok {
 				c.newImage.count[k] += v
@@ -215,7 +218,7 @@ func (c *Converter) convertImageChunk(xlow, xhigh, ylow, yhigh int, t []palette.
 	for y := ylow; y < yhigh; y++ {
 		for x := xlow; x < xhigh; x++ {
 			// Euclidean distance
-			r32, g32, b32, a := c.image.At(x, y).RGBA()
+			r32, g32, b32, a := c.newImage.image.At(x, y).RGBA()
 			r, g, b := uint8(r32), uint8(g32), uint8(b32)
 
 			minLen := math.MaxFloat64
