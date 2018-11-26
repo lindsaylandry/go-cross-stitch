@@ -43,24 +43,24 @@ func labDistance(l1, a1, b1, l2, a2, b2 float64) float64 {
 	dLp := l2 - l1
 	lL := (l1 + l2) / 2.0
 
-	c1 := math.Sqrt(math.Pow(a1, 2) + math.Pow(b1, 2))
-	c2 := math.Sqrt(math.Pow(a2, 2) + math.Pow(b2, 2))
+	c1 := math.Sqrt(math.Pow(a1, 2.0) + math.Pow(b1, 2.0))
+	c2 := math.Sqrt(math.Pow(a2, 2.0) + math.Pow(b2, 2.0))
 
 	lC := (c1 + c2) / 2.0
 
-	a1p := a1 + (a1/2.0)*(1.0-math.Sqrt(math.Pow(lC, 7)/(math.Pow(lC, 7)+math.Pow(25.0, 7))))
-	a2p := a2 + (a2/2.0)*(1.0-math.Sqrt(math.Pow(lC, 7)/(math.Pow(lC, 7)+math.Pow(25.0, 7))))
+	a1p := a1 + (a1/2.0)*(1.0-math.Sqrt(math.Pow(lC, 7.0)/(math.Pow(lC, 7.0) + math.Pow(25.0, 7.0))))
+	a2p := a2 + (a2/2.0)*(1.0-math.Sqrt(math.Pow(lC, 7.0)/(math.Pow(lC, 7.0) + math.Pow(25.0, 7.0))))
 
-	c1p := math.Sqrt(math.Pow(a1p, 2) + math.Pow(b1, 2))
-	c2p := math.Sqrt(math.Pow(a2p, 2) + math.Pow(b2, 2))
+	c1p := math.Sqrt(math.Pow(a1p, 2.0) + math.Pow(b1, 2.0))
+	c2p := math.Sqrt(math.Pow(a2p, 2.0) + math.Pow(b2, 2.0))
 
 	dCp := c2p - c1p
 	lCp := (c1p + c2p) / 2.0
 
 	// b1, b2, a1p, and a2p are in degrees, convert to radians for atan
 	// MUST convert back to degrees from 0 to 360 (-pi to pi is bad)
-	h1p := math.Mod(math.Atan2(math.Pi/180.0*b1, math.Pi/180.0*a1p)+2.0*math.Pi, 2.0*math.Pi)
-	h2p := math.Mod(math.Atan2(math.Pi/180.0*b2, math.Pi/180.0*a2p)+2.0*math.Pi, 2.0*math.Pi)
+	h1p := math.Mod(math.Atan2(math.Pi/180.0*b1, math.Pi/180.0*a1p) + 2.0*math.Pi, 2.0*math.Pi)
+	h2p := math.Mod(math.Atan2(math.Pi/180.0*b2, math.Pi/180.0*a2p) + 2.0*math.Pi, 2.0*math.Pi)
 
 	var dhp float64
 	if math.Abs(h1p-h2p) <= math.Pi {
@@ -82,15 +82,15 @@ func labDistance(l1, a1, b1, l2, a2, b2 float64) float64 {
 		lHp = (h1p + h2p - 2.0*math.Pi) / 2.0
 	}
 
-	t := 1.0 - 0.17*math.Cos(lHp-math.Pi/6.0) + 0.24*math.Cos(2.0*lHp) + 0.32*math.Cos(3.0*lHp+math.Pi/30.0) - 0.20*math.Cos(4.0*lHp-math.Pi*7.0/20.0)
+	t := 1.0 - 0.17*math.Cos(lHp - math.Pi/6.0) + 0.24*math.Cos(2.0*lHp) + 0.32*math.Cos(3.0*lHp + math.Pi/30.0) - 0.20*math.Cos(4.0*lHp - math.Pi*7.0/20.0)
 
-	sL := 1.0 + (0.015 * math.Pow(lL-50.0, 2) / math.Sqrt(20.0 + math.Pow(lL-50.0, 2)))
+	sL := 1.0 + (0.015 * math.Pow(lL-50.0, 2.0) / math.Sqrt(20.0 + math.Pow(lL-50.0, 2.0)))
 	sC := 1.0 + 0.045*lCp
 	sH := 1.0 + 0.015*lCp*t
 
-	rT := -2.0 * math.Sqrt(math.Pow(lCp, 7)/(math.Pow(lCp, 7)+math.Pow(25.0, 7))) * math.Sin(math.Pi/3.0*math.Exp(-math.Pow((lHp-math.Pi*55.0/36.0)/(math.Pi*5.0/36.0), 2)))
+	rT := -2.0 * math.Sqrt(math.Pow(lCp, 7.0)/(math.Pow(lCp, 7.0) + math.Pow(25.0, 7.0))) * math.Sin(math.Pi/3.0*math.Exp(-math.Pow((lHp-math.Pi*55.0/36.0)/(math.Pi*5.0/36.0), 2.0)))
 
-	e := math.Sqrt(math.Pow(dLp/(kL*sL), 2) + math.Pow(dCp/(kC*sC), 2) + math.Pow(dHp/(kH*sH), 2) + rT*(dCp/(kC*sC))*(dHp/(kH*sH)))
+	e := math.Sqrt(math.Pow(dLp/(kL*sL), 2.0) + math.Pow(dCp/(kC*sC), 2.0) + math.Pow(dHp/(kH*sH), 2.0) + rT*(dCp/(kC*sC))*(dHp/(kH*sH)))
 
 	return e
 }

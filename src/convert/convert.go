@@ -299,6 +299,9 @@ func (c *Converter) colorQuant() []colorConverter.SRGB {
 			yr := colorRanges[1][1] - colorRanges[1][0]
 			zr := colorRanges[2][1] - colorRanges[2][0]
 
+			if xr == 0 && yr == 0 && zr == 0 { continue }
+
+			// Sort channel that has greatest variance
 			if xr > yr && xr > zr {
 				quickSortRed(s)
 			} else if yr > xr && yr > zr {
