@@ -36,7 +36,7 @@ This is a project that will take an image and convert it to a png and html of DM
 ### General Usage
 Once the binary is compiled, use as follows:
 ```
-./cross-stitch -n 10 -rgb=false examples/test_images/FullMoon150px.jpg
+./bin/cross-stitch -n 10 examples/test_images/FullMoon150px.jpg
 ```
 This will make two files in examples/test_images:
 ```
@@ -45,6 +45,18 @@ FullMoon150px-dmc.html
 ```
 the png is the image converted to cross-stitch DMC thread colors.
 the HTML is the instructions to stitch the pattern, with the DMC image included.
+
+### Flags
+```
+./bin/cross-stitch --help
+Usage of ./bin/cross-stitch:
+  -all
+    	use all thread colors available (currently broken)
+  -n int
+    	number of colors to attempt to match (2^n) (default 6)
+  -rgb
+    	use rgb color space
+```
 
 ## References
 Color distance formulas: https://en.wikipedia.org/wiki/Color_difference
