@@ -16,9 +16,9 @@ import (
 )
 
 type Legend struct {
-	Thread   palette.Thread
-	Stitches int
-	Symbol   int
+	Color  palette.Thread
+	Count  int
+	Symbol int
 }
 
 type Converter struct {
@@ -33,7 +33,6 @@ type Converter struct {
 	symbols []int
 	limit   int
 	rgb     bool
-	all     bool
 	pc      []palette.Thread
 }
 
@@ -59,18 +58,6 @@ func NewConverter(filename string, num int, rgb, all bool) (*Converter, error) {
 		return &c, err
 	}
 
-	c.symbols = palette.GetSymbols()
-	c.limit = num
-	c.rgb = rgb
-	c.all = all
-	c.pc = palette.GetDMCColors()
-
-	//for _, p := range c.pc {
-	//	fmt.Println(p)
-	//}
-
-	c.newImage.count = make(map[palette.Thread]int)
-
 	bounds := c.image.Bounds()
 	c.newImage.image = image.NewRGBA(bounds)
 
@@ -82,6 +69,21 @@ func NewConverter(filename string, num int, rgb, all bool) (*Converter, error) {
 			c.newImage.image.Set(x, y, pixel)
 		}
 	}
+
+	c.symbols = palette.GetSymbols()
+	c.limit = num
+	c.rgb = rgb
+
+	c.pc = palette.GetDMCColors()
+
+	if !all {
+		//best colors rgb
+		bcrgb := c.colorQuant()
+		// Convert best-colors to thread palette
+		c.pc = c.convertPalette(bcrgb)
+	}
+
+	c.newImage.count = make(map[palette.Thread]int)
 
 	return &c, nil
 }
@@ -109,19 +111,8 @@ func Greyscale(img image.Image, outputLoc string) (*image.Gray, error) {
 }
 
 func (c *Converter) DMC() error {
-	//best colors rgb
-	bcrgb := c.colorQuant()
-
-	var bt []palette.Thread
-	if !c.all {
-		// Convert best-colors to thread palette
-		bt = c.convertPalette(bcrgb)
-	} else {
-		bt = c.pc
-	}
-
 	// convert image to best colors
-	err := c.convertImage(bt)
+	err := c.convertImage()
 	if err != nil {
 		return err
 	}
@@ -173,7 +164,7 @@ func (c *Converter) convertPalette(colors []colorConverter.SRGB) []palette.Threa
 	return legend
 }
 
-func (c *Converter) convertImage(t []palette.Thread) error {
+func (c *Converter) convertImage() error {
 	bounds := c.image.Bounds()
 
 	n := 4
@@ -181,19 +172,18 @@ func (c *Converter) convertImage(t []palette.Thread) error {
 
 	for m := 0; m < n; m++ {
 		ylow := bounds.Min.Y + m*bounds.Dy()/n
-		yhigh := (m+1)*bounds.Dy()/n
+		yhigh := (m + 1) * bounds.Dy() / n
 
 		for p := 0; p < n; p++ {
 			xlow := bounds.Min.X + p*bounds.Dx()/n
-			xhigh := (p+1)*bounds.Dx()/n
+			xhigh := (p + 1) * bounds.Dx() / n
 
-			go func () {
-				count := c.convertImageChunk(xlow, xhigh, ylow, yhigh, t)
+			go func() {
+				count := c.convertImageChunk(xlow, xhigh, ylow, yhigh)
 				countChan <- count
 			}()
 		}
 	}
-
 
 	for i := 0; i < n*n; i++ {
 		count := <-countChan
@@ -206,7 +196,7 @@ func (c *Converter) convertImage(t []palette.Thread) error {
 		}
 	}
 
-	for i, v := range t {
+	for i, v := range c.pc {
 		l := Legend{v, c.newImage.count[v], c.symbols[i]}
 		c.newImage.legend = append(c.newImage.legend, l)
 	}
@@ -214,7 +204,7 @@ func (c *Converter) convertImage(t []palette.Thread) error {
 	return nil
 }
 
-func (c *Converter) convertImageChunk(xlow, xhigh, ylow, yhigh int, t []palette.Thread) map[palette.Thread]int {
+func (c *Converter) convertImageChunk(xlow, xhigh, ylow, yhigh int) map[palette.Thread]int {
 	count := make(map[palette.Thread]int)
 	for y := ylow; y < yhigh; y++ {
 		for x := xlow; x < xhigh; x++ {
@@ -224,13 +214,13 @@ func (c *Converter) convertImageChunk(xlow, xhigh, ylow, yhigh int, t []palette.
 
 			minLen := math.MaxFloat64
 			minIndex := 0
-			for i := 0; i < len(t); i++ {
+			for i := 0; i < len(c.pc); i++ {
 				var dist float64
 				if c.rgb {
-					dist = rgbDistance(float64(r), float64(g), float64(b), float64(t[i].RGB.R), float64(t[i].RGB.G), float64(t[i].RGB.B))
+					dist = rgbDistance(float64(r), float64(g), float64(b), float64(c.pc[i].RGB.R), float64(c.pc[i].RGB.G), float64(c.pc[i].RGB.B))
 				} else {
 					cie := colorConverter.SRGBToCIELab(colorConverter.SRGB{r, g, b})
-					dist = labDistance(t[i].LAB.L, t[i].LAB.A, t[i].LAB.B, cie.L, cie.A, cie.B)
+					dist = labDistance(c.pc[i].LAB.L, c.pc[i].LAB.A, c.pc[i].LAB.B, cie.L, cie.A, cie.B)
 				}
 				if dist < minLen {
 					minLen = dist
@@ -238,14 +228,14 @@ func (c *Converter) convertImageChunk(xlow, xhigh, ylow, yhigh int, t []palette.
 				}
 			}
 
-			if _, ok := count[t[minIndex]]; ok {
-				count[t[minIndex]] += 1
+			if _, ok := count[c.pc[minIndex]]; ok {
+				count[c.pc[minIndex]] += 1
 			} else {
-				count[t[minIndex]] = 1
+				count[c.pc[minIndex]] = 1
 			}
 
 			c.newImage.symbols[y][x] = c.symbols[minIndex]
-			c.newImage.image.Set(x, y, color.RGBA{uint8(t[minIndex].RGB.R), uint8(t[minIndex].RGB.G), uint8(t[minIndex].RGB.B), uint8(a)})
+			c.newImage.image.Set(x, y, color.RGBA{uint8(c.pc[minIndex].RGB.R), uint8(c.pc[minIndex].RGB.G), uint8(c.pc[minIndex].RGB.B), uint8(a)})
 		}
 	}
 	return count
@@ -299,7 +289,9 @@ func (c *Converter) colorQuant() []colorConverter.SRGB {
 			yr := colorRanges[1][1] - colorRanges[1][0]
 			zr := colorRanges[2][1] - colorRanges[2][0]
 
-			if xr == 0 && yr == 0 && zr == 0 { continue }
+			if xr == 0 && yr == 0 && zr == 0 {
+				continue
+			}
 
 			// Sort channel that has greatest variance
 			if xr > yr && xr > zr {

@@ -52,7 +52,7 @@ func quickSortLegend(c []Legend) {
 	piv := 0
 	for i := 0; i < len(c); i++ {
 		// switch c with pivot point if less than pivot
-		if c[i].Thread.ID < c[len(c)-1].Thread.ID {
+		if c[i].Color.ID < c[len(c)-1].Color.ID {
 			tmp = c[i]
 			c[i] = c[piv]
 			c[piv] = tmp
@@ -102,74 +102,74 @@ func quickSortRed(c []colorConverter.SRGB) {
 
 	quickSortRed(c[0:piv])
 	if piv+1 <= len(c)-1 {
-		quickSortRed(c[piv+1:len(c)])
+		quickSortRed(c[piv+1 : len(c)])
 	}
 }
 
 func quickSortGreen(c []colorConverter.SRGB) {
-  if len(c) <= 1 {
-    return
-  }
+	if len(c) <= 1 {
+		return
+	}
 
-  p := len(c) / 2
-  // switch pivot with end
-  tmp := c[p]
-  c[p] = c[len(c)-1]
-  c[len(c)-1] = tmp
+	p := len(c) / 2
+	// switch pivot with end
+	tmp := c[p]
+	c[p] = c[len(c)-1]
+	c[len(c)-1] = tmp
 
-  piv := 0
-  for i := 0; i < len(c); i++ {
-    // switch c with pivot point if less than pivot
-    if c[i].G < c[len(c)-1].G {
-      tmp = c[i]
-      c[i] = c[piv]
-      c[piv] = tmp
+	piv := 0
+	for i := 0; i < len(c); i++ {
+		// switch c with pivot point if less than pivot
+		if c[i].G < c[len(c)-1].G {
+			tmp = c[i]
+			c[i] = c[piv]
+			c[piv] = tmp
 
-      piv++
-    }
-  }
+			piv++
+		}
+	}
 
-  // put pivot point back where it was
-  tmp = c[piv]
-  c[piv] = c[len(c)-1]
-  c[len(c)-1] = tmp
+	// put pivot point back where it was
+	tmp = c[piv]
+	c[piv] = c[len(c)-1]
+	c[len(c)-1] = tmp
 
-  quickSortGreen(c[0:piv])
-  if piv+1 <= len(c)-1 {
-    quickSortGreen(c[piv+1:len(c)])
-  }
+	quickSortGreen(c[0:piv])
+	if piv+1 <= len(c)-1 {
+		quickSortGreen(c[piv+1 : len(c)])
+	}
 }
 
 func quickSortBlue(c []colorConverter.SRGB) {
-  if len(c) <= 1 {
-    return
-  }
+	if len(c) <= 1 {
+		return
+	}
 
-  p := len(c) / 2
-  // switch pivot with end
-  tmp := c[p]
-  c[p] = c[len(c)-1]
-  c[len(c)-1] = tmp
+	p := len(c) / 2
+	// switch pivot with end
+	tmp := c[p]
+	c[p] = c[len(c)-1]
+	c[len(c)-1] = tmp
 
-  piv := 0
-  for i := 0; i < len(c); i++ {
-    // switch c with pivot point if less than pivot
-    if c[i].B < c[len(c)-1].B {
-      tmp = c[i]
-      c[i] = c[piv]
-      c[piv] = tmp
+	piv := 0
+	for i := 0; i < len(c); i++ {
+		// switch c with pivot point if less than pivot
+		if c[i].B < c[len(c)-1].B {
+			tmp = c[i]
+			c[i] = c[piv]
+			c[piv] = tmp
 
-      piv++
-    }
-  }
+			piv++
+		}
+	}
 
-  // put pivot point back where it was
-  tmp = c[piv]
-  c[piv] = c[len(c)-1]
-  c[len(c)-1] = tmp
+	// put pivot point back where it was
+	tmp = c[piv]
+	c[piv] = c[len(c)-1]
+	c[len(c)-1] = tmp
 
-  quickSortBlue(c[0:piv])
-  if piv+1 <= len(c)-1 {
-    quickSortBlue(c[piv+1:len(c)])
-  }
+	quickSortBlue(c[0:piv])
+	if piv+1 <= len(c)-1 {
+		quickSortBlue(c[piv+1 : len(c)])
+	}
 }
