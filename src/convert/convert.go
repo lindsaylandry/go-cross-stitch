@@ -49,7 +49,7 @@ func (c *Converter) getImage() error {
 	return err
 }
 
-func NewConverter(filename string, num int, rgb, all bool) (*Converter, error) {
+func NewConverter(filename string, num int, rgb, all bool, pal string) (*Converter, error) {
 	c := Converter{}
 
 	c.path = filename
@@ -74,13 +74,17 @@ func NewConverter(filename string, num int, rgb, all bool) (*Converter, error) {
 	c.limit = num
 	c.rgb = rgb
 
-	c.pc = palette.GetDMCColors()
+	if pal == "lego" {
+		c.pc = palette.GetLEGOColors()
+	} else { //if pal == "dmc" {
+		c.pc = palette.GetDMCColors()
 
-	if !all {
-		//best colors rgb
-		bcrgb := c.colorQuant()
-		// Convert best-colors to thread palette
-		c.pc = c.convertPalette(bcrgb)
+		if !all {
+			//best colors rgb
+			bcrgb := c.colorQuant()
+			// Convert best-colors to thread palette
+			c.pc = c.convertPalette(bcrgb)
+		}
 	}
 
 	c.newImage.count = make(map[palette.Thread]int)
