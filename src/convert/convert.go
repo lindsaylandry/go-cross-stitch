@@ -8,7 +8,6 @@ import (
 	"image/png"
 	"io/ioutil"
 	"math"
-	"os"
 
 	"fmt"
 	"github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
@@ -29,11 +28,13 @@ type Converter struct {
 		legend  []Legend
 		symbols [][]int
 	}
-	path    string
-	symbols []int
-	limit   int
-	rgb     bool
-	pc      []palette.Thread
+	path      string
+	symbols   []int
+	limit     int
+	rgb       bool
+	pc        []palette.Thread
+	dither    bool
+	greyscale bool
 }
 
 func (c *Converter) getImage() error {
@@ -49,7 +50,7 @@ func (c *Converter) getImage() error {
 	return err
 }
 
-func NewConverter(filename string, num int, rgb, all bool, pal string) (*Converter, error) {
+func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre bool) (*Converter, error) {
 	c := Converter{}
 
 	c.path = filename
@@ -73,10 +74,12 @@ func NewConverter(filename string, num int, rgb, all bool, pal string) (*Convert
 	c.symbols = palette.GetSymbols()
 	c.limit = num
 	c.rgb = rgb
+	c.dither = dit
+	c.greyscale = gre
 
 	if pal == "lego" {
 		c.pc = palette.GetLEGOColors()
-	} else { //if pal == "dmc" {
+	} else if pal == "dmc" {
 		c.pc = palette.GetDMCColors()
 
 		if !all {
@@ -85,6 +88,8 @@ func NewConverter(filename string, num int, rgb, all bool, pal string) (*Convert
 			// Convert best-colors to thread palette
 			c.pc = c.convertPalette(bcrgb)
 		}
+	} else {
+		c.pc = palette.GetBWColors()
 	}
 
 	c.newImage.count = make(map[palette.Thread]int)
@@ -92,32 +97,21 @@ func NewConverter(filename string, num int, rgb, all bool, pal string) (*Convert
 	return &c, nil
 }
 
-func Greyscale(img image.Image, outputLoc string) (*image.Gray, error) {
-	bounds := img.Bounds()
-	greyImg := image.NewGray(bounds)
-
+func (c *Converter) Greyscale() {
+	bounds := c.newImage.image.Bounds()
 	for x := bounds.Min.X; x < bounds.Dx(); x++ {
 		for y := bounds.Min.Y; y < bounds.Dy(); y++ {
-			pix := img.At(x, y)
-			greyImg.Set(x, y, pix)
+			r32, g32, b32, a := c.newImage.image.At(x, y).RGBA()
+			r, g, b := uint8(r32), uint8(g32), uint8(b32)
+
+			gg := uint8(0.3*float64(r) + 0.59*float64(g) + 0.11*float64(b))
+			c.newImage.image.Set(x, y, color.RGBA{gg, gg, gg, uint8(a)})
 		}
 	}
-
-	place, err := os.Create(outputLoc)
-	if err != nil {
-		return greyImg, err
-	}
-	defer place.Close()
-
-	err = png.Encode(place, greyImg)
-
-	return greyImg, err
 }
 
-func (c *Converter) DMC() error {
-	// convert image to best colors
-	err := c.convertImage()
-	if err != nil {
+func (c *Converter) Convert() error {
+	if err := c.convertImage(); err != nil {
 		return err
 	}
 
@@ -169,33 +163,39 @@ func (c *Converter) convertPalette(colors []colorConverter.SRGB) []palette.Threa
 }
 
 func (c *Converter) convertImage() error {
-	bounds := c.image.Bounds()
+	if c.dither {
+		c.floydSteinbergDither()
+	} else {
 
-	n := 4
-	countChan := make(chan map[palette.Thread]int, n*n)
+		bounds := c.image.Bounds()
 
-	for m := 0; m < n; m++ {
-		ylow := bounds.Min.Y + m*bounds.Dy()/n
-		yhigh := (m + 1) * bounds.Dy() / n
+		n := 4
+		countChan := make(chan map[palette.Thread]int, n*n)
 
-		for p := 0; p < n; p++ {
-			xlow := bounds.Min.X + p*bounds.Dx()/n
-			xhigh := (p + 1) * bounds.Dx() / n
+		// goroutines
+		for m := 0; m < n; m++ {
+			ylow := bounds.Min.Y + m*bounds.Dy()/n
+			yhigh := (m + 1) * bounds.Dy() / n
 
-			go func() {
-				count := c.convertImageChunk(xlow, xhigh, ylow, yhigh)
-				countChan <- count
-			}()
+			for p := 0; p < n; p++ {
+				xlow := bounds.Min.X + p*bounds.Dx()/n
+				xhigh := (p + 1) * bounds.Dx() / n
+
+				go func() {
+					count := c.convertImageChunk(xlow, xhigh, ylow, yhigh)
+					countChan <- count
+				}()
+			}
 		}
-	}
 
-	for i := 0; i < n*n; i++ {
-		count := <-countChan
-		for k, v := range count {
-			if _, ok := c.newImage.count[k]; ok {
-				c.newImage.count[k] += v
-			} else {
-				c.newImage.count[k] = v
+		for i := 0; i < n*n; i++ {
+			count := <-countChan
+			for k, v := range count {
+				if _, ok := c.newImage.count[k]; ok {
+					c.newImage.count[k] += v
+				} else {
+					c.newImage.count[k] = v
+				}
 			}
 		}
 	}
@@ -212,37 +212,42 @@ func (c *Converter) convertImageChunk(xlow, xhigh, ylow, yhigh int) map[palette.
 	count := make(map[palette.Thread]int)
 	for y := ylow; y < yhigh; y++ {
 		for x := xlow; x < xhigh; x++ {
-			// Euclidean distance
-			r32, g32, b32, a := c.newImage.image.At(x, y).RGBA()
-			r, g, b := uint8(r32), uint8(g32), uint8(b32)
-
-			minLen := math.MaxFloat64
-			minIndex := 0
-			for i := 0; i < len(c.pc); i++ {
-				var dist float64
-				if c.rgb {
-					dist = rgbDistance(float64(r), float64(g), float64(b), float64(c.pc[i].RGB.R), float64(c.pc[i].RGB.G), float64(c.pc[i].RGB.B))
-				} else {
-					cie := colorConverter.SRGBToCIELab(colorConverter.SRGB{r, g, b})
-					dist = labDistance(c.pc[i].LAB.L, c.pc[i].LAB.A, c.pc[i].LAB.B, cie.L, cie.A, cie.B)
-				}
-				if dist < minLen {
-					minLen = dist
-					minIndex = i
-				}
-			}
+			minIndex := c.setNewPixel(x, y)
 
 			if _, ok := count[c.pc[minIndex]]; ok {
 				count[c.pc[minIndex]] += 1
 			} else {
 				count[c.pc[minIndex]] = 1
 			}
-
-			c.newImage.symbols[y][x] = c.symbols[minIndex]
-			c.newImage.image.Set(x, y, color.RGBA{uint8(c.pc[minIndex].RGB.R), uint8(c.pc[minIndex].RGB.G), uint8(c.pc[minIndex].RGB.B), uint8(a)})
 		}
 	}
 	return count
+}
+
+func (c *Converter) setNewPixel(x, y int) int {
+	r32, g32, b32, a := c.newImage.image.At(x, y).RGBA()
+	r, g, b := uint8(r32), uint8(g32), uint8(b32)
+
+	minLen := math.MaxFloat64
+	minIndex := 0
+	for i := 0; i < len(c.pc); i++ {
+		var dist float64
+		if c.rgb {
+			dist = rgbDistance(float64(r), float64(g), float64(b), float64(c.pc[i].RGB.R), float64(c.pc[i].RGB.G), float64(c.pc[i].RGB.B))
+		} else {
+			cie := colorConverter.SRGBToCIELab(colorConverter.SRGB{r, g, b})
+			dist = labDistance(c.pc[i].LAB.L, c.pc[i].LAB.A, c.pc[i].LAB.B, cie.L, cie.A, cie.B)
+		}
+		if dist < minLen {
+			minLen = dist
+			minIndex = i
+		}
+	}
+
+	c.newImage.symbols[y][x] = c.symbols[minIndex]
+	c.newImage.image.Set(x, y, color.RGBA{uint8(c.pc[minIndex].RGB.R), uint8(c.pc[minIndex].RGB.G), uint8(c.pc[minIndex].RGB.B), uint8(a)})
+
+	return minIndex
 }
 
 // start with 32 colors
