@@ -52,6 +52,10 @@ the HTML is the instructions to stitch the pattern, with the DMC image included.
 Usage of ./bin/cross-stitch:
   -all
     	use all thread colors available (currently broken)
+  -color string
+    	color palette to use (OPTIONS: dmc, lego, bw) (default "dmc")
+  -d	implement dithering
+  -g	convert image to greyscale
   -n int
     	number of colors to attempt to match (2^n) (default 6)
   -rgb
