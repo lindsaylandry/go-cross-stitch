@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"html/template"
-	"image"
 	"image/png"
 	"os"
 	"strings"
@@ -25,10 +24,10 @@ func mod(i, j int) bool  { return i%j == 0 }
 func plus(a, b int) int  { return a + b }
 func minus(a, b int) int { return a - b }
 
-func WriteHTML(img image.Image, legend []Legend, symbols [][]int, path string) error {
+func (c *Converter) WriteHTML() (string, error) {
 	// encode image to base64 string
 	var buff bytes.Buffer
-	png.Encode(&buff, img)
+	png.Encode(&buff, c.newImage.image)
 	imgString := base64.StdEncoding.EncodeToString(buff.Bytes())
 
 	// struct to send to html
@@ -48,28 +47,32 @@ func WriteHTML(img image.Image, legend []Legend, symbols [][]int, path string) e
 	}
 
 	// Write new image to png file
-	split := strings.Split(path, ".")
+	split := strings.Split(c.path, ".")
 
 	// Write HTML instructions
-	htmlPath := split[0] + "-dmc.html"
+	var htmlPath string
+	if c.rgb {
+		htmlPath = split[0] + "-dmc-rgb.html"
+	} else {
+		htmlPath = split[0] + "-dmc-lab.html"
+	}
 	htmlFile, err := os.Create(htmlPath)
 	if err != nil {
-		return err
-	}
-	t := template.Must(template.New("instructions").Funcs(fmap).ParseFiles("templates/instructions.html"))
-	if err := t.ExecuteTemplate(htmlFile, "instructions.html", AA{Img: imgString, Symbols: symbols, Legend: legend, Xlen: len(symbols[0]), Ylen: len(symbols)}); err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	t := template.Must(template.New("instructions").Funcs(fmap).ParseFiles("templates/instructions.html"))
+	err = t.ExecuteTemplate(htmlFile, "instructions.html", AA{Img: imgString, Symbols: c.newImage.symbols, Legend: c.newImage.legend, Xlen: len(c.newImage.symbols[0]), Ylen: len(c.newImage.symbols)})
+
+	return htmlPath, err
 }
 
-func WritePNG(img image.Image, path string, isRGB bool) (string, error) {
+func (c *Converter) WritePNG() (string, error) {
 	// Write new image to png file
-	split := strings.Split(path, ".")
+	split := strings.Split(c.path, ".")
 
 	var newPath string
-	if isRGB {
+	if c.rgb {
 		newPath = split[0] + "-dmc-rgb.png"
 	} else {
 		newPath = split[0] + "-dmc-lab.png"
@@ -80,6 +83,6 @@ func WritePNG(img image.Image, path string, isRGB bool) (string, error) {
 	}
 	defer place.Close()
 
-	err = png.Encode(place, img)
+	err = png.Encode(place, c.newImage.image)
 	return newPath, err
 }

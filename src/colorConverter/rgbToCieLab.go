@@ -37,51 +37,49 @@ func SRGBToCIELab(s SRGB) CIELab {
 }
 
 func sRGBTolRGB(s SRGB) lrgb {
-	a := 0.055
-
 	l := lrgb{}
-
 	r, g, b := float64(s.R)/255.0, float64(s.G)/255.0, float64(s.B)/255.0
 
-	if r <= 0.04045 {
-		l.r = r/12.92
-	} else {
-		l.r = math.Pow((r + a)/(1.0 + a), 2.4)
-	}
-
-	if g <= 0.04045 {
-    l.g = g/12.92
-  } else {
-    l.g = math.Pow((g + a)/(1.0 + a), 2.4)
-  }
-
-	if b <= 0.04045 {
-    l.b = b/12.92
-  } else {
-    l.b = math.Pow((b + a)/(1.0 + a), 2.4)
-  }
+	l.r = linearize(r)
+	l.g = linearize(g)
+	l.b = linearize(b)
 
 	return l
+}
+
+func linearize(c float64) float64 {
+	a := 0.055
+
+	if c <= 0.04045 {
+		return c / 12.92
+	}
+	return math.Pow((c+a)/(1.0+a), 2.4)
 }
 
 func lRGBToXYZ(l lrgb) xyz {
 	c := xyz{}
 
-	c.x = (0.4124*l.r) + (0.3576*l.g) + (0.1805*l.b)
-	c.y = (0.2126*l.r) + (0.7152*l.g) + (0.0722*l.b)
-	c.z = (0.0193*l.r) + (0.1192*l.g) + (0.9505*l.b)
+	c.x = (0.4124 * l.r) + (0.3576 * l.g) + (0.1805 * l.b)
+	c.y = (0.2126 * l.r) + (0.7152 * l.g) + (0.0722 * l.b)
+	c.z = (0.0193 * l.r) + (0.1192 * l.g) + (0.9503 * l.b)
 
 	return c
 }
 
 func xyzToLab(c xyz) CIELab {
-	d := 6.0/29.0
-	d2 := math.Pow(d, 2)
-	d3 := math.Pow(d, 3)
+	d := 6.0 / 29.0
+	d2 := math.Pow(d, 2.0)
+	d3 := math.Pow(d, 3.0)
 
+	// D65
 	xn := 0.95047
 	yn := 1.00000
 	zn := 1.08883
+
+	// D50
+	//xn := 0.966797
+	//yn := 1.00000
+	//zn := 0.825188
 
 	xr := c.x / xn
 	yr := c.y / yn
@@ -92,25 +90,25 @@ func xyzToLab(c xyz) CIELab {
 	if xr > d3 {
 		fx = math.Pow(xr, 1.0/3.0)
 	} else {
-		fx = xr/(3*d2) + 4.0/29.0
+		fx = xr/(3.0*d2) + 4.0/29.0
 	}
 
 	if yr > d3 {
-    fy = math.Pow(yr, 1.0/3.0)
-  } else {
-    fy = yr/(3*d2) + 4.0/29.0
-  }
+		fy = math.Pow(yr, 1.0/3.0)
+	} else {
+		fy = yr/(3.0*d2) + 4.0/29.0
+	}
 
 	if zr > d3 {
-    fz = math.Pow(zr, 1.0/3.0)
-  } else {
-    fz = zr/(3*d2) + 4.0/29.0
-  }
+		fz = math.Pow(zr, 1.0/3.0)
+	} else {
+		fz = zr/(3.0*d2) + 4.0/29.0
+	}
 	cie := CIELab{}
 
 	cie.L = 116.0*fy - 16.0
-	cie.A = 500.0*(fx - fy)
-	cie.B = 200.0*(fy - fz)
+	cie.A = 500.0 * (fx - fy)
+	cie.B = 200.0 * (fy - fz)
 
 	return cie
 }

@@ -2,10 +2,11 @@ package convert
 
 import (
 	"math"
+	//"fmt"
 )
 
 func labDistance76(l1, a1, b1, l2, a2, b2 float64) float64 {
-	return math.Pow((l2-l1), 2) + math.Pow((a2-a1), 2) + math.Pow((b2-b1), 2)
+	return square(l2-l1) + square(a2-a1) + square(b2-b1)
 }
 
 func labDistance94(l1, a1, b1, l2, a2, b2 float64) float64 {
@@ -13,11 +14,11 @@ func labDistance94(l1, a1, b1, l2, a2, b2 float64) float64 {
 	dA := a1 - a2
 	dB := b1 - b2
 
-	c1 := math.Sqrt(math.Pow(a1, 2) + math.Pow(b1, 2))
-	c2 := math.Sqrt(math.Pow(a2, 2) + math.Pow(b2, 2))
+	c1 := math.Sqrt(a1*a1 + b1*b1)
+	c2 := math.Sqrt(a2*a2 + b2*b2)
 	dCab := c1 - c2
 
-	dHab := math.Sqrt(math.Pow(dA, 2) + math.Pow(dB, 2) - math.Pow(dCab, 2))
+	dHab := math.Sqrt(square(dA) + square(dB) - square(dCab))
 
 	// constants for textiles
 	kL := 2.0
@@ -31,11 +32,15 @@ func labDistance94(l1, a1, b1, l2, a2, b2 float64) float64 {
 	sC := 1.0 + k1*c1
 	sH := 1.0 + k2*c1
 
-	e := math.Sqrt(math.Pow(dL/(kL*sL), 2) + math.Pow(dCab/(kC*sC), 2) + math.Pow(dHab/(kH*sH), 2))
+	e := math.Sqrt(square(dL/(kL*sL)) + square(dCab/(kC*sC)) + square(dHab/(kH*sH)))
 	return e
 }
 
 func labDistance(l1, a1, b1, l2, a2, b2 float64) float64 {
+	//fmt.Printf("%f %f %f\n", l2, a2, b2)
+	//l1, a1, b1 = l1*100.0, a1*100.0, b1*100.0
+	//l2, a2, b2 = l2*100.0, a2*100.0, b2*100.0
+
 	kL := 1.0
 	kC := 1.0
 	kH := 1.0
@@ -43,59 +48,81 @@ func labDistance(l1, a1, b1, l2, a2, b2 float64) float64 {
 	dLp := l2 - l1
 	lL := (l1 + l2) / 2.0
 
-	c1 := math.Sqrt(math.Pow(a1, 2.0) + math.Pow(b1, 2.0))
-	c2 := math.Sqrt(math.Pow(a2, 2.0) + math.Pow(b2, 2.0))
+	c1 := math.Sqrt(square(a1) + square(b1))
+	c2 := math.Sqrt(square(a2) + square(b2))
 
 	lC := (c1 + c2) / 2.0
 
-	a1p := a1 + (a1/2.0)*(1.0-math.Sqrt(math.Pow(lC, 7.0)/(math.Pow(lC, 7.0)+math.Pow(25.0, 7.0))))
-	a2p := a2 + (a2/2.0)*(1.0-math.Sqrt(math.Pow(lC, 7.0)/(math.Pow(lC, 7.0)+math.Pow(25.0, 7.0))))
+	cc := math.Sqrt(math.Pow(lC, 7.0) / (math.Pow(lC, 7.0) + math.Pow(25.0, 7.0)))
+	g := (1.0 - cc) / 2.0
 
-	c1p := math.Sqrt(math.Pow(a1p, 2.0) + math.Pow(b1, 2.0))
-	c2p := math.Sqrt(math.Pow(a2p, 2.0) + math.Pow(b2, 2.0))
+	a1p := a1 * (1.0 + g)
+	a2p := a2 * (1.0 + g)
+
+	c1p := math.Sqrt(square(a1p) + square(b1))
+	c2p := math.Sqrt(square(a2p) + square(b2))
 
 	dCp := c2p - c1p
 	lCp := (c1p + c2p) / 2.0
 
-	// b1, b2, a1p, and a2p are in degrees, convert to radians for atan
-	// MUST convert back to degrees from 0 to 360 (-pi to pi is bad)
-	h1p := math.Mod(math.Atan2(math.Pi/180.0*b1, math.Pi/180.0*a1p)+2.0*math.Pi, 2.0*math.Pi)
-	h2p := math.Mod(math.Atan2(math.Pi/180.0*b2, math.Pi/180.0*a2p)+2.0*math.Pi, 2.0*math.Pi)
+	var h1p float64
+	if b1 != a1p || a1p != 0 {
+		h1p = math.Atan2(b1, a1p)
+		if h1p < 0 {
+			h1p += 2.0 * math.Pi
+		}
+		h1p *= 180.0 / math.Pi
+	}
+
+	var h2p float64
+	if b2 != a2p || a2p != 0 {
+		h2p = math.Atan2(b2, a2p)
+		if h2p < 0 {
+			h1p += 2.0 * math.Pi
+		}
+		h2p *= 180.0 / math.Pi
+	}
 
 	var dhp float64
-	if math.Abs(h1p-h2p) <= math.Pi {
+	if c1p*c2p != 0 {
 		dhp = h2p - h1p
-	} else if h2p <= h1p {
-		dhp = h2p - h1p + 2.0*math.Pi
-	} else {
-		dhp = h2p - h1p - 2.0*math.Pi
+		if dhp > 180.0 {
+			dhp -= 360.0
+		} else if dhp < 180.0 {
+			dhp += 360.0
+		}
 	}
 
-	dHp := 2.0 * math.Sqrt(c1p*c2p) * math.Sin(dhp/2.0)
+	dHp := 2.0 * math.Sqrt(c1p*c2p) * math.Sin(dhp/2.0*math.Pi/180.0)
 
 	var lHp float64
-	if math.Abs(h1p-h2p) <= math.Pi {
+	if math.Abs(h1p-h2p) <= 180.0 {
 		lHp = (h1p + h2p) / 2.0
-	} else if h2p+h1p < 2.0*math.Pi {
-		lHp = (h1p + h2p + 2.0*math.Pi) / 2.0
+	} else if h1p+h2p < 360.0 {
+		lHp = (h1p + h2p + 360.0) / 2.0
 	} else {
-		lHp = (h1p + h2p - 2.0*math.Pi) / 2.0
+		lHp = (h1p + h2p - 360.0) / 2.0
 	}
 
-	t := 1.0 - 0.17*math.Cos(lHp-math.Pi/6.0) + 0.24*math.Cos(2.0*lHp) + 0.32*math.Cos(3.0*lHp+math.Pi/30.0) - 0.20*math.Cos(4.0*lHp-math.Pi*7.0/20.0)
+	t := 1.0 - 0.17*math.Cos((lHp-30.0)*math.Pi/180.0) + 0.24*math.Cos(2.0*lHp*math.Pi/180.0) + 0.32*math.Cos((3.0*lHp+6.0)*math.Pi/180.0) - 0.20*math.Cos((4.0*lHp-63.0)*math.Pi/180.0)
 
-	sL := 1.0 + (0.015 * math.Pow(lL-50.0, 2.0) / math.Sqrt(20.0+math.Pow(lL-50.0, 2.0)))
+	dT := 30.0 * math.Exp(-square((lHp-275.0)/25.0))
+
+	sL := 1.0 + (0.015 * square(lL-50.0) / math.Sqrt(20.0+square(lL-50.0)))
 	sC := 1.0 + 0.045*lCp
 	sH := 1.0 + 0.015*lCp*t
 
-	rT := -2.0 * math.Sqrt(math.Pow(lCp, 7.0)/(math.Pow(lCp, 7.0)+math.Pow(25.0, 7.0))) * math.Sin(math.Pi/3.0*math.Exp(-math.Pow((lHp-math.Pi*55.0/36.0)/(math.Pi*5.0/36.0), 2.0)))
+	rT := -2.0 * cc * math.Sin(2.0*dT*math.Pi/180.0)
 
-	e := math.Sqrt(math.Pow(dLp/(kL*sL), 2.0) + math.Pow(dCp/(kC*sC), 2.0) + math.Pow(dHp/(kH*sH), 2.0) + rT*(dCp/(kC*sC))*(dHp/(kH*sH)))
+	e := math.Sqrt(square(dLp/(kL*sL)) + square(dCp/(kC*sC)) + square(dHp/(kH*sH)) + rT*(dCp/(kC*sC))*(dHp/(kH*sH)))
 
 	return e
 }
 
 func rgbDistance(r1, g1, b1, r2, g2, b2 float64) float64 {
-	dist := 2*math.Pow((r2-r1), 2) + 4*math.Pow((g2-g1), 2) + 3*math.Pow((b2-b1), 2) + (r2+r1)/2*(math.Pow((r2-r1), 2)-math.Pow((b2-b1), 2))/256
-	return dist
+	return math.Sqrt(2*square(r2-r1) + 4*square(g2-g1) + 3*square(b2-b1) + (r2+r1)/2*(square(r2-r1)-square(b2-b1))/256)
+}
+
+func square(a float64) float64 {
+	return a * a
 }

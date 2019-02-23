@@ -16,7 +16,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	num := flag.Int("n", 6, "number of colors to attempt to match (2^n)")
+	num := flag.Int("n", 10, "number of colors to attempt to match (2^n)")
 	rgb := flag.Bool("rgb", false, "use rgb color space")
 	all := flag.Bool("all", false, "use all thread colors available (currently broken)")
 	pal := flag.String("color", "dmc", "color palette to use (OPTIONS: dmc, lego, bw)")

@@ -11,7 +11,7 @@ func GetLEGOColors() []Thread {
 		{23, "Bright Blue", colorConverter.SRGB{0, 0, 255}, colorConverter.CIELab{}},
 		{24, "Bright Yellow", colorConverter.SRGB{255, 255, 0}, colorConverter.CIELab{}},
 		{26, "Black", colorConverter.SRGB{0, 0, 0}, colorConverter.CIELab{}},
-//		{28, "Dark Green", colorConverter.SRGB{0, 153, 0}, colorConverter.CIELab{}},
+		//		{28, "Dark Green", colorConverter.SRGB{0, 153, 0}, colorConverter.CIELab{}},
 	}
 
 	for i, c := range legoColors {

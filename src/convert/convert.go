@@ -104,7 +104,7 @@ func (c *Converter) Greyscale() {
 			r32, g32, b32, a := c.newImage.image.At(x, y).RGBA()
 			r, g, b := uint8(r32), uint8(g32), uint8(b32)
 
-			gg := uint8(0.3*float64(r) + 0.59*float64(g) + 0.11*float64(b))
+			gg := colorConverter.Greyscale(r, g, b)
 			c.newImage.image.Set(x, y, color.RGBA{gg, gg, gg, uint8(a)})
 		}
 	}
@@ -116,18 +116,19 @@ func (c *Converter) Convert() error {
 	}
 
 	// write new image file
-	path, err := WritePNG(c.newImage.image, c.path, c.rgb)
+	path, err := c.WritePNG()
 	if err != nil {
 		return err
 	}
 	fmt.Printf("Wrote new PNG to %s\n", path)
 
 	// write HTML instructions
-	err = WriteHTML(c.newImage.image, c.newImage.legend, c.newImage.symbols, c.path)
+	path, err = c.WriteHTML()
 	if err != nil {
 		return err
 	}
 
+	fmt.Printf("Wrote instructions to %s\n", path)
 	return nil
 }
 
@@ -232,7 +233,7 @@ func (c *Converter) setNewPixel(x, y int) int {
 	minIndex := 0
 	for i := 0; i < len(c.pc); i++ {
 		var dist float64
-		if c.rgb {
+		if c.rgb || colorConverter.Greyscale(r, g, b) < 100 {
 			dist = rgbDistance(float64(r), float64(g), float64(b), float64(c.pc[i].RGB.R), float64(c.pc[i].RGB.G), float64(c.pc[i].RGB.B))
 		} else {
 			cie := colorConverter.SRGBToCIELab(colorConverter.SRGB{r, g, b})
