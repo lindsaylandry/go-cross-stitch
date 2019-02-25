@@ -26,10 +26,10 @@ type Converter struct {
 		image   *image.RGBA
 		count   map[palette.Thread]int
 		legend  []Legend
-		symbols [][]int
+		symbols [][]palette.Symbol
 	}
 	path      string
-	symbols   []int
+	symbols   []palette.Symbol
 	limit     int
 	rgb       bool
 	pc        []palette.Thread
@@ -62,9 +62,9 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre 
 	bounds := c.image.Bounds()
 	c.newImage.image = image.NewRGBA(bounds)
 
-	c.newImage.symbols = make([][]int, bounds.Dy()-bounds.Min.Y)
+	c.newImage.symbols = make([][]palette.Symbol, bounds.Dy()-bounds.Min.Y)
 	for y := bounds.Min.Y; y < bounds.Dy(); y++ {
-		c.newImage.symbols[y] = make([]int, bounds.Dx()-bounds.Min.X)
+		c.newImage.symbols[y] = make([]palette.Symbol, bounds.Dx()-bounds.Min.X)
 		for x := bounds.Min.X; x < bounds.Dx(); x++ {
 			pixel := c.image.At(x, y)
 			c.newImage.image.Set(x, y, pixel)
@@ -127,8 +127,15 @@ func (c *Converter) Convert() error {
 	if err != nil {
 		return err
 	}
-
 	fmt.Printf("Wrote instructions to %s\n", path)
+
+	// write HTML instructions
+	path, err = c.WritePDFFromHTML()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Wrote PDF to %s\n", path)
+
 	return nil
 }
 
@@ -202,7 +209,7 @@ func (c *Converter) convertImage() error {
 	}
 
 	for i, v := range c.pc {
-		l := Legend{v, c.newImage.count[v], c.symbols[i]}
+		l := Legend{v, c.newImage.count[v], c.symbols[i].Code}
 		c.newImage.legend = append(c.newImage.legend, l)
 	}
 	quickSortLegend(c.newImage.legend)
