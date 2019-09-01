@@ -27,7 +27,8 @@ func mod(i, j int) bool  { return i%j == 0 }
 func plus(a, b int) int  { return a + b }
 func minus(a, b int) int { return a - b }
 func mult(a, b int) int  { return a * b }
-func div(a, b int) int   { return a / b }
+func div(a, b int) float32   { return float32(a) / float32(b) }
+func fmtFloat(a float32) string { return fmt.Sprintf("%.1f", a) }
 
 func (c *Converter) WriteHTML() (string, error) {
 	// encode image to base64 string
@@ -46,6 +47,9 @@ func (c *Converter) WriteHTML() (string, error) {
 		Img    string
 		Legend []Legend
 		Tables []Table
+		Width  int
+		Height int
+		Scheme string
 	}
 
 	// funcs to use in html template
@@ -56,6 +60,7 @@ func (c *Converter) WriteHTML() (string, error) {
 		"minus":   minus,
 		"mult":    mult,
 		"div":     div,
+		"fmtFloat": fmtFloat,
 	}
 
 	htmlPath := c.getPath("html")
@@ -67,21 +72,21 @@ func (c *Converter) WriteHTML() (string, error) {
 	aa := AA{
 		Img:    imgString,
 		Legend: c.newImage.legend,
+		Width:  len(c.newImage.symbols[0]),
+		Height: len(c.newImage.symbols),
+		Scheme: "DMC",
 	}
 
 	xchunk := 50
 	ychunk := 60
 
-	xlen := len(c.newImage.symbols[0])
-	ylen := len(c.newImage.symbols)
-
-	xnum := xlen / xchunk
-	if xlen%xchunk != 0 {
+	xnum := aa.Width / xchunk
+	if aa.Width%xchunk != 0 {
 		xnum += 1
 	}
 
-	ynum := ylen / ychunk
-	if ylen%ychunk != 0 {
+	ynum := aa.Height / ychunk
+	if aa.Height%ychunk != 0 {
 		ynum += 1
 	}
 
@@ -89,17 +94,17 @@ func (c *Converter) WriteHTML() (string, error) {
 		for x := 0; x < xnum; x++ {
 			table := Table{}
 			table.Xstart = x * xchunk
-			if (x+1)*xchunk <= xlen {
+			if (x+1)*xchunk <= aa.Width {
 				table.Xend = (x+1)*xchunk - 1
 			} else {
-				table.Xend = xlen - 1
+				table.Xend = aa.Width - 1
 			}
 
 			table.Ystart = y * ychunk
-			if (y+1)*ychunk <= ylen {
+			if (y+1)*ychunk <= aa.Height {
 				table.Yend = (y+1)*ychunk - 1
 			} else {
-				table.Yend = ylen - 1
+				table.Yend = aa.Height - 1
 			}
 
 			fmt.Printf("%d %d %d %d\n", table.Xstart, table.Xend, table.Ystart, table.Yend)

@@ -50,7 +50,7 @@ func (c *Converter) WritePDFFromHTML() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println("PDF size %vkB", len(pdfg.Bytes())/1024)
+	fmt.Printf("PDF size %vkB\n", len(pdfg.Bytes())/1024)
 
 	return path, nil
 }

@@ -6,8 +6,8 @@ table.instructions {
   border: 3px solid black; 
   table-layout: fixed; 
   width: 100%;
-	max-width: 918px;
-	border-collapse: collapse;
+max-width: 918px;
+border-collapse: collapse;
 }
 table.instructions tr, table.instructions td, table.instructions th {
   border-bottom: 1px solid black;
@@ -25,34 +25,48 @@ table.instructions tr td:nth-child(10n+1), table.instructions tr th:nth-child(10
 table.instructions tr:nth-child(10n+1) td, table.instructions th {
   border-bottom: 3px solid black;
 }
+table.info {
+  padding-top: 10px;
+  table-layout: fixed;
+  width: 300px;
+}
+table.info tr td:nth-child(2n+1) {
+  font-family: sans-serif;
+  font-weight: bold;
+  text-align: left;
+}
+table.info tr td:nth-child(2n) {
+  font-family: sans-serif;
+  text-align: right;
+}
 td.indexes, th.indexes {
-	font-family: sans-serif;
+  font-family: sans-serif;
   font-weight: bold;
   font-size: 8pt;
-	text-align: "right";
+  text-align: "right";
   background-color: lightgray;
-	width: 18px;
-	height: 18px;
-	text-align: right;
-	white-space: nowrap;
-	overflow-y: hidden;
-	padding: 0px;
+  width: 18px;
+  height: 18px;
+  text-align: right;
+  white-space: nowrap;
+  overflow-y: hidden;
+  padding: 0px;
 }
 td.symbols {
   width: 18px;
-	height: 20px;
-	white-space: nowrap;
-	overflow-y: hidden;
-	padding: 0px;
-	font-family: "Arial";
+  height: 20px;
+  white-space: nowrap;
+  overflow-y: hidden;
+  padding: 0px;
+  font-family: "Arial";
 }
 table.legend {
   border-collapse: collapse;
 }
 table.legend td, table.legend th {
   padding-right: 18px;
-	height: 20px;
-	font-family: "Arial";
+  height: 20px;
+  font-family: "Arial";
 }
 table.legend tr th {
   border-bottom: 3px solid black;
@@ -62,19 +76,38 @@ table.legend tr:nth-child(2n) td {
   text-align: "right"
 }
 div.cushion {
-	padding: 20px;
+  padding: 20px;
+}
+h1 {
+  font-family: sans-serif;
 }
 @media print {
   table { page-break-inside:auto }
   tr    { page-break-inside:avoid; page-break-after:auto }
   div.cushion { page-break-after: always }
-	table.instructions { page-break-after: always }
+table.instructions { page-break-after: always }
 }
     </style>
   </head>
   <body>
     <img src="data:image/png;base64,{{ .Img }}" width="600" align="middle" style="image-rendering: pixelated;" alt="Image">
-    <h1>Legend</h1>
+  <table class="info">
+    <tr>
+      <td>Fabric:</td>
+      <td>14ct Aida</td>
+    </tr>
+    <tr>
+      <td>Size:</td>
+      {{ $w := div .Width 14 }}
+      {{ $h := div .Height 14 }}
+      <td>{{ fmtFloat $w }}x{{ fmtFloat $h }}in</td>
+    </tr>
+    <tr>
+      <td>Colors:</td>
+      <td>{{ .Scheme }}</td>
+    </tr>
+  </table>
+  <h1>Legend</h1>
     <table class="legend">
       <tr>
         <th align="right">Color</th>
@@ -86,31 +119,31 @@ div.cushion {
       {{ range $color := .Legend }}
       <tr >
         <td align="right" style="background-color:rgb({{ $color.Color.RGB.R }},{{ $color.Color.RGB.G }},{{ $color.Color.RGB.B }})"></td>
-        <td align="center">&#{{ $color.Symbol }}</td>
+        <td align="right">&#{{ $color.Symbol }}</td>
         <td align="right">{{ $color.Color.ID }}</td>
         <td align="right">{{ $color.Count }} </td>
         <td align="left">{{ $color.Color.Name }}</td>
       </tr>
       {{ end }}
     </table>
-		<div class="cushion"></div>
+  <div class="cushion"></div>
     {{ range $i, $table := $.Tables }}
     <table class="instructions">
       <tr>
       {{ range $x := forloop $table.Xstart (plus $table.Xend 1) }}
-				<th class="indexes">{{ if mod $x 10 }}{{ $x }}{{ end }}</th>
+      <th class="indexes">{{ if mod $x 10 }}{{ $x }}{{ end }}</th>
       {{ end }}
       </tr>
       {{ range $y := forloop $table.Ystart $table.Yend }}
       <tr>
-				<td class="indexes" align="center">{{ if mod (plus $y 1) 10 }}{{ plus $y 1 }}{{ end }}</td>
+      <td class="indexes" align="center">{{ if mod (plus $y 1) 10 }}{{ plus $y 1 }}{{ end }}</td>
         {{ $k := minus $y $table.Ystart }}
         {{ range $j := index $table.Symbols $k }}
-				<td class="symbols" align="center" valign="middle" style="font-size:{{ $j.FontSize }}pt">&#{{ $j.Code }}</td>
+      <td class="symbols" align="center" valign="middle" style="font-size:{{ $j.FontSize }}pt">&#{{ $j.Code }}</td>
         {{ end }}
       </tr>
       {{ end }}
-		</table>
+  </table>
     {{ end }}
   </body>
 </html>
