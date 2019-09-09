@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"math"
 
-	"fmt"
 	"github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
 	"github.com/lindsaylandry/go-cross-stitch/src/palette"
 )
@@ -24,6 +23,7 @@ type Converter struct {
 	image    image.Image
 	newImage struct {
 		image   *image.RGBA
+		p       int
 		count   map[palette.Thread]int
 		legend  []Legend
 		symbols [][]palette.Symbol
@@ -53,6 +53,7 @@ func (c *Converter) getImage() error {
 func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre bool) (*Converter, error) {
 	c := Converter{}
 
+	c.newImage.p = 4
 	c.path = filename
 
 	if err := c.getImage(); err != nil {
@@ -115,28 +116,9 @@ func (c *Converter) Convert() error {
 		return err
 	}
 
-	// write new image file
-	path, err := c.WritePNG()
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Wrote new PNG to %s\n", path)
+	err := c.WriteFiles()
 
-	// write HTML instructions
-	path, err = c.WriteHTML()
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Wrote instructions to %s\n", path)
-
-	// write HTML instructions
-	path, err = c.WritePDFFromHTML()
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Wrote PDF to %s\n", path)
-
-	return nil
+	return err
 }
 
 // convert best-color palette to match available threads

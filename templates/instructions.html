@@ -2,29 +2,50 @@
   <head>
     <title>Instructions</title>
     <style>
-table.instructions {
-  border: 3px solid black; 
-  table-layout: fixed; 
-  width: 100%;
-  max-width: 918px;
-  border-collapse: collapse;
+.grid-container {
+	display: grid;
+	grid-template-columns: repeat(51, 18px);
+	grid-template-rows: repeat(61, 18px);
 }
-table.instructions tr, table.instructions td, table.instructions th {
+.grid-item-nums {
+	font-family: sans-serif;
+  font-weight: bold;
+  font-size: 8pt;
+  text-align: "right";
+  background-color: lightgray;
+	border-right: 1px solid black;
+	border-bottom: 2px solid black;
+	border-top: 3px solid black;
+}
+.grid-vert-nums {
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 8pt;
+  text-align: "right";
+  background-color: lightgray;
+  border-right: 2px solid black;
+  border-bottom: 1px solid black;
+  border-left: 3px solid black;
+}
+.grid-symbol {
   border-bottom: 1px solid black;
   border-right: 1px solid black;
+  font-family: sans-serif;
+  text-align: "center";
 }
-table.instructions tr td:nth-child(5n+1), table.instructions tr th:nth-child(5n+1) {
-  border-right: 2px solid black;
+.grid-item-nums:nth-of-type(5n+1) {
+	border-right: 2px solid black;
 }
-table.instructions tr:nth-child(5n+1) td {
-  border-bottom: 2px solid black;
-}
-table.instructions tr td:nth-child(10n+1), table.instructions tr th:nth-child(10n+1) {
+.grid-item-nums:nth-of-type(10n+1) {
   border-right: 3px solid black;
 }
-table.instructions tr:nth-child(10n+1) td, table.instructions th {
+.grid-vert-nums:nth-of-type(5n+1) {
+  border-bottom: 2px solid black;
+}
+.grid-vert-nums:nth-of-type(10n+1) {
   border-bottom: 3px solid black;
 }
+
 table.info {
   padding-top: 10px;
   table-layout: fixed;
@@ -84,8 +105,9 @@ h1 {
 @media print {
   table { page-break-inside:auto }
   tr    { page-break-inside:avoid; page-break-after:auto }
-  div.cushion { page-break-after: always }
-table.instructions { page-break-after: always }
+	.info { page-break-after: always }
+	div.cushion { page-break-after: always }
+.grid-container { page-break-after: always }
 }
     </style>
   </head>
@@ -128,22 +150,20 @@ table.instructions { page-break-after: always }
     </table>
   <div class="cushion"></div>
     {{ range $i, $table := $.Tables }}
-    <table class="instructions">
-      <tr>
+	  <div class="grid-container">
       {{ range $x := forloop $table.Xstart (plus $table.Xend 1) }}
-      <th class="indexes">{{ if mod $x 10 }}{{ $x }}{{ end }}</th>
+      <div class="grid-item-nums">{{ if mod $x 10 }}{{ $x }}{{ end }}</div>
       {{ end }}
-      </tr>
-      {{ range $y := forloop $table.Ystart $table.Yend }}
-      <tr>
-      <td class="indexes" align="center">{{ if mod (plus $y 1) 10 }}{{ plus $y 1 }}{{ end }}</td>
+			{{ range $y := forloop $table.Ystart $table.Yend }}
+			<div class="grid-vert-nums" align="center">{{ if mod (plus $y 1) 10 }}{{ plus $y 1 }}{{ end }}</div>
         {{ $k := minus $y $table.Ystart }}
         {{ range $j := index $table.Symbols $k }}
-      <td class="symbols" align="center" valign="middle" style="font-size:{{ $j.FontSize }}pt">&#{{ $j.Code }}</td>
+      <div class="grid-symbol" align="center" valign="middle" style="font-size:{{ $j.FontSize }}pt">&#{{ $j.Code }}</div>
         {{ end }}
-      </tr>
       {{ end }}
-  </table>
-    {{ end }}
+  </div>
+	{{ end }}
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script src="../../templates/script.js"></script>
   </body>
 </html>

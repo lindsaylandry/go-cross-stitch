@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func (c *Converter) WritePDF() (string, error) {
+func (c *Converter) writePDF() (string, error) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 10)
@@ -26,7 +26,7 @@ func (c *Converter) WritePDF() (string, error) {
 	return path, pdf.OutputFileAndClose(path)
 }
 
-func (c *Converter) WritePDFFromHTML() (string, error) {
+func (c *Converter) writePDFFromHTML() (string, error) {
 	path := c.getPath("html")
 	pdfg, err := wkhtmltopdf.NewPDFGenerator()
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"html/template"
+	"image"
 	"image/png"
 	"os"
 	"strings"
@@ -23,17 +24,42 @@ func forloop(start, end int) (stream chan int) {
 	return
 }
 
-func mod(i, j int) bool  { return i%j == 0 }
-func plus(a, b int) int  { return a + b }
-func minus(a, b int) int { return a - b }
-func mult(a, b int) int  { return a * b }
-func div(a, b int) float32   { return float32(a) / float32(b) }
+func mod(i, j int) bool         { return i%j == 0 }
+func plus(a, b int) int         { return a + b }
+func minus(a, b int) int        { return a - b }
+func mult(a, b int) int         { return a * b }
+func div(a, b int) float32      { return float32(a) / float32(b) }
 func fmtFloat(a float32) string { return fmt.Sprintf("%.1f", a) }
 
-func (c *Converter) WriteHTML() (string, error) {
+func (c *Converter) WriteFiles() error {
+	// write new image file
+	path, img, err := c.writePNG()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Wrote new PNG to %s\n", path)
+
+	// write HTML instructions
+	path, err = c.writeHTML(img)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Wrote instructions to %s\n", path)
+
+	// write HTML instructions
+	path, err = c.writePDFFromHTML()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Wrote PDF to %s\n", path)
+
+	return nil
+}
+
+func (c *Converter) writeHTML(img *image.RGBA) (string, error) {
 	// encode image to base64 string
 	var buff bytes.Buffer
-	png.Encode(&buff, c.newImage.image)
+	png.Encode(&buff, img)
 	imgString := base64.StdEncoding.EncodeToString(buff.Bytes())
 
 	type Table struct {
@@ -54,12 +80,12 @@ func (c *Converter) WriteHTML() (string, error) {
 
 	// funcs to use in html template
 	fmap := template.FuncMap{
-		"forloop": forloop,
-		"mod":     mod,
-		"plus":    plus,
-		"minus":   minus,
-		"mult":    mult,
-		"div":     div,
+		"forloop":  forloop,
+		"mod":      mod,
+		"plus":     plus,
+		"minus":    minus,
+		"mult":     mult,
+		"div":      div,
 		"fmtFloat": fmtFloat,
 	}
 
@@ -130,17 +156,33 @@ func (c *Converter) WriteHTML() (string, error) {
 	return htmlPath, err
 }
 
-func (c *Converter) WritePNG() (string, error) {
-	// Write new image to png file
+func (c *Converter) writePNG() (string, *image.RGBA, error) {
+	// Make each pixel 3x3
+	bounds := c.newImage.image.Bounds()
+	bounds.Max.X = bounds.Max.X * c.newImage.p
+	bounds.Max.Y = bounds.Max.Y * 4
+	img := image.NewRGBA(bounds)
+
 	newPath := c.getPath("png")
 	place, err := os.Create(newPath)
 	if err != nil {
-		return "", err
+		return "", img, err
 	}
 	defer place.Close()
 
-	err = png.Encode(place, c.newImage.image)
-	return newPath, err
+	for x := 0; x < bounds.Max.X; x++ {
+		for y := 0; y < bounds.Max.Y; y++ {
+			pixel := c.newImage.image.At(x, y)
+			for xx := 0; xx < 4; xx++ {
+				for yy := 0; yy < 4; yy++ {
+					img.Set(x*4+xx, y*4+yy, pixel)
+				}
+			}
+		}
+	}
+
+	err = png.Encode(place, img)
+	return newPath, img, err
 }
 
 func (c *Converter) getPath(extension string) string {
