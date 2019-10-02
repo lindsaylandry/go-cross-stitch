@@ -6,8 +6,10 @@ import (
 	"image/color"
 	"image/jpeg"
 	"image/png"
+	"image/gif"
 	"io/ioutil"
 	"math"
+	"strings"
 
 	"github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
 	"github.com/lindsaylandry/go-cross-stitch/src/palette"
@@ -19,6 +21,12 @@ type Legend struct {
 	Symbol int
 }
 
+type ColorSymbol struct {
+	Symbol  palette.Symbol
+	Color   palette.Thread
+	Text    string
+}
+
 type Converter struct {
 	image    image.Image
 	newImage struct {
@@ -26,7 +34,7 @@ type Converter struct {
 		p       int
 		count   map[palette.Thread]int
 		legend  []Legend
-		symbols [][]palette.Symbol
+		symbols [][]ColorSymbol
 	}
 	path      string
 	symbols   []palette.Symbol
@@ -35,6 +43,7 @@ type Converter struct {
 	pc        []palette.Thread
 	dither    bool
 	greyscale bool
+	title     string
 }
 
 func (c *Converter) getImage() error {
@@ -45,6 +54,7 @@ func (c *Converter) getImage() error {
 
 	image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
 	image.RegisterFormat("jpeg", "jpeg", jpeg.Decode, jpeg.DecodeConfig)
+	image.RegisterFormat("gif", "gif", gif.Decode, gif.DecodeConfig)
 
 	c.image, _, err = image.Decode(bytes.NewReader(data))
 	return err
@@ -63,9 +73,9 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre 
 	bounds := c.image.Bounds()
 	c.newImage.image = image.NewRGBA(bounds)
 
-	c.newImage.symbols = make([][]palette.Symbol, bounds.Dy()-bounds.Min.Y)
+	c.newImage.symbols = make([][]ColorSymbol, bounds.Dy()-bounds.Min.Y)
 	for y := bounds.Min.Y; y < bounds.Dy(); y++ {
-		c.newImage.symbols[y] = make([]palette.Symbol, bounds.Dx()-bounds.Min.X)
+		c.newImage.symbols[y] = make([]ColorSymbol, bounds.Dx()-bounds.Min.X)
 		for x := bounds.Min.X; x < bounds.Dx(); x++ {
 			pixel := c.image.At(x, y)
 			c.newImage.image.Set(x, y, pixel)
@@ -94,8 +104,18 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre 
 	}
 
 	c.newImage.count = make(map[palette.Thread]int)
+	c.getTitle(filename)
 
 	return &c, nil
+}
+
+func (c *Converter) getTitle(filename string) {
+	fn := strings.SplitAfter(filename, "/")
+	n := strings.Split(fn[len(fn)-1], ".")
+	name := strings.ReplaceAll(n[0], "-", " ")
+	name2 := strings.ReplaceAll(name, "_", " ")
+
+	c.title = strings.ToUpper(name2)
 }
 
 func (c *Converter) Greyscale() {
@@ -234,7 +254,9 @@ func (c *Converter) setNewPixel(x, y int) int {
 		}
 	}
 
-	c.newImage.symbols[y][x] = c.symbols[minIndex]
+	c.newImage.symbols[y][x].Symbol = c.symbols[minIndex]
+	c.newImage.symbols[y][x].Color = c.pc[minIndex]
+	c.newImage.symbols[y][x].Text = "black"
 	c.newImage.image.Set(x, y, color.RGBA{uint8(c.pc[minIndex].RGB.R), uint8(c.pc[minIndex].RGB.G), uint8(c.pc[minIndex].RGB.B), uint8(a)})
 
 	return minIndex

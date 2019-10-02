@@ -9,8 +9,6 @@ import (
 	"image/png"
 	"os"
 	"strings"
-
-	"github.com/lindsaylandry/go-cross-stitch/src/palette"
 )
 
 func forloop(start, end int) (stream chan int) {
@@ -46,13 +44,12 @@ func (c *Converter) WriteFiles() error {
 	}
 	fmt.Printf("Wrote instructions to %s\n", path)
 
-	// write HTML instructions
+	// write PDF instructions
 	path, err = c.writePDFFromHTML()
 	if err != nil {
 		return err
 	}
 	fmt.Printf("Wrote PDF to %s\n", path)
-
 	return nil
 }
 
@@ -63,7 +60,7 @@ func (c *Converter) writeHTML(img *image.RGBA) (string, error) {
 	imgString := base64.StdEncoding.EncodeToString(buff.Bytes())
 
 	type Table struct {
-		Symbols        [][]palette.Symbol
+		Symbols        [][]ColorSymbol
 		Xstart, Ystart int
 		Xend, Yend     int
 	}
@@ -76,6 +73,7 @@ func (c *Converter) writeHTML(img *image.RGBA) (string, error) {
 		Width  int
 		Height int
 		Scheme string
+		Title  string
 	}
 
 	// funcs to use in html template
@@ -101,6 +99,7 @@ func (c *Converter) writeHTML(img *image.RGBA) (string, error) {
 		Width:  len(c.newImage.symbols[0]),
 		Height: len(c.newImage.symbols),
 		Scheme: "DMC",
+		Title:  c.title,
 	}
 
 	xchunk := 50
@@ -135,9 +134,9 @@ func (c *Converter) writeHTML(img *image.RGBA) (string, error) {
 
 			fmt.Printf("%d %d %d %d\n", table.Xstart, table.Xend, table.Ystart, table.Yend)
 
-			s := make([][]palette.Symbol, table.Yend-table.Ystart+1)
+			s := make([][]ColorSymbol, table.Yend-table.Ystart+1)
 			for i := table.Ystart; i <= table.Yend; i++ {
-				s2 := make([]palette.Symbol, table.Xend-table.Xstart+1)
+				s2 := make([]ColorSymbol, table.Xend-table.Xstart+1)
 				for j := table.Xstart; j <= table.Xend; j++ {
 					s2[j-table.Xstart] = c.newImage.symbols[i][j]
 				}

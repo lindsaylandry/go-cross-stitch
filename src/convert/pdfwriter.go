@@ -4,31 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	wkhtmltopdf "github.com/SebastiaanKlippert/go-wkhtmltopdf"
-	"github.com/jung-kurt/gofpdf"
 	"io/ioutil"
-	"strconv"
 )
-
-func (c *Converter) writePDF() (string, error) {
-	pdf := gofpdf.New("P", "mm", "A4", "")
-	pdf.AddPage()
-	pdf.SetFont("Arial", "B", 10)
-
-	for _, y := range c.newImage.symbols {
-		for _, x := range y {
-			symbol := rune(x.Code)
-			pdf.CellFormat(5.0, 5.0, strconv.QuoteRuneToGraphic(symbol), "1", 0, "CM", false, 0, "")
-		}
-		pdf.Ln(-1.0)
-	}
-
-	path := c.getPath("pdf")
-	return path, pdf.OutputFileAndClose(path)
-}
 
 func (c *Converter) writePDFFromHTML() (string, error) {
 	path := c.getPath("html")
 	pdfg, err := wkhtmltopdf.NewPDFGenerator()
+	pdfg.Dpi.Set(300)
 	if err != nil {
 		return "", err
 	}
