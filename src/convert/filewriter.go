@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"image"
 	"image/png"
+	"image/color"
 	"os"
 	"strings"
 )
@@ -45,11 +46,13 @@ func (c *Converter) WriteFiles() error {
 	fmt.Printf("Wrote instructions to %s\n", path)
 
 	// write PDF instructions
+	/*
 	path, err = c.writePDFFromHTML()
 	if err != nil {
 		return err
 	}
 	fmt.Printf("Wrote PDF to %s\n", path)
+	*/
 	return nil
 }
 
@@ -132,8 +135,6 @@ func (c *Converter) writeHTML(img *image.RGBA) (string, error) {
 				table.Yend = aa.Height - 1
 			}
 
-			fmt.Printf("%d %d %d %d\n", table.Xstart, table.Xend, table.Ystart, table.Yend)
-
 			s := make([][]ColorSymbol, table.Yend-table.Ystart+1)
 			for i := table.Ystart; i <= table.Yend; i++ {
 				s2 := make([]ColorSymbol, table.Xend-table.Xstart+1)
@@ -159,7 +160,7 @@ func (c *Converter) writePNG() (string, *image.RGBA, error) {
 	// Make each pixel 3x3
 	bounds := c.newImage.image.Bounds()
 	bounds.Max.X = bounds.Max.X * c.newImage.p
-	bounds.Max.Y = bounds.Max.Y * 4
+	bounds.Max.Y = bounds.Max.Y * c.newImage.p
 	img := image.NewRGBA(bounds)
 
 	newPath := c.getPath("png")
@@ -172,9 +173,14 @@ func (c *Converter) writePNG() (string, *image.RGBA, error) {
 	for x := 0; x < bounds.Max.X; x++ {
 		for y := 0; y < bounds.Max.Y; y++ {
 			pixel := c.newImage.image.At(x, y)
-			for xx := 0; xx < 4; xx++ {
-				for yy := 0; yy < 4; yy++ {
-					img.Set(x*4+xx, y*4+yy, pixel)
+			for xx := 0; xx < c.newImage.p; xx++ {
+				for yy := 0; yy < c.newImage.p; yy++ {
+					if xx == c.newImage.p - 1 || yy == c.newImage.p - 1 {
+						px := color.Gray16{0}
+						img.Set(x*c.newImage.p+xx, y*c.newImage.p+yy, px)
+					} else {
+						img.Set(x*c.newImage.p+xx, y*c.newImage.p+yy, pixel)
+					}
 				}
 			}
 		}

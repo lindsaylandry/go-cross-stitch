@@ -1,11 +1,14 @@
 <html>
   <head>
-    <title>Instructions</title>
+    <title>{{ .Title }}</title>
     <style>
+h1.title {
+	font-size: 40px;
+}
 .grid-container {
 	display: grid;
-	grid-template-columns: repeat(51, 14pt);
-	grid-template-rows: repeat(61, 14pt);
+	grid-template-columns:{{ range $x := forloop 0 50 }} 14pt{{end}};
+	grid-template-rows:{{ range $y := forloop 0 60 }} 14pt{{end}};
 }
 .grid-item-nums {
 	font-family: sans-serif;
@@ -24,16 +27,15 @@
   font-size: 8pt;
   text-align: "right";
   background-color: lightgray;
-  border-top: 3px solid black;
-  border-right: 1px solid black;
-  border-bottom: 2px solid black;
-	transform: rotate(270deg);
+  border-left: 3px solid black;
+  border-bottom: 1px solid black;
+  border-right: 2px solid black;
 }
-.grid-symbol {
+div.grid-symbol {
   border-bottom: 1px solid black;
   border-right: 1px solid black;
   font-family: sans-serif;
-  text-align: "center";
+	padding-top: 1px;
 }
 .grid-item-nums:nth-of-type(5n+1) {
 	border-right: 2px solid black;
@@ -48,14 +50,18 @@
   border-top: 3px solid black;
 }
 .grid-vert-nums:nth-of-type(5n+1) {
-  border-left: 2px solid black;
+  border-bottom: 2px solid black;
 }
 .grid-vert-nums:nth-of-type(10n+1) {
-  border-left: 3px solid black;
+	transform: rotate(270deg);
+	border-right: 0px;
+	border-top: 3px solid black;
+	border-left: 3px solid black;
+	border-bottom: 2px solid black;
 }
 
 img.source {
-	width: 600px;
+	width: 1000px;
 	margin: 0 auto;
 	image-rendering: pixelated;
 }
@@ -65,11 +71,15 @@ div.padding {
 }
 
 table.info {
-  padding-top: 10px;
+	padding: 10px;
   table-layout: fixed;
-  width: 300px;
+  width: 100%;
 	margin: 0 auto;
 	border: 1px solid black;
+}
+table.info tr td {
+	padding-top: 5px;
+	padding-bottom: 5px;
 }
 table.info tr td:nth-child(2n+1) {
   font-family: sans-serif;
@@ -109,6 +119,10 @@ table.legend td, table.legend th {
   height: 20px;
   font-family: "Arial";
 }
+table.legend tr td {
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
 table.legend tr th {
   border-bottom: 3px solid black;
 }
@@ -131,13 +145,14 @@ h1 {
     </style>
   </head>
   <body>
-		<h1>{{ .Title }}</h1>
+		<h1 class="title">{{ .Title }}</h1>
 		<img class="source"src="data:image/png;base64,{{ .Img }}" alt="Image">
 	<div class="padding"></div>
+	<h1>Info</h1>
   <table class="info">
     <tr>
       <td>Fabric:</td>
-      <td>14ct Aida</td>
+      <td>14ct Aida Black</td>
     </tr>
     <tr>
       <td>Size:</td>
@@ -177,20 +192,36 @@ h1 {
       {{ end }}
     </table>
   <div class="cushion"></div>
-    {{ range $i, $table := $.Tables }}
-	  <div class="grid-container">
-      {{ range $x := forloop $table.Xstart (plus $table.Xend 1) }}
-      <div class="grid-item-nums">{{ if mod $x 10 }}{{ $x }}{{ end }}</div>
+  {{ range $i, $table := $.Tables }}
+	<div class="grid-container">
+    {{ range $x := forloop $table.Xstart (plus $table.Xend 1) }}
+    <div class="grid-item-nums">{{ if mod $x 10 }}{{ $x }}{{ end }}</div>
+    {{ end }}
+		{{ range $y := forloop $table.Ystart $table.Yend }}
+		<div class="grid-vert-nums">{{ if mod (plus $y 1) 10 }}{{ plus $y 1 }}{{ end }}</div>
+      {{ $k := minus $y $table.Ystart }}
+      {{ range $j := index $table.Symbols $k }}
+    <div class="grid-symbol" align="center" valign="center" style="font-size:{{ $j.Symbol.FontSize }}pt">&#{{ $j.Symbol.Code }}</div>
       {{ end }}
-			{{ range $y := forloop $table.Ystart $table.Yend }}
-			<div class="grid-vert-nums" align="center">{{ if mod (plus $y 1) 10 }}{{ plus $y 1 }}{{ end }}</div>
-        {{ $k := minus $y $table.Ystart }}
-        {{ range $j := index $table.Symbols $k }}
-      <div class="grid-symbol" align="center" valign="middle" style="font-size:{{ $j.Symbol.FontSize }}pt">&#{{ $j.Symbol.Code }}</div>
-        {{ end }}
-      {{ end }}
-  </div>
+    {{ end }}
+	</div>
 	{{ end }}
+	<div class="cushion"></div>
+	{{ range $i, $table := $.Tables }}
+  <div class="grid-container">
+    {{ range $x := forloop $table.Xstart (plus $table.Xend 1) }}
+    <div class="grid-item-nums">{{ if mod $x 10 }}{{ $x }}{{ end }}</div>
+    {{ end }}
+    {{ range $y := forloop $table.Ystart $table.Yend }}
+    <div class="grid-vert-nums">{{ if mod (plus $y 1) 10 }}{{ plus $y 1 }}{{ end }}</div>
+      {{ $k := minus $y $table.Ystart }}
+      {{ range $j := index $table.Symbols $k }}
+			<div class="grid-symbol" align="center" valign="center" style="font-size:{{ $j.Symbol.FontSize }}pt;background-color:rgb({{ $j.Color.RGB.R }},{{ $j.Color.RGB.G }},{{ $j.Color.RGB.B }});color:{{$j.Text}};">&#{{ $j.Symbol.Code }}</div>
+      {{ end }}
+    {{ end }}
+  </div>
+  {{ end }}
+
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
 	<script src="../../templates/script.js"></script>

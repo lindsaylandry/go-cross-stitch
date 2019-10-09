@@ -63,7 +63,7 @@ func (c *Converter) getImage() error {
 func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre bool) (*Converter, error) {
 	c := Converter{}
 
-	c.newImage.p = 4
+	c.newImage.p = 10
 	c.path = filename
 
 	if err := c.getImage(); err != nil {
@@ -256,10 +256,19 @@ func (c *Converter) setNewPixel(x, y int) int {
 
 	c.newImage.symbols[y][x].Symbol = c.symbols[minIndex]
 	c.newImage.symbols[y][x].Color = c.pc[minIndex]
-	c.newImage.symbols[y][x].Text = "black"
+	c.newImage.symbols[y][x].Text = getTextColor(c.pc[minIndex])
 	c.newImage.image.Set(x, y, color.RGBA{uint8(c.pc[minIndex].RGB.R), uint8(c.pc[minIndex].RGB.G), uint8(c.pc[minIndex].RGB.B), uint8(a)})
 
 	return minIndex
+}
+
+func getTextColor(cc palette.Thread) string {
+	gg := colorConverter.Greyscale(cc.RGB.R, cc.RGB.G, cc.RGB.B)
+
+	if gg < 100 {
+		return "white"
+	}
+	return "black"
 }
 
 // start with 32 colors
