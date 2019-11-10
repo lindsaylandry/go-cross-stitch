@@ -60,7 +60,7 @@ func (c *Converter) getImage() error {
 	return err
 }
 
-func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre bool) (*Converter, error) {
+func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre, pix bool) (*Converter, error) {
 	c := Converter{}
 
 	c.newImage.p = 10
@@ -94,8 +94,15 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre 
 		c.pc = palette.GetDMCColors()
 
 		if !all {
-			//best colors rgb
-			bcrgb := c.colorQuant()
+			bcrgb := []colorConverter.SRGB{}
+			if pix {
+				// most colors rgb
+				bcrgb = c.pixel()
+			} else {
+				//best colors rgb
+				bcrgb = c.colorQuant()
+			}
+
 			// Convert best-colors to thread palette
 			c.pc = c.convertPalette(bcrgb)
 		}
