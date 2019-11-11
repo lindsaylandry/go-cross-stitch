@@ -3,90 +3,76 @@ package convert
 import (
 	"image/color"
 	//"fmt"
-	"math"
 )
 
 func (c *Converter) floydSteinbergDither() {
 	bounds := c.image.Bounds()
 	for y := bounds.Min.Y; y < bounds.Dy(); y++ {
 		for x := bounds.Min.X; x < bounds.Dx(); x++ {
+			xx := x
+			if y % 2 != 0 {
+				xx = bounds.Dx() - 1 - x
+			}
+
+			r32, g32, b32, _ := c.newImage.image.At(xx, y).RGBA()
+			r1, g1, b1 := float64(uint8(r32)), float64(uint8(g32)), float64(uint8(b32))
+
+			// x, y
+			minIndex := c.setNewPixel(xx, y)
+			if _, ok := c.newImage.count[c.pc[minIndex]]; ok {
+				c.newImage.count[c.pc[minIndex]] += 1
+			} else {
+				c.newImage.count[c.pc[minIndex]] = 1
+			}
+
+			r232, g232, b232, _ := c.newImage.image.At(xx, y).RGBA()
+			r2, g2, b2 := float64(uint8(r232)), float64(uint8(g232)), float64(uint8(b232))
+
+			qR := r1 - r2
+			qG := g1 - g2
+			qB := b1 - b2
+
 			// Odd
-			if math.Mod(float64(y), 2) != 0.0 {
-				xmod := bounds.Dx() - 1 - x
-				r32, g32, b32, _ := c.newImage.image.At(xmod, y).RGBA()
-				r1, g1, b1 := uint8(r32), uint8(g32), uint8(b32)
-
-				// x, y
-				minIndex := c.setNewPixel(xmod, y)
-				if _, ok := c.newImage.count[c.pc[minIndex]]; ok {
-					c.newImage.count[c.pc[minIndex]] += 1
-				} else {
-					c.newImage.count[c.pc[minIndex]] = 1
-				}
-
-				r232, g232, b232, _ := c.newImage.image.At(xmod, y).RGBA()
-				r2, g2, b2 := uint8(r232), uint8(g232), uint8(b232)
-
-				qR := float64(int8(r1) - int8(r2))
-				qG := float64(int8(g1) - int8(g2))
-				qB := float64(int8(b1) - int8(b2))
-
+			if y % 2 != 0 {
 				// x-1, y (7/16)
-				if xmod-1 > bounds.Min.X {
-					c.setPixelError(xmod-1, y, qR, qG, qB, 7.0/16.0)
+				if xx-1 > bounds.Min.X {
+					c.setPixelError(xx-1, y, qR, qG, qB, 7.0/16.0)
 				}
 
 				// x+1, y+1 (3/16)
-				if xmod+1 < bounds.Dx() && y+1 < bounds.Dy() {
-					c.setPixelError(xmod+1, y+1, qR, qG, qB, 3.0/16.0)
+				if xx+1 < bounds.Dx() && y+1 < bounds.Dy() {
+					c.setPixelError(xx+1, y+1, qR, qG, qB, 3.0/16.0)
 				}
 
 				// x, y+1 (5/16)
 				if y+1 < bounds.Dy() {
-					c.setPixelError(xmod, y+1, qR, qG, qB, 5.0/16.0)
+					c.setPixelError(xx, y+1, qR, qG, qB, 5.0/16.0)
 				}
 
 				// x-1, y+1 (1/16)
-				if xmod-1 > bounds.Min.X && y+1 < bounds.Dy() {
-					c.setPixelError(xmod-1, y+1, qR, qG, qB, 1.0/16.0)
+				if xx-1 > bounds.Min.X && y+1 < bounds.Dy() {
+					c.setPixelError(xx-1, y+1, qR, qG, qB, 1.0/16.0)
 				}
+			// Even
 			} else {
-				r32, g32, b32, _ := c.newImage.image.At(x, y).RGBA()
-				r1, g1, b1 := uint8(r32), uint8(g32), uint8(b32)
-
-				// x, y
-				minIndex := c.setNewPixel(x, y)
-				if _, ok := c.newImage.count[c.pc[minIndex]]; ok {
-					c.newImage.count[c.pc[minIndex]] += 1
-				} else {
-					c.newImage.count[c.pc[minIndex]] = 1
-				}
-
-				r232, g232, b232, _ := c.newImage.image.At(x, y).RGBA()
-				r2, g2, b2 := uint8(r232), uint8(g232), uint8(b232)
-
-				qR := float64(int8(r1) - int8(r2))
-				qG := float64(int8(g1) - int8(g2))
-				qB := float64(int8(b1) - int8(b2))
-
 				// x+1, y (7/16)
-				if x+1 < bounds.Dx() {
-					c.setPixelError(x+1, y, qR, qG, qB, 7.0/16.0)
+				if xx+1 < bounds.Dx() {
+					c.setPixelError(xx+1, y, qR, qG, qB, 7.0/16.0)
 				}
 
 				// x-1, y+1 (3/16)
-				if x-1 > bounds.Min.X && y+1 < bounds.Dy() {
-					c.setPixelError(x-1, y+1, qR, qG, qB, 3.0/16.0)
+				if xx-1 > bounds.Min.X && y+1 < bounds.Dy() {
+					c.setPixelError(xx-1, y+1, qR, qG, qB, 3.0/16.0)
 				}
 
 				// x, y+1 (5/16)
 				if y+1 < bounds.Dy() {
-					c.setPixelError(x, y+1, qR, qG, qB, 5.0/16.0)
+					c.setPixelError(xx, y+1, qR, qG, qB, 5.0/16.0)
 				}
 
 				// x+1, y+1 (1/16)
-				if x+1 < bounds.Dx() && y+1 < bounds.Dy() {
-					c.setPixelError(x+1, y+1, qR, qG, qB, 1.0/16.0)
+				if xx+1 < bounds.Dx() && y+1 < bounds.Dy() {
+					c.setPixelError(xx+1, y+1, qR, qG, qB, 1.0/16.0)
 				}
 			}
 		}
