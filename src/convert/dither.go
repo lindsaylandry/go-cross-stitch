@@ -2,7 +2,6 @@ package convert
 
 import (
 	"image/color"
-	//"fmt"
 )
 
 func (c *Converter) floydSteinbergDither() {
@@ -32,6 +31,11 @@ func (c *Converter) floydSteinbergDither() {
 			qG := g1 - g2
 			qB := b1 - b2
 
+			// x, y+1 (5/16)
+			if y+1 < bounds.Dy() {
+				c.setPixelError(xx, y+1, qR, qG, qB, 5.0/16.0)
+			}
+
 			// Odd
 			if y % 2 != 0 {
 				// x-1, y (7/16)
@@ -42,11 +46,6 @@ func (c *Converter) floydSteinbergDither() {
 				// x+1, y+1 (3/16)
 				if xx+1 < bounds.Dx() && y+1 < bounds.Dy() {
 					c.setPixelError(xx+1, y+1, qR, qG, qB, 3.0/16.0)
-				}
-
-				// x, y+1 (5/16)
-				if y+1 < bounds.Dy() {
-					c.setPixelError(xx, y+1, qR, qG, qB, 5.0/16.0)
 				}
 
 				// x-1, y+1 (1/16)
@@ -65,11 +64,6 @@ func (c *Converter) floydSteinbergDither() {
 					c.setPixelError(xx-1, y+1, qR, qG, qB, 3.0/16.0)
 				}
 
-				// x, y+1 (5/16)
-				if y+1 < bounds.Dy() {
-					c.setPixelError(xx, y+1, qR, qG, qB, 5.0/16.0)
-				}
-
 				// x+1, y+1 (1/16)
 				if xx+1 < bounds.Dx() && y+1 < bounds.Dy() {
 					c.setPixelError(xx+1, y+1, qR, qG, qB, 1.0/16.0)
@@ -81,9 +75,9 @@ func (c *Converter) floydSteinbergDither() {
 
 func (c *Converter) setPixelError(x, y int, qR, qG, qB, diffusion float64) {
 	rr32, gg32, bb32, aa := c.newImage.image.At(x, y).RGBA()
-	rr, gg, bb := uint8(rr32), uint8(gg32), uint8(bb32)
-	rd := uint8(float64(rr) + qR*diffusion)
-	gd := uint8(float64(gg) + qG*diffusion)
-	bd := uint8(float64(bb) + qB*diffusion)
-	c.newImage.image.Set(x, y, color.RGBA{rd, gd, bd, uint8(aa)})
+	rr, gg, bb := float64(uint8(rr32)), float64(uint8(gg32)), float64(uint8(bb32))
+	rr += qR*diffusion
+	gg += qG*diffusion
+	bb += qB*diffusion
+	c.newImage.image.Set(x, y, color.RGBA{uint8(rr), uint8(gg), uint8(bb), uint8(aa)})
 }
