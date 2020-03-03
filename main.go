@@ -22,9 +22,10 @@ func main() {
 	pal := flag.String("color", "dmc", "color palette to use (OPTIONS: dmc, lego, bw)")
 	dit := flag.Bool("d", false, "implement dithering")
 	gre := flag.Bool("g", false, "convert image to greyscale")
+	pix := flag.Bool("px", false, "quantize pixellated image")
 	flag.Parse()
 
-	c, err := convert.NewConverter(flag.Args()[0], *num, *rgb, *all, *pal, *dit, *gre)
+	c, err := convert.NewConverter(flag.Args()[0], *num, *rgb, *all, *pal, *dit, *gre, *pix)
 	if err != nil {
 		panic(err)
 	}
