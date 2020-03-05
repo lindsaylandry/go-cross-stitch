@@ -6,10 +6,9 @@ This is a project that will take an image and convert it to a png and html of DM
 ## How To Use
 
 ### Build From Scratch
-```make build```
+To build the binary, run the following:
 
-### Render all test images
-```make examples```
+```make build```
 
 ### General Usage
 Once the binary is compiled, use as follows:
@@ -52,6 +51,9 @@ To convert to PDF, do the following:
 NOTE: it will take a while for the Firefox browser to convert the HTML to PDF. Do not close the page until the PDF is fully rendered.
 
 TODO: auto-create PDF from HTML; find out what libraries Firefox is using.
+
+### Render all test images
+```make examples```
 
 ## References
 Color distance formulas: https://en.wikipedia.org/wiki/Color_difference
