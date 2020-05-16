@@ -5,7 +5,7 @@ import (
 )
 
 type Thread struct {
-	ID   int
+	ID   string
 	Name string
 	RGB  colorConverter.SRGB
 	LAB  colorConverter.CIELab

@@ -8,8 +8,6 @@ import (
 	"github.com/lindsaylandry/go-cross-stitch/src/convert"
 )
 
-//go:generate go run scripts/setupColors.go
-
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("No input image provided")

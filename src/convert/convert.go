@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"image"
 	"image/color"
+	"image/gif"
 	"image/jpeg"
 	"image/png"
-	"image/gif"
 	"io/ioutil"
 	"math"
 	"strings"
@@ -18,13 +18,13 @@ import (
 type Legend struct {
 	Color  palette.Thread
 	Count  int
-	Symbol int
+	Symbol string
 }
 
 type ColorSymbol struct {
-	Symbol  palette.Symbol
-	Color   palette.Thread
-	Text    string
+	Symbol palette.Symbol
+	Color  palette.Thread
+	Text   string
 }
 
 type Converter struct {
