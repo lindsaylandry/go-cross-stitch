@@ -5,10 +5,11 @@ import (
 )
 
 type Thread struct {
-	ID   string
-	Name string
-	RGB  colorConverter.SRGB
-	LAB  colorConverter.CIELab
+	ID       int
+	StringID string
+	Name     string
+	RGB      colorConverter.SRGB
+	LAB      colorConverter.CIELab
 }
 
 func GreyPalette() ([]Thread, error) {
