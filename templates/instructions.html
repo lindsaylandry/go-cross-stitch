@@ -5,11 +5,13 @@
 h1.title {
 	font-size: 40px;
 }
-.grid-container {
+{{ range $i, $table := $.Tables }}
+.grid-container-{{ $i }} {
 	display: grid;
-	grid-template-columns:{{ range $x := forloop 0 50 }} 14pt{{end}};
-	grid-template-rows:{{ range $y := forloop 0 60 }} 14pt{{end}};
+	grid-template-columns:{{ range $x := forloop $table.Xstart (plus $table.Xend 1) }} 14pt{{end}};
+	grid-template-rows:{{ range $y := forloop $table.Ystart (plus $table.Yend 1) }} 14pt{{end}};
 }
+{{ end }}
 .grid-item-nums {
 	font-family: sans-serif;
   font-weight: bold;
@@ -193,7 +195,7 @@ h1 {
     </table>
   <div class="cushion"></div>
   {{ range $i, $table := $.Tables }}
-	<div class="grid-container">
+	<div class="grid-container-{{ $i }}">
     {{ range $x := forloop $table.Xstart (plus $table.Xend 1) }}
     <div class="grid-item-nums">{{ if mod $x 10 }}{{ $x }}{{ end }}</div>
     {{ end }}
@@ -208,7 +210,7 @@ h1 {
 	{{ end }}
 	<div class="cushion"></div>
 	{{ range $i, $table := $.Tables }}
-  <div class="grid-container">
+  <div class="grid-container-{{ $i }}">
     {{ range $x := forloop $table.Xstart (plus $table.Xend 1) }}
     <div class="grid-item-nums">{{ if mod $x 10 }}{{ $x }}{{ end }}</div>
     {{ end }}
