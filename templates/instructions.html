@@ -11,6 +11,12 @@ h1.title {
 	grid-template-columns:{{ range $x := forloop $table.Xstart (plus $table.Xend 1) }} 14pt{{end}};
 	grid-template-rows:{{ range $y := forloop $table.Ystart (plus $table.Yend 1) }} 14pt{{end}};
 }
+div.grid-symbol-{{ $i }} {
+  border-bottom: 1px solid black;
+  border-right: 1px solid black;
+  font-family: sans-serif;
+  padding-top: 1px;
+}
 {{ end }}
 .grid-item-nums {
 	font-family: sans-serif;
@@ -32,12 +38,6 @@ h1.title {
   border-left: 3px solid black;
   border-bottom: 1px solid black;
   border-right: 2px solid black;
-}
-div.grid-symbol {
-  border-bottom: 1px solid black;
-  border-right: 1px solid black;
-  font-family: sans-serif;
-	padding-top: 1px;
 }
 .grid-item-nums:nth-of-type(5n+1) {
 	border-right: 2px solid black;
@@ -203,7 +203,7 @@ h1 {
 		<div class="grid-vert-nums">{{ if mod (plus $y 1) 10 }}{{ plus $y 1 }}{{ end }}</div>
       {{ $k := minus $y $table.Ystart }}
       {{ range $j := index $table.Symbols $k }}
-    <div class="grid-symbol" align="center" valign="center" style="font-size:{{ $j.Symbol.FontSize }}pt">&#{{ $j.Symbol.Code }}</div>
+			<div class="grid-symbol-{{ $i }}" align="center" valign="center" style="font-size:{{ $j.Symbol.FontSize }}pt">&#{{ $j.Symbol.Code }}</div>
       {{ end }}
     {{ end }}
 	</div>
@@ -218,7 +218,7 @@ h1 {
     <div class="grid-vert-nums">{{ if mod (plus $y 1) 10 }}{{ plus $y 1 }}{{ end }}</div>
       {{ $k := minus $y $table.Ystart }}
       {{ range $j := index $table.Symbols $k }}
-			<div class="grid-symbol" align="center" valign="center" style="font-size:{{ $j.Symbol.FontSize }}pt;background-color:rgb({{ $j.Color.RGB.R }},{{ $j.Color.RGB.G }},{{ $j.Color.RGB.B }});color:{{$j.Text}};">&#{{ $j.Symbol.Code }}</div>
+			<div class="grid-symbol-{{ $i }}" align="center" valign="center" style="font-size:{{ $j.Symbol.FontSize }}pt;background-color:rgb({{ $j.Color.RGB.R }},{{ $j.Color.RGB.G }},{{ $j.Color.RGB.B }});color:{{$j.Text}};">&#{{ $j.Symbol.Code }}</div>
       {{ end }}
     {{ end }}
   </div>
@@ -226,6 +226,28 @@ h1 {
 
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
-	<script src="../../templates/script.js"></script>
+	<script>
+{{ range $i, $table := $.Tables }}
+$('div[class^="grid-symbol-{{ $i }}"]').each(function (index) {
+	{{ $w := plus (minus $table.Xend $table.Xstart) 1 }}
+	{{ $h := plus (minus $table.Yend $table.Ystart) 1 }}
+	{{ $mm := mod $w 10 }}
+
+	// bold border for every 5th and 10th column
+	if (((index+1) % {{ $w }}) % 10 == 0) {
+    $(this).css("border-right", "3px solid black");
+	} else if (((index+1) % {{ $w }}) % 5 == 0) {
+    $(this).css("border-right", "2px solid black");
+  }
+
+  // bold border for every 5th and 10th row
+	if (index % {{ mult $w 10 }} >= {{ mult $w 9 }}) {
+    $(this).css("border-bottom", "3px solid black");
+  } else if (index % {{ mult $w 5 }} >= {{ mult $w 4 }}) {
+    $(this).css("border-bottom", "2px solid black");
+  }
+});
+{{ end }}
+	</script>
   </body>
 </html>

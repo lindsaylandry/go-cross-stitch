@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"html/template"
 	"image"
-	"image/png"
 	"image/color"
+	"image/png"
 	"os"
 	"strings"
 )
@@ -47,11 +47,11 @@ func (c *Converter) WriteFiles() error {
 
 	// write PDF instructions
 	/*
-	path, err = c.writePDFFromHTML()
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Wrote PDF to %s\n", path)
+		path, err = c.writePDFFromHTML()
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Wrote PDF to %s\n", path)
 	*/
 	return nil
 }
@@ -175,7 +175,7 @@ func (c *Converter) writePNG() (string, *image.RGBA, error) {
 			pixel := c.newImage.image.At(x, y)
 			for xx := 0; xx < c.newImage.p; xx++ {
 				for yy := 0; yy < c.newImage.p; yy++ {
-					if xx == c.newImage.p - 1 || yy == c.newImage.p - 1 {
+					if xx == c.newImage.p-1 || yy == c.newImage.p-1 {
 						px := color.Gray16{0}
 						img.Set(x*c.newImage.p+xx, y*c.newImage.p+yy, px)
 					} else {
