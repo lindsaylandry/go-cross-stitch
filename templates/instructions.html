@@ -228,11 +228,8 @@ h1 {
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
 	<script>
 {{ range $i, $table := $.Tables }}
-$('div[class^="grid-symbol-{{ $i }}"]').each(function (index) {
-	{{ $w := plus (minus $table.Xend $table.Xstart) 1 }}
-	{{ $h := plus (minus $table.Yend $table.Ystart) 1 }}
-	{{ $mm := mod $w 10 }}
-
+$('div[class="grid-symbol-{{ $i }}"]').each(function (index) {
+	{{ $w := plus (minus $table.Xend $table.Xstart) 1 }}{{ $h := plus (minus $table.Yend $table.Ystart) 1 }}{{ $mm := mod $w 10 }}
 	// bold border for every 5th and 10th column
 	if (((index+1) % {{ $w }}) % 10 == 0) {
     $(this).css("border-right", "3px solid black");
@@ -241,7 +238,7 @@ $('div[class^="grid-symbol-{{ $i }}"]').each(function (index) {
   }
 
   // bold border for every 5th and 10th row
-	if (index % {{ mult $w 10 }} >= {{ mult $w 9 }}) {
+	if (index % {{ mult $w 10 }}>={{ mult $w 9 }}) {
     $(this).css("border-bottom", "3px solid black");
   } else if (index % {{ mult $w 5 }} >= {{ mult $w 4 }}) {
     $(this).css("border-bottom", "2px solid black");
