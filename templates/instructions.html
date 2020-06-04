@@ -17,19 +17,18 @@ div.grid-symbol-{{ $i }} {
   font-family: sans-serif;
   padding-top: 1px;
 }
-{{ end }}
-.grid-item-nums {
-	font-family: sans-serif;
+.grid-item-nums-{{ $i }} {
+  font-family: sans-serif;
   font-weight: bold;
   font-size: 8pt;
   text-align: "right";
-	direction: rtl;
+  direction: rtl;
   background-color: lightgray;
-	border-right: 1px solid black;
-	border-bottom: 2px solid black;
-	border-top: 3px solid black;
+  border-right: 1px solid black;
+  border-bottom: 2px solid black;
+  border-top: 3px solid black;
 }
-.grid-vert-nums {
+.grid-vert-nums-{{ $i }} {
   font-family: sans-serif;
   font-weight: bold;
   font-size: 8pt;
@@ -39,17 +38,16 @@ div.grid-symbol-{{ $i }} {
   border-bottom: 1px solid black;
   border-right: 2px solid black;
 }
-.grid-item-nums:nth-of-type(5n+1) {
-	border-right: 2px solid black;
-}
-.grid-item-nums:nth-of-type(10n+1) {
-  border-right: 3px solid black;
-}
-.grid-item-nums:first-child {
-  border-right: 2px solid black;
-  border-bottom: 2px solid black;
+{{ end }}
+.grid-vert-nums {
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 8pt;
+  text-align: "right";
+  background-color: lightgray;
   border-left: 3px solid black;
-  border-top: 3px solid black;
+  border-bottom: 1px solid black;
+  border-right: 2px solid black;
 }
 .grid-vert-nums:nth-of-type(5n+1) {
   border-bottom: 2px solid black;
@@ -197,10 +195,10 @@ h1 {
   {{ range $i, $table := $.Tables }}
 	<div class="grid-container-{{ $i }}">
     {{ range $x := forloop $table.Xstart (plus $table.Xend 1) }}
-    <div class="grid-item-nums">{{ if mod $x 10 }}{{ $x }}{{ end }}</div>
+		<div class="grid-item-nums-{{ $i }}">{{ if mod $x 10 }}{{ $x }}{{ end }}</div>
     {{ end }}
 		{{ range $y := forloop $table.Ystart $table.Yend }}
-		<div class="grid-vert-nums">{{ if mod (plus $y 1) 10 }}{{ plus $y 1 }}{{ end }}</div>
+		<div class="grid-vert-nums-{{ $i }}">{{ if mod (plus $y 1) 10 }}{{ plus $y 1 }}{{ end }}</div>
       {{ $k := minus $y $table.Ystart }}
       {{ range $j := index $table.Symbols $k }}
 			<div class="grid-symbol-{{ $i }}" align="center" valign="center" style="font-size:{{ $j.Symbol.FontSize }}pt">&#{{ $j.Symbol.Code }}</div>
@@ -212,10 +210,10 @@ h1 {
 	{{ range $i, $table := $.Tables }}
   <div class="grid-container-{{ $i }}">
     {{ range $x := forloop $table.Xstart (plus $table.Xend 1) }}
-    <div class="grid-item-nums">{{ if mod $x 10 }}{{ $x }}{{ end }}</div>
+		<div class="grid-item-nums-{{ $i }}">{{ if mod $x 10 }}{{ $x }}{{ end }}</div>
     {{ end }}
     {{ range $y := forloop $table.Ystart $table.Yend }}
-    <div class="grid-vert-nums">{{ if mod (plus $y 1) 10 }}{{ plus $y 1 }}{{ end }}</div>
+		<div class="grid-vert-nums-{{ $i }}">{{ if mod (plus $y 1) 10 }}{{ plus $y 1 }}{{ end }}</div>
       {{ $k := minus $y $table.Ystart }}
       {{ range $j := index $table.Symbols $k }}
 			<div class="grid-symbol-{{ $i }}" align="center" valign="center" style="font-size:{{ $j.Symbol.FontSize }}pt;background-color:rgb({{ $j.Color.RGB.R }},{{ $j.Color.RGB.G }},{{ $j.Color.RGB.B }});color:{{$j.Text}};">&#{{ $j.Symbol.Code }}</div>
@@ -241,6 +239,33 @@ $('div[class="grid-symbol-{{ $i }}"]').each(function (index) {
 	if (index % {{ mult $w 10 }}>={{ mult $w 9 }}) {
     $(this).css("border-bottom", "3px solid black");
   } else if (index % {{ mult $w 5 }} >= {{ mult $w 4 }}) {
+    $(this).css("border-bottom", "2px solid black");
+  }
+});
+
+$('div[class="grid-item-nums-{{ $i }}"]').each(function (index) {
+  {{ $w := plus (minus $table.Xend $table.Xstart) 1 }}{{ $h := plus (minus $table.Yend $table.Ystart) 1 }}{{ $mm := mod $w 10 }}
+  // bold border for every 5th and 10th column
+	if (index == 0) {
+    $(this).css("border-left", "3px solid black");
+		$(this).css("border-right", "2px solid black");
+	} else if ((index % {{ $w }}) % 10 == 0) {
+    $(this).css("border-right", "3px solid black");
+  } else if ((index % {{ $w }}) % 5 == 0) {
+    $(this).css("border-right", "2px solid black");
+  }
+});
+
+$('div[class="grid-vert-nums-{{ $i }}"]').each(function (index) {
+  {{ $w := plus (minus $table.Xend $table.Xstart) 1 }}{{ $h := plus (minus $table.Yend $table.Ystart) 1 }}{{ $mm := mod $w 10 }}
+  // bold border for every 5th and 10th column
+  if (((index+1) % {{ $w }}) % 10 == 0) {
+		$(this).css("transform", "rotate(270deg)");
+    $(this).css("border-right", "0px");
+		$(this).css("border-top", "3px solid black");
+		$(this).css("border-left", "3px solid black");
+		$(this).css("border-bottom", "2px solid black");
+	} else if (((index+1) % {{ $w }}) % 5 == 0) {
     $(this).css("border-bottom", "2px solid black");
   }
 });
