@@ -21,9 +21,10 @@ func main() {
 	dit := flag.Bool("d", false, "implement dithering")
 	gre := flag.Bool("g", false, "convert image to greyscale")
 	pix := flag.Bool("px", false, "quantize pixellated image")
+	col := flag.Bool("c", true, "include color grid instructions")
 	flag.Parse()
 
-	c, err := convert.NewConverter(flag.Args()[0], *num, *rgb, *all, *pal, *dit, *gre, *pix)
+	c, err := convert.NewConverter(flag.Args()[0], *num, *rgb, *all, *pal, *dit, *gre, *pix, *col)
 	if err != nil {
 		panic(err)
 	}

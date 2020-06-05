@@ -70,13 +70,14 @@ func (c *Converter) writeHTML(img *image.RGBA) (string, error) {
 
 	// struct to send to html
 	type AA struct {
-		Img    string
-		Legend []Legend
-		Tables []Table
-		Width  int
-		Height int
-		Scheme string
-		Title  string
+		Img       string
+		Legend    []Legend
+		Tables    []Table
+		Width     int
+		Height    int
+		Scheme    string
+		Title     string
+		ColorGrid bool
 	}
 
 	// funcs to use in html template
@@ -97,12 +98,13 @@ func (c *Converter) writeHTML(img *image.RGBA) (string, error) {
 	}
 
 	aa := AA{
-		Img:    imgString,
-		Legend: c.newImage.legend,
-		Width:  len(c.newImage.symbols[0]),
-		Height: len(c.newImage.symbols),
-		Scheme: "DMC",
-		Title:  c.title,
+		Img:       imgString,
+		Legend:    c.newImage.legend,
+		Width:     len(c.newImage.symbols[0]),
+		Height:    len(c.newImage.symbols),
+		Scheme:    "DMC",
+		Title:     c.title,
+		ColorGrid: c.colorgrid,
 	}
 
 	xchunk := 50

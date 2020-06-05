@@ -44,6 +44,7 @@ type Converter struct {
 	dither    bool
 	greyscale bool
 	title     string
+	colorgrid bool
 }
 
 func (c *Converter) getImage() error {
@@ -60,7 +61,7 @@ func (c *Converter) getImage() error {
 	return err
 }
 
-func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre, pix bool) (*Converter, error) {
+func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre, pix, col bool) (*Converter, error) {
 	c := Converter{}
 
 	c.newImage.p = 10
@@ -87,6 +88,7 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 	c.rgb = rgb
 	c.dither = dit
 	c.greyscale = gre
+	c.colorgrid = col
 
 	if pal == "lego" {
 		c.pc = palette.GetLEGOColors()
