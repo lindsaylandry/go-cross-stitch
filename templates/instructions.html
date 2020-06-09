@@ -234,7 +234,7 @@ h1 {
 	<script>
 {{ range $i, $table := $.Tables }}
 $('div[class="grid-symbol-{{ $i }}"]').each(function (index) {
-	{{ $w := plus (minus $table.Xend $table.Xstart) 1 }}{{ $h := plus (minus $table.Yend $table.Ystart) 1 }}{{ $mm := mod $w 10 }}
+	{{ $w := plus (minus $table.Xend $table.Xstart) 1 }}
 	// bold border for every 5th and 10th column
 	if (((index+1) % {{ $w }}) % 10 == 0) {
     $(this).css("border-right", "3px solid black");
@@ -251,56 +251,56 @@ $('div[class="grid-symbol-{{ $i }}"]').each(function (index) {
 });
 
 $('div[class="grid-item-nums-bw-{{ $i }}"]').each(function (index) {
-  {{ $w := plus (minus $table.Xend $table.Xstart) 1 }}{{ $h := plus (minus $table.Yend $table.Ystart) 1 }}{{ $mm := mod $w 10 }}
-  // bold border for every 5th and 10th column
+	{{ $w := plus (minus $table.Xend $table.Xstart) 1 }}
+	// bold border for every 5th and 10th column
 	if (index == 0) {
     $(this).css("border-left", "3px solid black");
 		$(this).css("border-right", "2px solid black");
-	} else if ((index % {{ $w }}) % 10 == 0) {
+	} else if ((index % 10 == 0) || (index % {{ $w }} == 0)) {
     $(this).css("border-right", "3px solid black");
-  } else if ((index % {{ $w }}) % 5 == 0) {
+  } else if (index % 5 == 0) {
     $(this).css("border-right", "2px solid black");
   }
 });
 
 $('div[class="grid-vert-nums-bw-{{ $i }}"]').each(function (index) {
-  {{ $w := plus (minus $table.Xend $table.Xstart) 1 }}{{ $h := plus (minus $table.Yend $table.Ystart) 1 }}{{ $mm := mod $w 10 }}
+	{{ $h := plus (minus $table.Yend $table.Ystart) 1 }}
   // bold border for every 5th and 10th column
-  if (((index+1) % {{ $w }}) % 10 == 0) {
+  if (((index+1) % 10 == 0) || ((index+1) % {{ $h }} == 0)) {
     $(this).css("transform", "rotate(270deg)");
     $(this).css("border-right", "0px");
     $(this).css("border-top", "3px solid black");
     $(this).css("border-left", "3px solid black");
     $(this).css("border-bottom", "2px solid black");
-  } else if (((index+1) % {{ $w }}) % 5 == 0) {
+  } else if ((index+1) % 5 == 0) {
     $(this).css("border-bottom", "2px solid black");
   }
 });
 
 {{ if $.ColorGrid }}
 $('div[class="grid-item-nums-color-{{ $i }}"]').each(function (index) {
-  {{ $w := plus (minus $table.Xend $table.Xstart) 1 }}{{ $h := plus (minus $table.Yend $table.Ystart) 1 }}{{ $mm := mod $w 10 }}
+  {{ $w := plus (minus $table.Xend $table.Xstart) 1 }}
   // bold border for every 5th and 10th column
   if (index == 0) {
     $(this).css("border-left", "3px solid black");
     $(this).css("border-right", "2px solid black");
-  } else if ((index % {{ $w }}) % 10 == 0) {
+  } else if ((index % 10 == 0) || (index % {{ $w }} == 0)) {
     $(this).css("border-right", "3px solid black");
-  } else if ((index % {{ $w }}) % 5 == 0) {
+  } else if (index % 5 == 0) {
     $(this).css("border-right", "2px solid black");
   }
 });
 
 $('div[class="grid-vert-nums-color-{{ $i }}"]').each(function (index) {
-  {{ $w := plus (minus $table.Xend $table.Xstart) 1 }}{{ $h := plus (minus $table.Yend $table.Ystart) 1 }}{{ $mm := mod $w 10 }}
-  // bold border for every 5th and 10th column
-  if (((index+1) % {{ $w }}) % 10 == 0) {
+	{{ $h := plus (minus $table.Yend $table.Ystart) 1 }}
+	// bold border for every 5th and 10th column
+	if (((index+1) % 10 == 0) || ((index+1) % {{ $h }} == 0)) {
     $(this).css("transform", "rotate(270deg)");
     $(this).css("border-right", "0px");
     $(this).css("border-top", "3px solid black");
     $(this).css("border-left", "3px solid black");
     $(this).css("border-bottom", "2px solid black");
-  } else if (((index+1) % {{ $w }}) % 5 == 0) {
+  } else if ((index+1) % 5 == 0) {
     $(this).css("border-bottom", "2px solid black");
   }
 });
