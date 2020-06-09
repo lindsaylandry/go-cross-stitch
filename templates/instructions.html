@@ -204,10 +204,10 @@ h1 {
     {{ end }}
 		{{ range $y := forloop $table.Ystart $table.Yend }}
 		<div class="grid-vert-nums-bw-{{ $i }}">{{ if mod (plus $y 1) 10 }}{{ plus $y 1 }}{{ end }}</div>
-      {{ $k := minus $y $table.Ystart }}
-      {{ range $j := index $table.Symbols $k }}
-			<div class="grid-symbol-{{ $i }}" align="center" valign="center" style="font-size:{{ $j.Symbol.FontSize }}pt">&#{{ $j.Symbol.Code }}</div>
-      {{ end }}
+    {{ $k := minus $y $table.Ystart }}
+    {{ range $j := index $table.Symbols $k }}
+		<div class="grid-symbol-{{ $i }}" align="center" valign="center" style="font-size:{{ $j.Symbol.FontSize }}pt">&#{{ $j.Symbol.Code }}</div>
+    {{ end }}
     {{ end }}
 	</div>
 	{{ end }}
@@ -220,17 +220,17 @@ h1 {
     {{ end }}
     {{ range $y := forloop $table.Ystart $table.Yend }}
 		<div class="grid-vert-nums-color-{{ $i }}">{{ if mod (plus $y 1) 10 }}{{ plus $y 1 }}{{ end }}</div>
-      {{ $k := minus $y $table.Ystart }}
-      {{ range $j := index $table.Symbols $k }}
-			<div class="grid-symbol-{{ $i }}" align="center" valign="center" style="font-size:{{ $j.Symbol.FontSize }}pt;background-color:rgb({{ $j.Color.RGB.R }},{{ $j.Color.RGB.G }},{{ $j.Color.RGB.B }});color:{{$j.Text}};">&#{{ $j.Symbol.Code }}</div>
-      {{ end }}
+    {{ $k := minus $y $table.Ystart }}
+    {{ range $j := index $table.Symbols $k }}
+		<div class="grid-symbol-{{ $i }}" align="center" valign="center" style="font-size:{{ $j.Symbol.FontSize }}pt;background-color:rgb({{ $j.Color.RGB.R }},{{ $j.Color.RGB.G }},{{ $j.Color.RGB.B }});color:{{$j.Text}};">&#{{ $j.Symbol.Code }}</div>
+    {{ end }}
     {{ end }}
   </div>
   {{ end }}
 	{{ end }}
 
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+	<script type="text/javascript" src="../../javascript/jquery.min.js"></script>
+	<script type="text/javascript" src="../../javascript/jspdf.min.js"></script>
 	<script>
 {{ range $i, $table := $.Tables }}
 $('div[class="grid-symbol-{{ $i }}"]').each(function (index) {
