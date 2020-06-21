@@ -8,6 +8,7 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io/ioutil"
+	"log"
 	"math"
 	"strings"
 
@@ -45,6 +46,7 @@ type Converter struct {
 	greyscale bool
 	title     string
 	colorgrid bool
+	extra     string
 }
 
 func (c *Converter) getImage() error {
@@ -90,10 +92,19 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 	c.greyscale = gre
 	c.colorgrid = col
 
+	if c.rgb {
+		c.extra = "-" + pal + "-rgb"
+	} else {
+		c.extra = "-" + pal + "-lab"
+	}
 	if pal == "lego" {
 		c.pc = palette.GetLEGOColors()
-	} else if pal == "dmc" {
-		c.pc = palette.GetDMCColors()
+	} else if pal == "dmc" || pal == "anchor" {
+		if pal == "dmc" {
+			c.pc = palette.GetDMCColors()
+		} else {
+			c.pc = palette.GetAnchorColors()
+		}
 
 		if !all {
 			bcrgb := []colorConverter.SRGB{}
@@ -108,8 +119,10 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 			// Convert best-colors to thread palette
 			c.pc = c.convertPalette(bcrgb)
 		}
-	} else {
+	} else if pal == "bw" {
 		c.pc = palette.GetBWColors()
+	} else {
+		log.Fatalf("ERROR: -color not recognized")
 	}
 
 	c.newImage.count = make(map[palette.Thread]int)

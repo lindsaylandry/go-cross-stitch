@@ -196,12 +196,7 @@ func (c *Converter) getPath(extension string) string {
 	// Write new image to png file
 	split := strings.Split(c.path, ".")
 
-	var newPath string
-	if c.rgb {
-		newPath = split[0] + "-dmc-rgb." + extension
-	} else {
-		newPath = split[0] + "-dmc-lab." + extension
-	}
+	newPath := split[0] + c.extra + "." + extension
 
 	return newPath
 }

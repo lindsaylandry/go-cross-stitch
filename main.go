@@ -15,12 +15,12 @@ func main() {
 	}
 
 	num := flag.Int("n", 10, "number of colors to attempt to match (2^n)")
-	rgb := flag.Bool("rgb", false, "use rgb color space")
+	rgb := flag.Bool("rgb", false, "use rgb color space (default false)")
 	all := flag.Bool("all", false, "use all thread colors available (currently broken)")
-	pal := flag.String("color", "dmc", "color palette to use (OPTIONS: dmc, lego, bw)")
-	dit := flag.Bool("d", false, "implement dithering")
-	gre := flag.Bool("g", false, "convert image to greyscale")
-	pix := flag.Bool("px", false, "quantize pixellated image")
+	pal := flag.String("color", "dmc", "color palette to use (OPTIONS: dmc, anchor, lego, bw)")
+	dit := flag.Bool("d", false, "implement dithering (default false)")
+	gre := flag.Bool("g", false, "convert image to greyscale (default false)")
+	pix := flag.Bool("px", false, "quantize pixellated image (default false)")
 	col := flag.Bool("c", true, "include color grid instructions")
 	flag.Parse()
 
