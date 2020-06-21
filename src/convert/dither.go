@@ -35,7 +35,7 @@ func (c *Converter) floydSteinbergDither() {
 				xx = bounds.Dx() - 1 - x
 			}
 
-			// TODO: clip to 0-255, set pixel at this site
+			// clip to 0-255, set pixel at this site
 			px := errs[y][xx]
 			r1, g1, b1 := px.r, px.g, px.b
 
