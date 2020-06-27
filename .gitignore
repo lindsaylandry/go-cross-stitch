@@ -19,3 +19,8 @@ ao
 # ignore coverage files
 cover.html
 cover.out
+
+*/.DS_Store
+.DS_Store
+
+bin/
