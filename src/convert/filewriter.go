@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"html/template"
 	"image"
-	"image/png"
 	"image/color"
+	"image/png"
 	"os"
 	"strings"
 )
@@ -47,11 +47,11 @@ func (c *Converter) WriteFiles() error {
 
 	// write PDF instructions
 	/*
-	path, err = c.writePDFFromHTML()
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Wrote PDF to %s\n", path)
+		path, err = c.writePDFFromHTML()
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Wrote PDF to %s\n", path)
 	*/
 	return nil
 }
@@ -70,13 +70,14 @@ func (c *Converter) writeHTML(img *image.RGBA) (string, error) {
 
 	// struct to send to html
 	type AA struct {
-		Img    string
-		Legend []Legend
-		Tables []Table
-		Width  int
-		Height int
-		Scheme string
-		Title  string
+		Img       string
+		Legend    []Legend
+		Tables    []Table
+		Width     int
+		Height    int
+		Scheme    string
+		Title     string
+		ColorGrid bool
 	}
 
 	// funcs to use in html template
@@ -97,12 +98,13 @@ func (c *Converter) writeHTML(img *image.RGBA) (string, error) {
 	}
 
 	aa := AA{
-		Img:    imgString,
-		Legend: c.newImage.legend,
-		Width:  len(c.newImage.symbols[0]),
-		Height: len(c.newImage.symbols),
-		Scheme: "DMC",
-		Title:  c.title,
+		Img:       imgString,
+		Legend:    c.newImage.legend,
+		Width:     len(c.newImage.symbols[0]),
+		Height:    len(c.newImage.symbols),
+		Scheme:    "DMC",
+		Title:     c.title,
+		ColorGrid: c.colorgrid,
 	}
 
 	xchunk := 50
@@ -175,7 +177,7 @@ func (c *Converter) writePNG() (string, *image.RGBA, error) {
 			pixel := c.newImage.image.At(x, y)
 			for xx := 0; xx < c.newImage.p; xx++ {
 				for yy := 0; yy < c.newImage.p; yy++ {
-					if xx == c.newImage.p - 1 || yy == c.newImage.p - 1 {
+					if xx == c.newImage.p-1 || yy == c.newImage.p-1 {
 						px := color.Gray16{0}
 						img.Set(x*c.newImage.p+xx, y*c.newImage.p+yy, px)
 					} else {
@@ -194,12 +196,7 @@ func (c *Converter) getPath(extension string) string {
 	// Write new image to png file
 	split := strings.Split(c.path, ".")
 
-	var newPath string
-	if c.rgb {
-		newPath = split[0] + "-dmc-rgb." + extension
-	} else {
-		newPath = split[0] + "-dmc-lab." + extension
-	}
+	newPath := split[0] + c.extra + "." + extension
 
 	return newPath
 }

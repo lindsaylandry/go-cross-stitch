@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"image"
 	"image/color"
+	"image/gif"
 	"image/jpeg"
 	"image/png"
-	"image/gif"
 	"io/ioutil"
+	"log"
 	"math"
 	"strings"
 
@@ -18,13 +19,13 @@ import (
 type Legend struct {
 	Color  palette.Thread
 	Count  int
-	Symbol int
+	Symbol string
 }
 
 type ColorSymbol struct {
-	Symbol  palette.Symbol
-	Color   palette.Thread
-	Text    string
+	Symbol palette.Symbol
+	Color  palette.Thread
+	Text   string
 }
 
 type Converter struct {
@@ -44,6 +45,8 @@ type Converter struct {
 	dither    bool
 	greyscale bool
 	title     string
+	colorgrid bool
+	extra     string
 }
 
 func (c *Converter) getImage() error {
@@ -60,7 +63,7 @@ func (c *Converter) getImage() error {
 	return err
 }
 
-func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre, pix bool) (*Converter, error) {
+func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre, pix, col bool) (*Converter, error) {
 	c := Converter{}
 
 	c.newImage.p = 10
@@ -87,11 +90,21 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 	c.rgb = rgb
 	c.dither = dit
 	c.greyscale = gre
+	c.colorgrid = col
 
+	if c.rgb {
+		c.extra = "-" + pal + "-rgb"
+	} else {
+		c.extra = "-" + pal + "-lab"
+	}
 	if pal == "lego" {
 		c.pc = palette.GetLEGOColors()
-	} else if pal == "dmc" {
-		c.pc = palette.GetDMCColors()
+	} else if pal == "dmc" || pal == "anchor" {
+		if pal == "dmc" {
+			c.pc = palette.GetDMCColors()
+		} else {
+			c.pc = palette.GetAnchorColors()
+		}
 
 		if !all {
 			bcrgb := []colorConverter.SRGB{}
@@ -106,8 +119,10 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 			// Convert best-colors to thread palette
 			c.pc = c.convertPalette(bcrgb)
 		}
-	} else {
+	} else if pal == "bw" {
 		c.pc = palette.GetBWColors()
+	} else {
+		log.Fatalf("ERROR: -color not recognized")
 	}
 
 	c.newImage.count = make(map[palette.Thread]int)

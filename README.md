@@ -3,35 +3,12 @@ Do you love GoLang? Do you also love cross-stitching? Congratulations, you are a
 
 This is a project that will take an image and convert it to a png and html of DMC thread colors and instructions.
 
-## Example Image Conversions
-
-### Mars (reds)
-| Original | RGB Distance | CIELab Distance |
-|:--:|:--:|:--:|
-| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/mars.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/mars-dmc-rgb.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/mars-dmc-lab.png" height="250" style="image-rendering: pixelated;">
-
-### Earth (blues and greens)
-| Original | RGB Distance | CIELab Distance |
-|:--:|:--:|:--:|
-| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth-dmc-rgb.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth-dmc-lab.png" height="250" style="image-rendering: pixelated;">
-
-### Moon (greyscale)
-| Original | RGB Distance | CIELab Distance |
-|:--:|:--:|:--:|
-| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/full-moon.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/full-moon-dmc-rgb.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/full-moon-dmc-lab.png" height="250" style="image-rendering: pixelated;">
-
-### Full Color Spectrum
-| Original | RGB Distance | CIELab Distance |
-|:--:|:--:|:--:|
-| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/colors.jpg" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/colors-dmc-rgb.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/colors-dmc-lab.png" height="250" style="image-rendering: pixelated;">
-
 ## How To Use
 
 ### Build From Scratch
-```make build```
+To build the binary, run the following:
 
-### Render all test images
-```make examples```
+```make build```
 
 ### General Usage
 Once the binary is compiled, use as follows:
@@ -62,9 +39,49 @@ Usage of ./bin/cross-stitch:
     	use rgb color space
 ```
 
+### Creating a PDF from HTML
+For now, conversion from HTML to PDF is a manual process.
+
+To convert to PDF, do the following:
+* Open the generated HTML in Firefox. 
+* Click `File => Print`
+* Under `Appearance` check `Print Background Colors`
+* Click the `PDF` dropdown and click `Save as PDF`
+
+NOTE: it will take a while for the Firefox browser to convert the HTML to PDF. Do not close the page until the PDF is fully rendered.
+
+TODO: auto-create PDF from HTML; find out what libraries Firefox is using.
+
+### Render all test images
+```make examples```
+
 ## References
 Color distance formulas: https://en.wikipedia.org/wiki/Color_difference
 
 Color quantization: https://en.wikipedia.org/wiki/Color_quantization
 
-CIELab color space: https://en.wikipedia.org/wiki/CIELAB_color_space 
+CIELab color space: https://en.wikipedia.org/wiki/CIELAB_color_space
+
+## Example Image Conversions
+
+### Mars (reds)
+| Original | RGB Distance | CIELab Distance |
+|:--:|:--:|:--:|
+| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/mars.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/mars-dmc-rgb.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/mars-dmc-lab.png" height="250" style="image-rendering: pixelated;">
+
+### Earth (blues and greens)
+| Original | RGB Distance | CIELab Distance |
+|:--:|:--:|:--:|
+| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth-dmc-rgb.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/earth-dmc-lab.png" height="250" style="image-rendering: pixelated;">
+
+### Moon (greyscale)
+| Original | RGB Distance | CIELab Distance |
+|:--:|:--:|:--:|
+| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/full-moon.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/full-moon-dmc-rgb.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/full-moon-dmc-lab.png" height="250" style="image-rendering: pixelated;">
+
+### Full Color Spectrum
+| Original | RGB Distance | CIELab Distance |
+|:--:|:--:|:--:|
+| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/colors.jpg" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/colors-dmc-rgb.png" height="250" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/master/examples/test_images/colors-dmc-lab.png" height="250" style="image-rendering: pixelated;">
+
+

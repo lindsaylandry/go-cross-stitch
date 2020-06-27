@@ -4,19 +4,64 @@ import (
 	"image/color"
 )
 
+type errorPix struct {
+	r, g, b float64
+}
+
+// Problem: pixel error can exceed 0 and 255. Need to account for big errors.
 func (c *Converter) floydSteinbergDither() {
 	bounds := c.image.Bounds()
+
+	// create an error pixel matrix
+	boundX := bounds.Dx() - bounds.Min.X
+	boundY := bounds.Dy() - bounds.Min.Y
+
+	errs := make([][]errorPix, boundY)
+	for i := range errs {
+		errs[i] = make([]errorPix, boundX)
+	}
+
+	for y := bounds.Min.Y; y < bounds.Dy(); y++ {
+		for x := bounds.Min.X; x < bounds.Dx(); x++ {
+			r32, g32, b32, _ := c.newImage.image.At(x, y).RGBA()
+			errs[y][x] = errorPix{float64(uint8(r32)), float64(uint8(g32)), float64(uint8(b32))}
+		}
+	}
+
 	for y := bounds.Min.Y; y < bounds.Dy(); y++ {
 		for x := bounds.Min.X; x < bounds.Dx(); x++ {
 			xx := x
-			if y % 2 != 0 {
+			if y%2 != 0 {
 				xx = bounds.Dx() - 1 - x
 			}
 
-			r32, g32, b32, _ := c.newImage.image.At(xx, y).RGBA()
-			r1, g1, b1 := float64(uint8(r32)), float64(uint8(g32)), float64(uint8(b32))
+			// clip to 0-255, set pixel at this site
+			px := errs[y][xx]
+			r1, g1, b1 := px.r, px.g, px.b
 
-			// x, y
+			if r1 < 0 {
+				r1 = 0
+			} else if r1 > 255 {
+				r1 = 255
+			}
+
+			if g1 < 0 {
+				g1 = 0
+			} else if g1 > 255 {
+				g1 = 255
+			}
+
+			if b1 < 0 {
+				b1 = 0
+			} else if b1 > 255 {
+				b1 = 255
+			}
+
+			a := 255
+
+			c.newImage.image.Set(xx, y, color.RGBA{uint8(r1), uint8(g1), uint8(b1), uint8(a)})
+
+			// convert pixel to nearest palette color
 			minIndex := c.setNewPixel(xx, y)
 			if _, ok := c.newImage.count[c.pc[minIndex]]; ok {
 				c.newImage.count[c.pc[minIndex]] += 1
@@ -24,60 +69,59 @@ func (c *Converter) floydSteinbergDither() {
 				c.newImage.count[c.pc[minIndex]] = 1
 			}
 
-			r232, g232, b232, _ := c.newImage.image.At(xx, y).RGBA()
-			r2, g2, b2 := float64(uint8(r232)), float64(uint8(g232)), float64(uint8(b232))
+			// get new pixel values
+			r32, g32, b32, _ := c.newImage.image.At(xx, y).RGBA()
+			r2, g2, b2 := float64(uint8(r32)), float64(uint8(g32)), float64(uint8(b32))
 
+			// quantization error
 			qR := r1 - r2
 			qG := g1 - g2
 			qB := b1 - b2
 
 			// x, y+1 (5/16)
 			if y+1 < bounds.Dy() {
-				c.setPixelError(xx, y+1, qR, qG, qB, 5.0/16.0)
+				setPixelError(&errs[y+1][xx], qR, qG, qB, 5.0/16.0)
 			}
 
-			// Odd
-			if y % 2 != 0 {
+			// Odd: Backward
+			if y%2 != 0 {
 				// x-1, y (7/16)
 				if xx-1 > bounds.Min.X {
-					c.setPixelError(xx-1, y, qR, qG, qB, 7.0/16.0)
+					setPixelError(&errs[y][xx-1], qR, qG, qB, 7.0/16.0)
 				}
 
 				// x+1, y+1 (3/16)
 				if xx+1 < bounds.Dx() && y+1 < bounds.Dy() {
-					c.setPixelError(xx+1, y+1, qR, qG, qB, 3.0/16.0)
+					setPixelError(&errs[y+1][xx+1], qR, qG, qB, 3.0/16.0)
 				}
 
 				// x-1, y+1 (1/16)
 				if xx-1 > bounds.Min.X && y+1 < bounds.Dy() {
-					c.setPixelError(xx-1, y+1, qR, qG, qB, 1.0/16.0)
+					setPixelError(&errs[y+1][xx-1], qR, qG, qB, 1.0/16.0)
 				}
-			// Even
+				// Even: Forward
 			} else {
 				// x+1, y (7/16)
 				if xx+1 < bounds.Dx() {
-					c.setPixelError(xx+1, y, qR, qG, qB, 7.0/16.0)
+					setPixelError(&errs[y][xx+1], qR, qG, qB, 7.0/16.0)
 				}
 
 				// x-1, y+1 (3/16)
 				if xx-1 > bounds.Min.X && y+1 < bounds.Dy() {
-					c.setPixelError(xx-1, y+1, qR, qG, qB, 3.0/16.0)
+					setPixelError(&errs[y+1][xx-1], qR, qG, qB, 3.0/16.0)
 				}
 
 				// x+1, y+1 (1/16)
 				if xx+1 < bounds.Dx() && y+1 < bounds.Dy() {
-					c.setPixelError(xx+1, y+1, qR, qG, qB, 1.0/16.0)
+					setPixelError(&errs[y+1][xx+1], qR, qG, qB, 1.0/16.0)
 				}
 			}
 		}
 	}
 }
 
-func (c *Converter) setPixelError(x, y int, qR, qG, qB, diffusion float64) {
-	rr32, gg32, bb32, aa := c.newImage.image.At(x, y).RGBA()
-	rr, gg, bb := float64(uint8(rr32)), float64(uint8(gg32)), float64(uint8(bb32))
-	rr += qR*diffusion
-	gg += qG*diffusion
-	bb += qB*diffusion
-	c.newImage.image.Set(x, y, color.RGBA{uint8(rr), uint8(gg), uint8(bb), uint8(aa)})
+func setPixelError(e *errorPix, qR, qG, qB, diffusion float64) {
+	e.r += qR * diffusion
+	e.g += qG * diffusion
+	e.b += qB * diffusion
 }
