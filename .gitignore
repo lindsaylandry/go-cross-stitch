@@ -20,5 +20,7 @@ ao
 cover.html
 cover.out
 
-bin/
+*/.DS_Store
 .DS_Store
+
+bin/
