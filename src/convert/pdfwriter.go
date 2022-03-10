@@ -1,38 +1,38 @@
 package convert
 
 import (
-	"bytes"
-	"fmt"
-	wkhtmltopdf "github.com/SebastiaanKlippert/go-wkhtmltopdf"
-	"io/ioutil"
+	"github.com/jung-kurt/gofpdf"
+
+	"image"
+	//"unicode/utf8"
 )
 
-func (c *Converter) writePDFFromHTML() (string, error) {
-	path := c.getPath("html")
-	pdfg, err := wkhtmltopdf.NewPDFGenerator()
-	pdfg.Dpi.Set(300)
-	if err != nil {
-		return "", err
+func (c *Converter) writePDF(*image.RGBA) (string, error) {
+	path := c.getPath("pdf")
+
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddUTF8Font("aaa", "", "fonts/arial-unicode.ttf")
+	pdf.SetFont("aaa", "", 7)
+	pdf.SetAutoPageBreak(true, 1.5)
+	pdf.AddPage()
+
+	// Create Cells
+	maxX := 60
+	maxY := 90
+
+	code := '\u9312'
+
+	for i := 0; i < maxY; i++ {
+		for j := 1; j <= maxX; j++ {
+			ln := 0
+			if j == maxX {
+				ln = 1
+			}
+			pdf.CellFormat(3.0, 3.0, string(code), "1", ln, "CM", false, 0, "")
+		}
 	}
 
-	htmlfile, err := ioutil.ReadFile(path)
-	if err != nil {
-		return "", err
-	}
+	err := pdf.OutputFileAndClose(path)
 
-	page2 := wkhtmltopdf.NewPageReader(bytes.NewReader(htmlfile))
-	pdfg.AddPage(page2)
-	err = pdfg.Create()
-	if err != nil {
-		return "", err
-	}
-
-	newPath := c.getPath("pdf")
-	err = pdfg.WriteFile(newPath)
-	if err != nil {
-		return "", err
-	}
-	fmt.Printf("PDF size %vkB\n", len(pdfg.Bytes())/1024)
-
-	return path, nil
+	return path, err
 }

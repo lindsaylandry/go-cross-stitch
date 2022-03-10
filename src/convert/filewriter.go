@@ -39,20 +39,20 @@ func (c *Converter) WriteFiles() error {
 	fmt.Printf("Wrote new PNG to %s\n", path)
 
 	// write HTML instructions
-	path, err = c.writeHTML(img)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Wrote instructions to %s\n", path)
-
-	// write PDF instructions
 	/*
-		path, err = c.writePDFFromHTML()
+		path, err = c.writeHTML(img)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Wrote PDF to %s\n", path)
+		fmt.Printf("Wrote instructions to %s\n", path)
 	*/
+	// write PDF instructions
+	path, err = c.writePDF(img)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Wrote PDF to %s\n", path)
+
 	return nil
 }
 
