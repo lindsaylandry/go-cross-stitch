@@ -19,11 +19,11 @@ import (
 type Legend struct {
 	Color  palette.Thread
 	Count  int
-	Symbol string
+	Symbol rune
 }
 
 type ColorSymbol struct {
-	Symbol palette.Symbol
+	Symbol palette.SymbolRune
 	Color  palette.Thread
 	Text   string
 }
@@ -38,7 +38,7 @@ type Converter struct {
 		symbols [][]ColorSymbol
 	}
 	path      string
-	symbols   []palette.Symbol
+	symbols   []palette.SymbolRune
 	limit     int
 	rgb       bool
 	pc        []palette.Thread
@@ -85,7 +85,7 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 		}
 	}
 
-	c.symbols = palette.GetSymbols()
+	c.symbols = palette.GetSymbolRunes()
 	c.limit = num
 	c.rgb = rgb
 	c.dither = dit
