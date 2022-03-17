@@ -32,25 +32,25 @@ func fmtFloat(a float32) string { return fmt.Sprintf("%.1f", a) }
 
 func (c *Converter) WriteFiles() error {
 	// write new image file
-	path, img, err := c.writePNG()
-	if err != nil {
-		return err
+	imgPath, img, imgErr := c.writePNG()
+	if imgErr != nil {
+		return imgErr
 	}
-	fmt.Printf("Wrote new PNG to %s\n", path)
+	fmt.Printf("Wrote new PNG to %s\n", imgPath)
 
 	// write HTML instructions
-	path, err = c.writeHTML(img)
-	if err != nil {
-		return err
+	htmlPath, htmlErr := c.writeHTML(img)
+	if htmlErr != nil {
+		return htmlErr
 	}
-	fmt.Printf("Wrote instructions to %s\n", path)
+	fmt.Printf("Wrote instructions to %s\n", htmlPath)
 
 	// write PDF instructions
-	path, err = c.writePDF(img)
-	if err != nil {
-		return err
+	pdfPath, pdfErr := c.writePDF(imgPath)
+	if pdfErr != nil {
+		return pdfErr
 	}
-	fmt.Printf("Wrote PDF to %s\n", path)
+	fmt.Printf("Wrote PDF to %s\n", pdfPath)
 
 	return nil
 }

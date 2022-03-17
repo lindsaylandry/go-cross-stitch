@@ -7,7 +7,7 @@ type SymbolRune struct {
 
 func GetSymbolRunes() []SymbolRune {
 	return []SymbolRune{
-		{'\u25fc', 10},
+		{'\u25fe', 10},
 		{'\u2200', 10},
 		{'\u22c8', 10},
 		{'\u22ff', 10},
