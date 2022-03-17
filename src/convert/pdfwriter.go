@@ -52,8 +52,8 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 			if x == bounds.Max.X {
 				ln = 1
 			}
-			pdf.SetFillColor(int(c.newImage.symbols[x-1][y].Color.RGB.R), int(c.newImage.symbols[x-1][y].Color.RGB.G), int(c.newImage.symbols[x-1][y].Color.RGB.B))
-			pdf.CellFormat(2.6, 2.6, string(c.newImage.symbols[x-1][y].Symbol.Code), "1", ln, "CM", true, 0, "")
+			pdf.SetFillColor(int(c.newImage.symbols[y][x-1].Color.RGB.R), int(c.newImage.symbols[y][x-1].Color.RGB.G), int(c.newImage.symbols[y][x-1].Color.RGB.B))
+			pdf.CellFormat(2.6, 2.6, string(c.newImage.symbols[y][x-1].Symbol.Code), "1", ln, "CM", true, 0, "")
 		}
 	}
 
@@ -66,7 +66,7 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 			if x == bounds.Max.X {
 				ln = 1
 			}
-			pdf.CellFormat(2.6, 2.6, string(c.newImage.symbols[x-1][y].Symbol.Code), "1", ln, "CM", false, 0, "")
+			pdf.CellFormat(2.6, 2.6, string(c.newImage.symbols[y][x-1].Symbol.Code), "1", ln, "CM", false, 0, "")
 		}
 	}
 
