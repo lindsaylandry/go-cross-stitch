@@ -1,7 +1,7 @@
 # Go Cross-Stitch Pattern Generator
-Do you love GoLang? Do you also love cross-stitching? Congratulations, you are a very rare cross-section of people!
-
 This is a project that will take an image and convert it to a png and html of DMC thread colors and instructions.
+
+Other palettes include Anchor cross-stitch threads, simple LEGO colors, and greyscale.
 
 ## How To Use
 
