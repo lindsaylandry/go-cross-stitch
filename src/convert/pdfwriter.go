@@ -25,38 +25,57 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 
 	// Title
 	pdf.AddPage()
-	pdf.SetFont("aaa", "", 32)
-	pdf.CellFormat(100, 30.0, "TITLE", "", 1, "LM", false, 0, "")
+	pdf.SetFont("Arial", "B", 32)
+	pdf.CellFormat(100, 30.0, c.title, "", 1, "LM", false, 0, "")
 
 	// Image
 	pdf.Image(imgPath, 10, 20, 190, 0, true, "", 0, "")
 
 	// Info
-	pdf.SetFont("aaa", "", 8)
-	pdf.CellFormat(190.0, 50.0, "INFO", "1", 1, "LM", false, 0, "")
+	pdf.SetFont("Arial", "B", 20)
+	pdf.CellFormat(100.0, 20.0, "INFO", "", 1, "LM", false, 0, "")
+	pdf.SetFont("aaa", "", 12)
+	pdf.CellFormat(90.0, 5.0, "Fabric:", "", 0, "LM", false, 0, "")
+	pdf.CellFormat(90.0, 5.0, "14ct Aida Black", "", 1, "RM", false, 0, "")
+	pdf.CellFormat(90.0, 5.0, "Size:", "", 0, "LM", false, 0, "")
+	pdf.CellFormat(90.0, 5.0, "inches", "", 1, "RM", false, 0, "")
+	pdf.CellFormat(90.0, 5.0, "Color Scheme:", "", 0, "LM", false, 0, "")
+	pdf.CellFormat(90.0, 5.0, "DMC", "", 1, "RM", false, 0, "")
+	pdf.CellFormat(90.0, 5.0, "Number of Colors:", "", 0, "LM", false, 0, "")
+	pdf.CellFormat(90.0, 5.0, strconv.Itoa(len(c.newImage.legend)), "", 1, "RM", false, 0, "")
+	// TODO: draw box
 
 	// Legend
 	pdf.AddPage()
-	pdf.SetFont("aaa", "", 32)
-	pdf.CellFormat(100.0, 20.0, "LEGEND", "", 1, "LM", false, 0, "")
-	pdf.SetFont("aaa", "", 8)
+	pdf.SetFont("Arial", "B", 20)
+	pdf.CellFormat(100.0, 20.0, "Legend", "", 1, "LM", false, 0, "")
+	pdf.SetFont("Arial", "B", 8)
 	// header cells
-	pdf.SetFillColor(200, 200, 200)
-	pdf.CellFormat(15.0, 5.0, "Color", "1", 0, "CM", true, 0, "")
-	pdf.CellFormat(20.0, 5.0, "Symbol", "1", 0, "CM", true, 0, "")
-	pdf.CellFormat(20.0, 5.0, "Color ID", "1", 0, "CM", true, 0, "")
-	pdf.CellFormat(20.0, 5.0, "Count", "1", 0, "CM", true, 0, "")
-	pdf.CellFormat(40.0, 5.0, "Name", "1", 1, "CM", true, 0, "")
+	pdf.CellFormat(10.0, 4.5, "Color", "", 0, "CM", false, 0, "")
+	pdf.CellFormat(15.0, 4.5, "Symbol", "", 0, "CM", false, 0, "")
+	pdf.CellFormat(15.0, 4.5, "Color ID", "", 0, "CM", false, 0, "")
+	pdf.CellFormat(15.0, 4.5, "Stitches", "", 0, "CM", false, 0, "")
+	pdf.CellFormat(35.0, 4.5, "Color Description", "", 1, "LM", false, 0, "")
 
 	// body cells
+	pdf.SetFont("aaa", "", 8)
 	for i := 0; i < len(c.newImage.legend); i++ {
+		fill := false
 		pdf.SetFillColor(int(c.newImage.legend[i].Color.RGB.R), int(c.newImage.legend[i].Color.RGB.G), int(c.newImage.legend[i].Color.RGB.B))
-		pdf.CellFormat(15.0, 5.0, "", "1", 0, "CM", true, 0, "")
-		pdf.CellFormat(20.0, 5.0, string(c.newImage.legend[i].Symbol), "1", 0, "CM", false, 0, "")
-		pdf.CellFormat(20.0, 5.0, c.newImage.legend[i].Color.StringID, "1", 0, "RM", false, 0, "")
-		pdf.CellFormat(20.0, 5.0, strconv.Itoa(c.newImage.legend[i].Count), "1", 0, "RM", false, 0, "")
-		pdf.CellFormat(40.0, 5.0, c.newImage.legend[i].Color.Name, "1", 1, "LM", false, 0, "")
+		pdf.CellFormat(10.0, 4.5, "", "", 0, "CM", true, 0, "")
+
+		if i%2 == 0 {
+			pdf.SetFillColor(200, 200, 200)
+			fill = true
+		}
+		pdf.CellFormat(15.0, 4.5, string(c.newImage.legend[i].Symbol), "", 0, "CM", fill, 0, "")
+		pdf.CellFormat(15.0, 4.5, c.newImage.legend[i].Color.StringID, "", 0, "RM", fill, 0, "")
+		pdf.CellFormat(15.0, 4.5, strconv.Itoa(c.newImage.legend[i].Count), "", 0, "RM", fill, 0, "")
+		pdf.CellFormat(35.0, 4.5, c.newImage.legend[i].Color.Name, "", 1, "LM", fill, 0, "")
 	}
+
+	pdf.SetLineWidth(0.4)
+	pdf.Line(10.0, 10.0+20.0+4.5, 10.0+10.0+15.0+15.0+15.0+35.0, 10.0+20.0+4.5)
 
 	// TODO: 70x100 chunks
 	maxChunkX := 70
@@ -119,7 +138,6 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 }
 
 func (c *Converter) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, color bool) {
-	pdf.SetFont("aaa", "", 6)
 	pdf.SetLineWidth(0.1)
 	for y := grid.Ystart; y <= grid.Yend; y++ {
 		for x := grid.Xstart; x <= grid.Xend; x++ {
@@ -133,6 +151,7 @@ func (c *Converter) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, color bool) {
 				if x%10 == 0 {
 					xLabel = strconv.Itoa(x)
 				}
+				pdf.SetFont("Arial", "B", 5)
 				pdf.CellFormat(2.5, 2.5, xLabel, "1", ln, "CM", true, 0, "")
 			} else if x == grid.Xstart {
 				pdf.SetFillColor(200, 200, 200)
@@ -140,6 +159,7 @@ func (c *Converter) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, color bool) {
 				if y%10 == 0 {
 					yLabel = strconv.Itoa(y)
 				}
+				pdf.SetFont("Arial", "B", 5)
 				pdf.CellFormat(2.5, 2.5, yLabel, "1", ln, "CM", true, 0, "")
 			} else {
 				fill := false
@@ -147,6 +167,7 @@ func (c *Converter) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, color bool) {
 					pdf.SetFillColor(int(c.newImage.symbols[y-1][x-1].Color.RGB.R), int(c.newImage.symbols[y-1][x-1].Color.RGB.G), int(c.newImage.symbols[y-1][x-1].Color.RGB.B))
 					fill = true
 				}
+				pdf.SetFont("aaa", "", 6)
 				pdf.CellFormat(2.5, 2.5, string(c.newImage.symbols[y-1][x-1].Symbol.Code), "1", ln, "CM", fill, 0, "")
 			}
 		}
