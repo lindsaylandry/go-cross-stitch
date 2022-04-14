@@ -116,19 +116,17 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 
 	fmt.Println(grids)
 
-	// Create Cells (color)
-	// TODO: white vs black font
-	for _, grid := range grids {
-		pdf.AddPage()
-		c.CreateGrid(pdf, grid, true)
-		setGridLines(pdf, grid)
-	}
-
 	// Create Cells (bw)
-	// TOOO: line width on 10 spaces
 	for _, grid := range grids {
 		pdf.AddPage()
 		c.CreateGrid(pdf, grid, false)
+		setGridLines(pdf, grid)
+	}
+
+	// Create Cells (color)
+	for _, grid := range grids {
+		pdf.AddPage()
+		c.CreateGrid(pdf, grid, true)
 		setGridLines(pdf, grid)
 	}
 
@@ -141,6 +139,7 @@ func (c *Converter) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, color bool) {
 	pdf.SetLineWidth(0.1)
 	for y := grid.Ystart; y <= grid.Yend; y++ {
 		for x := grid.Xstart; x <= grid.Xend; x++ {
+			pdf.SetTextColor(0, 0, 0)
 			ln := 0
 			if x == grid.Xend {
 				ln = 1
@@ -164,6 +163,11 @@ func (c *Converter) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, color bool) {
 			} else {
 				fill := false
 				if color == true {
+					// TODO: set text color
+					brightness := (int(c.newImage.symbols[y-1][x-1].Color.RGB.R) + int(c.newImage.symbols[y-1][x-1].Color.RGB.G) + int(c.newImage.symbols[y-1][x-1].Color.RGB.B)) / 3
+					if brightness < 127 {
+						pdf.SetTextColor(255, 255, 255)
+					}
 					pdf.SetFillColor(int(c.newImage.symbols[y-1][x-1].Color.RGB.R), int(c.newImage.symbols[y-1][x-1].Color.RGB.G), int(c.newImage.symbols[y-1][x-1].Color.RGB.B))
 					fill = true
 				}
