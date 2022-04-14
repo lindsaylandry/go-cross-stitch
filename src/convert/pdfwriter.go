@@ -13,7 +13,7 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddUTF8Font("aaa", "", "fonts/arial-unicode.ttf")
-	pdf.SetAutoPageBreak(true, 1.5)
+	pdf.SetAutoPageBreak(false, 1.5)
 
 	bounds := c.newImage.image.Bounds()
 
@@ -40,7 +40,7 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 	pdf.CellFormat(20.0, 5.0, "Symbol", "1", 0, "CM", true, 0, "")
 	pdf.CellFormat(20.0, 5.0, "Color ID", "1", 0, "CM", true, 0, "")
 	pdf.CellFormat(20.0, 5.0, "Count", "1", 0, "CM", true, 0, "")
-	pdf.CellFormat(30.0, 5.0, "Name", "1", 1, "CM", true, 0, "")
+	pdf.CellFormat(40.0, 5.0, "Name", "1", 1, "CM", true, 0, "")
 
 	// body cells
 	for i := 0; i < len(c.newImage.legend); i++ {
@@ -49,8 +49,10 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 		pdf.CellFormat(20.0, 5.0, string(c.newImage.legend[i].Symbol), "1", 0, "CM", false, 0, "")
 		pdf.CellFormat(20.0, 5.0, c.newImage.legend[i].Color.StringID, "1", 0, "RM", false, 0, "")
 		pdf.CellFormat(20.0, 5.0, strconv.Itoa(c.newImage.legend[i].Count), "1", 0, "RM", false, 0, "")
-		pdf.CellFormat(30.0, 5.0, c.newImage.legend[i].Color.Name, "1", 1, "LM", false, 0, "")
+		pdf.CellFormat(40.0, 5.0, c.newImage.legend[i].Color.Name, "1", 1, "LM", false, 0, "")
 	}
+
+	// TODO: 70x100 chunks
 
 	// Create Cells (color)
 	// TODO: white vs black font
@@ -83,6 +85,7 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 		}
 	}
 
+	setGridLines(pdf, bounds.Max.X, bounds.Max.Y)
 	// Create Cells (bw)
 	// TOOO: line width on 10 spaces
 	pdf.AddPage()
@@ -93,45 +96,57 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 			if x == bounds.Max.X {
 				ln = 1
 			}
+			pdf.SetLineWidth(0.1)
+			border := "1"
 			if y == 0 {
 				pdf.SetFillColor(200, 200, 200)
 				xLabel := ""
 				if x%10 == 0 {
 					xLabel = strconv.Itoa(x)
 				}
-				pdf.CellFormat(2.5, 2.5, xLabel, "1", ln, "CM", true, 0, "")
+				pdf.CellFormat(2.5, 2.5, xLabel, border, ln, "CM", true, 0, "")
 			} else if x == 0 {
 				pdf.SetFillColor(200, 200, 200)
 				yLabel := ""
 				if y%10 == 0 {
 					yLabel = strconv.Itoa(y)
 				}
-				pdf.CellFormat(2.5, 2.5, yLabel, "1", ln, "CM", true, 0, "")
+				pdf.CellFormat(2.5, 2.5, yLabel, border, ln, "CM", true, 0, "")
 			} else {
-				pdf.SetLineWidth(0.2)
-				border := "1"
-				if x%10 == 0 && y%10 == 0 {
-					pdf.SetLineWidth(0.3)
-					border = "RB"
-				} else if x%10 == 0 && y%2 == 0 {
-					pdf.SetLineWidth(0.3)
-					border = "R"
-				} else if x%10 == 1 && y%2 == 1 {
-					pdf.SetLineWidth(0.3)
-					border = "L"
-				} else if y%10 == 0 && x%2 == 0 {
-					pdf.SetLineWidth(0.3)
-					border = "B"
-				} else if y%10 == 1 && x%2 == 1 {
-					pdf.SetLineWidth(0.3)
-					border = "T"
-				}
 				pdf.CellFormat(2.5, 2.5, string(c.newImage.symbols[y-1][x-1].Symbol.Code), border, ln, "CM", false, 0, "")
 			}
 		}
 	}
 
+	setGridLines(pdf, bounds.Max.X, bounds.Max.Y)
+
 	err := pdf.OutputFileAndClose(path)
 
 	return path, err
+}
+
+func setGridLines(pdf *gofpdf.Fpdf, maxX, maxY int) {
+	pdf.SetLineWidth(0.3)
+	endX := 10.0 + 2.5*float64(maxX+1)
+	endY := 10.0 + 2.5*float64(maxY+1)
+	for x := 0; x <= maxX; x += 10 {
+		if x == 0 {
+			pdf.Line(10.0, 10.0, 10.0, endY)
+			pdf.Line(10.0+2.5, 10.0, 10.0+2.5, endY)
+		} else {
+			pdf.Line(10.0+2.5+2.5*float64(x), 10.0, 10.0+2.5+2.5*float64(x), endY)
+		}
+	}
+
+	for y := 0; y <= maxY; y += 10 {
+		if y == 0 {
+			pdf.Line(10.0, 10.0, endX, 10.0)
+			pdf.Line(10.0, 10.0+2.5, endX, 10.0+2.5)
+		} else {
+			pdf.Line(10.0, 10.0+2.5+2.5*float64(y), endX, 10.0+2.5+2.5*float64(y))
+		}
+	}
+	// R and B borders
+	pdf.Line(endX, 10.0, endX, endY)
+	pdf.Line(10.0, endY, endX, endY)
 }
