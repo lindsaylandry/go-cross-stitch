@@ -1,10 +1,7 @@
 package convert
 
 import (
-	"bytes"
-	"encoding/base64"
 	"fmt"
-	"html/template"
 	"image"
 	"image/color"
 	"image/png"
@@ -38,14 +35,6 @@ func (c *Converter) WriteFiles() error {
 	}
 	fmt.Printf("Wrote new PNG to %s\n", imgPath)
 
-	// write HTML instructions
-	/*htmlPath, htmlErr := c.writeHTML(img)
-	if htmlErr != nil {
-		return htmlErr
-	}
-	fmt.Printf("Wrote instructions to %s\n", htmlPath)
-	*/
-
 	// write PDF instructions
 	pdfPath, pdfErr := c.writePDF(imgPath)
 	if pdfErr != nil {
@@ -54,108 +43,6 @@ func (c *Converter) WriteFiles() error {
 	fmt.Printf("Wrote PDF to %s\n", pdfPath)
 
 	return nil
-}
-
-func (c *Converter) writeHTML(img *image.RGBA) (string, error) {
-	// encode image to base64 string
-	var buff bytes.Buffer
-	png.Encode(&buff, img)
-	imgString := base64.StdEncoding.EncodeToString(buff.Bytes())
-
-	type Table struct {
-		Symbols        [][]ColorSymbol
-		Xstart, Ystart int
-		Xend, Yend     int
-	}
-
-	// struct to send to html
-	type AA struct {
-		Img       string
-		Legend    []Legend
-		Tables    []Table
-		Width     int
-		Height    int
-		Scheme    string
-		Title     string
-		ColorGrid bool
-	}
-
-	// funcs to use in html template
-	fmap := template.FuncMap{
-		"forloop":  forloop,
-		"mod":      mod,
-		"plus":     plus,
-		"minus":    minus,
-		"mult":     mult,
-		"div":      div,
-		"fmtFloat": fmtFloat,
-	}
-
-	htmlPath := c.getPath("html")
-	htmlFile, err := os.Create(htmlPath)
-	if err != nil {
-		return "", err
-	}
-
-	aa := AA{
-		Img:       imgString,
-		Legend:    c.newImage.legend,
-		Width:     len(c.newImage.symbols[0]),
-		Height:    len(c.newImage.symbols),
-		Scheme:    "DMC",
-		Title:     c.title,
-		ColorGrid: c.colorgrid,
-	}
-
-	xchunk := 50
-	ychunk := 60
-
-	xnum := aa.Width / xchunk
-	if aa.Width%xchunk != 0 {
-		xnum += 1
-	}
-
-	ynum := aa.Height / ychunk
-	if aa.Height%ychunk != 0 {
-		ynum += 1
-	}
-
-	for y := 0; y < ynum; y++ {
-		for x := 0; x < xnum; x++ {
-			table := Table{}
-			table.Xstart = x * xchunk
-			if (x+1)*xchunk <= aa.Width {
-				table.Xend = (x+1)*xchunk - 1
-			} else {
-				table.Xend = aa.Width - 1
-			}
-
-			table.Ystart = y * ychunk
-			if (y+1)*ychunk <= aa.Height {
-				table.Yend = (y+1)*ychunk - 1
-			} else {
-				table.Yend = aa.Height - 1
-			}
-
-			s := make([][]ColorSymbol, table.Yend-table.Ystart+1)
-			for i := table.Ystart; i <= table.Yend; i++ {
-				s2 := make([]ColorSymbol, table.Xend-table.Xstart+1)
-				for j := table.Xstart; j <= table.Xend; j++ {
-					s2[j-table.Xstart] = c.newImage.symbols[i][j]
-				}
-				s[i-table.Ystart] = s2
-			}
-
-			table.Symbols = s
-
-			aa.Tables = append(aa.Tables, table)
-		}
-	}
-
-	t := template.Must(template.New("instructions").Funcs(fmap).ParseFiles("templates/instructions.html"))
-	err = t.ExecuteTemplate(htmlFile, "instructions.html", aa)
-
-	return htmlPath, err
 }
 
 func (c *Converter) writePNG() (string, *image.RGBA, error) {
