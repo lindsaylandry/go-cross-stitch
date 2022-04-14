@@ -5,7 +5,13 @@ import (
 
 	"strconv"
 	//"unicode/utf8"
+	"fmt"
 )
+
+type Grid struct {
+	Xstart, Ystart int
+	Xend, Yend     int
+}
 
 func (c *Converter) writePDF(imgPath string) (string, error) {
 	// Setup pdf
@@ -53,25 +59,82 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 	}
 
 	// TODO: 70x100 chunks
+	maxChunkX := 70
+	maxChunkY := 100
+
+	xnum := bounds.Max.X / maxChunkX
+	if bounds.Max.X%maxChunkX != 0 {
+		xnum += 1
+	}
+
+	ynum := bounds.Max.Y / maxChunkY
+	if bounds.Max.Y%maxChunkY != 0 {
+		ynum += 1
+	}
+
+	grids := []Grid{}
+
+	for y := 0; y < ynum; y++ {
+		for x := 0; x < xnum; x++ {
+			grid := Grid{}
+			grid.Xstart = x * maxChunkX
+			if (x+1)*maxChunkX <= bounds.Max.X {
+				grid.Xend = (x+1)*maxChunkX - 1
+			} else {
+				grid.Xend = bounds.Max.X - 1
+			}
+
+			grid.Ystart = y * maxChunkY
+			if (y+1)*maxChunkY <= bounds.Max.Y {
+				grid.Yend = (y+1)*maxChunkY - 1
+			} else {
+				grid.Yend = bounds.Max.Y - 1
+			}
+
+			grids = append(grids, grid)
+		}
+	}
+
+	fmt.Println(grids)
 
 	// Create Cells (color)
 	// TODO: white vs black font
-	pdf.AddPage()
+	for _, grid := range grids {
+		pdf.AddPage()
+		c.CreateGrid(pdf, grid, true)
+		setGridLines(pdf, grid)
+	}
+
+	// Create Cells (bw)
+	// TOOO: line width on 10 spaces
+	for _, grid := range grids {
+		pdf.AddPage()
+		c.CreateGrid(pdf, grid, false)
+		setGridLines(pdf, grid)
+	}
+
+	err := pdf.OutputFileAndClose(path)
+
+	return path, err
+}
+
+func (c *Converter) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, color bool) {
 	pdf.SetFont("aaa", "", 6)
-	for y := 0; y <= bounds.Max.Y; y++ {
-		for x := 0; x <= bounds.Max.X; x++ {
+	pdf.SetLineWidth(0.1)
+	for y := grid.Ystart; y <= grid.Yend; y++ {
+		for x := grid.Xstart; x <= grid.Xend; x++ {
 			ln := 0
-			if x == bounds.Max.X {
+			if x == grid.Xend {
 				ln = 1
 			}
-			if y == 0 {
+			if y == grid.Ystart {
 				pdf.SetFillColor(200, 200, 200)
 				xLabel := ""
 				if x%10 == 0 {
 					xLabel = strconv.Itoa(x)
 				}
 				pdf.CellFormat(2.5, 2.5, xLabel, "1", ln, "CM", true, 0, "")
-			} else if x == 0 {
+			} else if x == grid.Xstart {
 				pdf.SetFillColor(200, 200, 200)
 				yLabel := ""
 				if y%10 == 0 {
@@ -79,57 +142,24 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 				}
 				pdf.CellFormat(2.5, 2.5, yLabel, "1", ln, "CM", true, 0, "")
 			} else {
-				pdf.SetFillColor(int(c.newImage.symbols[y-1][x-1].Color.RGB.R), int(c.newImage.symbols[y-1][x-1].Color.RGB.G), int(c.newImage.symbols[y-1][x-1].Color.RGB.B))
-				pdf.CellFormat(2.5, 2.5, string(c.newImage.symbols[y-1][x-1].Symbol.Code), "1", ln, "CM", true, 0, "")
+				fill := false
+				if color == true {
+					pdf.SetFillColor(int(c.newImage.symbols[y-1][x-1].Color.RGB.R), int(c.newImage.symbols[y-1][x-1].Color.RGB.G), int(c.newImage.symbols[y-1][x-1].Color.RGB.B))
+					fill = true
+				}
+				pdf.CellFormat(2.5, 2.5, string(c.newImage.symbols[y-1][x-1].Symbol.Code), "1", ln, "CM", fill, 0, "")
 			}
 		}
 	}
-
-	setGridLines(pdf, bounds.Max.X, bounds.Max.Y)
-	// Create Cells (bw)
-	// TOOO: line width on 10 spaces
-	pdf.AddPage()
-
-	for y := 0; y <= bounds.Max.Y; y++ {
-		for x := 0; x <= bounds.Max.X; x++ {
-			ln := 0
-			if x == bounds.Max.X {
-				ln = 1
-			}
-			pdf.SetLineWidth(0.1)
-			border := "1"
-			if y == 0 {
-				pdf.SetFillColor(200, 200, 200)
-				xLabel := ""
-				if x%10 == 0 {
-					xLabel = strconv.Itoa(x)
-				}
-				pdf.CellFormat(2.5, 2.5, xLabel, border, ln, "CM", true, 0, "")
-			} else if x == 0 {
-				pdf.SetFillColor(200, 200, 200)
-				yLabel := ""
-				if y%10 == 0 {
-					yLabel = strconv.Itoa(y)
-				}
-				pdf.CellFormat(2.5, 2.5, yLabel, border, ln, "CM", true, 0, "")
-			} else {
-				pdf.CellFormat(2.5, 2.5, string(c.newImage.symbols[y-1][x-1].Symbol.Code), border, ln, "CM", false, 0, "")
-			}
-		}
-	}
-
-	setGridLines(pdf, bounds.Max.X, bounds.Max.Y)
-
-	err := pdf.OutputFileAndClose(path)
-
-	return path, err
 }
 
-func setGridLines(pdf *gofpdf.Fpdf, maxX, maxY int) {
+func setGridLines(pdf *gofpdf.Fpdf, grid Grid) {
 	pdf.SetLineWidth(0.3)
-	endX := 10.0 + 2.5*float64(maxX+1)
-	endY := 10.0 + 2.5*float64(maxY+1)
-	for x := 0; x <= maxX; x += 10 {
+	xRange := grid.Xend - grid.Xstart
+	yRange := grid.Yend - grid.Ystart
+	endX := 10.0 + 2.5*float64(xRange+1)
+	endY := 10.0 + 2.5*float64(yRange+1)
+	for x := 0; x <= xRange; x += 10 {
 		if x == 0 {
 			pdf.Line(10.0, 10.0, 10.0, endY)
 			pdf.Line(10.0+2.5, 10.0, 10.0+2.5, endY)
@@ -138,7 +168,7 @@ func setGridLines(pdf *gofpdf.Fpdf, maxX, maxY int) {
 		}
 	}
 
-	for y := 0; y <= maxY; y += 10 {
+	for y := 0; y <= yRange; y += 10 {
 		if y == 0 {
 			pdf.Line(10.0, 10.0, endX, 10.0)
 			pdf.Line(10.0, 10.0+2.5, endX, 10.0+2.5)
