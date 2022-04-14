@@ -98,16 +98,16 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 			grid := Grid{}
 			grid.Xstart = x * maxChunkX
 			if (x+1)*maxChunkX <= bounds.Max.X {
-				grid.Xend = (x+1)*maxChunkX - 1
+				grid.Xend = (x + 1) * maxChunkX
 			} else {
-				grid.Xend = bounds.Max.X - 1
+				grid.Xend = bounds.Max.X
 			}
 
 			grid.Ystart = y * maxChunkY
 			if (y+1)*maxChunkY <= bounds.Max.Y {
-				grid.Yend = (y+1)*maxChunkY - 1
+				grid.Yend = (y + 1) * maxChunkY
 			} else {
-				grid.Yend = bounds.Max.Y - 1
+				grid.Yend = bounds.Max.Y
 			}
 
 			grids = append(grids, grid)
