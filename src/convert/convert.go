@@ -42,6 +42,7 @@ type Converter struct {
 	limit     int
 	rgb       bool
 	pc        []palette.Thread
+	scheme    string
 	dither    bool
 	greyscale bool
 	title     string
@@ -98,11 +99,14 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 		c.extra = "-" + pal + "-lab"
 	}
 	if pal == "lego" {
+		c.scheme = "LEGO"
 		c.pc = palette.GetLEGOColors()
 	} else if pal == "dmc" || pal == "anchor" {
 		if pal == "dmc" {
+			c.scheme = "DMC"
 			c.pc = palette.GetDMCColors()
 		} else {
+			c.scheme = "Anchor"
 			c.pc = palette.GetAnchorColors()
 		}
 

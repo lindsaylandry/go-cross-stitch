@@ -19,7 +19,8 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddUTF8Font("aaa", "", "fonts/arial-unicode.ttf")
-	pdf.SetAutoPageBreak(false, 1.5)
+	//pdf.AddUTF8Font("aaa", "", "fonts/NotoSansSymbols.ttf")
+	pdf.SetAutoPageBreak(true, 1.5)
 
 	bounds := c.newImage.image.Bounds()
 
@@ -32,18 +33,39 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 	pdf.Image(imgPath, 10, 20, 190, 0, true, "", 0, "")
 
 	// Info
-	pdf.SetFont("Arial", "B", 20)
+	aida := 14
+	aidaColor := "Black"
+
+	widthInches := float64(bounds.Max.X) / float64(aida)
+	heightInches := float64(bounds.Max.Y) / float64(aida)
+
+	pdf.SetFont("Arial", "B", 18)
 	pdf.CellFormat(100.0, 20.0, "INFO", "", 1, "LM", false, 0, "")
-	pdf.SetFont("aaa", "", 12)
-	pdf.CellFormat(90.0, 5.0, "Fabric:", "", 0, "LM", false, 0, "")
-	pdf.CellFormat(90.0, 5.0, "14ct Aida Black", "", 1, "RM", false, 0, "")
-	pdf.CellFormat(90.0, 5.0, "Size:", "", 0, "LM", false, 0, "")
-	pdf.CellFormat(90.0, 5.0, "inches", "", 1, "RM", false, 0, "")
-	pdf.CellFormat(90.0, 5.0, "Color Scheme:", "", 0, "LM", false, 0, "")
-	pdf.CellFormat(90.0, 5.0, "DMC", "", 1, "RM", false, 0, "")
-	pdf.CellFormat(90.0, 5.0, "Number of Colors:", "", 0, "LM", false, 0, "")
-	pdf.CellFormat(90.0, 5.0, strconv.Itoa(len(c.newImage.legend)), "", 1, "RM", false, 0, "")
-	// TODO: draw box
+
+	pdf.SetFont("Arial", "B", 12)
+	pdf.CellFormat(90.0, 5.5, "Fabric:", "", 0, "LM", false, 0, "")
+	pdf.SetFont("Arial", "", 12)
+	pdf.CellFormat(100.0, 5.5, fmt.Sprintf("%dct Aida %s", aida, aidaColor), "", 1, "RM", false, 0, "")
+
+	pdf.SetFont("Arial", "B", 12)
+	pdf.CellFormat(90.0, 5.5, "Size:", "", 0, "LM", false, 0, "")
+	pdf.SetFont("Arial", "", 12)
+	pdf.CellFormat(100.0, 5.5, fmt.Sprintf("%.1fx%.1fin", widthInches, heightInches), "", 1, "RM", false, 0, "")
+
+	pdf.SetFont("Arial", "B", 12)
+	pdf.CellFormat(90.0, 5.5, "Color Scheme:", "", 0, "LM", false, 0, "")
+	pdf.SetFont("Arial", "", 12)
+	pdf.CellFormat(100.0, 5.5, c.scheme, "", 1, "RM", false, 0, "")
+
+	pdf.SetFont("Arial", "B", 12)
+	pdf.CellFormat(90.0, 5.5, "Number of Colors:", "", 0, "LM", false, 0, "")
+	pdf.SetFont("Arial", "", 12)
+	pdf.CellFormat(100.0, 5.5, strconv.Itoa(len(c.newImage.legend)), "", 1, "RM", false, 0, "")
+
+	// TODO: figure out how far down to put the info box
+	ratio := 190 * float64(bounds.Max.Y) / float64(bounds.Max.X)
+	fmt.Println(ratio)
+	pdf.Rect(10, 10+ratio+20+25, 190, 30, "D")
 
 	// Legend
 	pdf.AddPage()
@@ -72,10 +94,12 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 		pdf.CellFormat(15.0, 4.5, c.newImage.legend[i].Color.StringID, "", 0, "RM", fill, 0, "")
 		pdf.CellFormat(15.0, 4.5, strconv.Itoa(c.newImage.legend[i].Count), "", 0, "RM", fill, 0, "")
 		pdf.CellFormat(35.0, 4.5, c.newImage.legend[i].Color.Name, "", 1, "LM", fill, 0, "")
-	}
 
-	pdf.SetLineWidth(0.4)
-	pdf.Line(10.0, 10.0+20.0+4.5, 10.0+10.0+15.0+15.0+15.0+35.0, 10.0+20.0+4.5)
+		if i == 0 {
+			pdf.SetLineWidth(0.4)
+			pdf.Line(10.0, 10.0+20.0+4.5, 10.0+10.0+15.0+15.0+15.0+35.0, 10.0+20.0+4.5)
+		}
+	}
 
 	// TODO: 70x100 chunks
 	maxChunkX := 70
@@ -113,8 +137,6 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 			grids = append(grids, grid)
 		}
 	}
-
-	fmt.Println(grids)
 
 	// Create Cells (bw)
 	for _, grid := range grids {
@@ -165,7 +187,7 @@ func (c *Converter) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, color bool) {
 				if color == true {
 					// TODO: set text color
 					brightness := (int(c.newImage.symbols[y-1][x-1].Color.RGB.R) + int(c.newImage.symbols[y-1][x-1].Color.RGB.G) + int(c.newImage.symbols[y-1][x-1].Color.RGB.B)) / 3
-					if brightness < 127 {
+					if brightness < 100 {
 						pdf.SetTextColor(255, 255, 255)
 					}
 					pdf.SetFillColor(int(c.newImage.symbols[y-1][x-1].Color.RGB.R), int(c.newImage.symbols[y-1][x-1].Color.RGB.G), int(c.newImage.symbols[y-1][x-1].Color.RGB.B))
