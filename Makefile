@@ -9,7 +9,7 @@ cover:
 fmt:
 	go fmt ./...
 deps:
-	dep ensure -v
+	go mod init
 clean:
 	go clean
 	rm -f bin/

@@ -24,3 +24,6 @@ cover.out
 .DS_Store
 
 bin/
+
+# binary
+go-cross-stitch

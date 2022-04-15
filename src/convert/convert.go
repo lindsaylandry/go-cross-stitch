@@ -19,11 +19,11 @@ import (
 type Legend struct {
 	Color  palette.Thread
 	Count  int
-	Symbol string
+	Symbol rune
 }
 
 type ColorSymbol struct {
-	Symbol palette.Symbol
+	Symbol palette.SymbolRune
 	Color  palette.Thread
 	Text   string
 }
@@ -38,10 +38,11 @@ type Converter struct {
 		symbols [][]ColorSymbol
 	}
 	path      string
-	symbols   []palette.Symbol
+	symbols   []palette.SymbolRune
 	limit     int
 	rgb       bool
 	pc        []palette.Thread
+	scheme    string
 	dither    bool
 	greyscale bool
 	title     string
@@ -85,7 +86,7 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 		}
 	}
 
-	c.symbols = palette.GetSymbols()
+	c.symbols = palette.GetSymbolRunes()
 	c.limit = num
 	c.rgb = rgb
 	c.dither = dit
@@ -98,11 +99,14 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 		c.extra = "-" + pal + "-lab"
 	}
 	if pal == "lego" {
+		c.scheme = "LEGO"
 		c.pc = palette.GetLEGOColors()
 	} else if pal == "dmc" || pal == "anchor" {
 		if pal == "dmc" {
+			c.scheme = "DMC"
 			c.pc = palette.GetDMCColors()
 		} else {
+			c.scheme = "Anchor"
 			c.pc = palette.GetAnchorColors()
 		}
 
