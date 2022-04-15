@@ -1,5 +1,5 @@
 # Go Cross-Stitch Pattern Generator
-This is a project that will take an image and convert it to a png and html of DMC thread colors and instructions.
+This is a project that will take an image and convert it to a png and pdf of DMC thread colors and instructions.
 
 Other palettes include Anchor cross-stitch threads, simple LEGO colors, and greyscale.
 
@@ -18,10 +18,10 @@ Once the binary is compiled, use as follows:
 This will make two files in examples/test_images:
 ```
 FullMoon150px-dmc-lab.png
-FullMoon150px-dmc.html
+FullMoon150px-dmc.pdf
 ```
 the png is the image converted to cross-stitch DMC thread colors.
-the HTML is the instructions to stitch the pattern, with the DMC image included.
+the PDF is the instructions to stitch the pattern, with the DMC image included.
 
 ### Flags
 ```
@@ -38,19 +38,6 @@ Usage of ./bin/cross-stitch:
   -rgb
     	use rgb color space
 ```
-
-### Creating a PDF from HTML
-For now, conversion from HTML to PDF is a manual process.
-
-To convert to PDF, do the following:
-* Open the generated HTML in Firefox. 
-* Click `File => Print`
-* Under `Appearance` check `Print Background Colors`
-* Click the `PDF` dropdown and click `Save as PDF`
-
-NOTE: it will take a while for the Firefox browser to convert the HTML to PDF. Do not close the page until the PDF is fully rendered.
-
-TODO: auto-create PDF from HTML; find out what libraries Firefox is using.
 
 ### Render all test images
 ```make examples```
@@ -83,5 +70,3 @@ CIELab color space: https://en.wikipedia.org/wiki/CIELAB_color_space
 | Original | RGB Distance | CIELab Distance |
 |:--:|:--:|:--:|
 | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/examples/test_images/colors.jpg" height="200" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/examples/test_images/colors-dmc-rgb.png" height="200" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/examples/test_images/colors-dmc-lab.png" height="200" style="image-rendering: pixelated;">
-
-
