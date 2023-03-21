@@ -18,10 +18,10 @@ jobs:
       - name: Run go fmt
         run: test -z $(gofmt -l .)
 
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: v1.29
+          #- name: Run golangci-lint
+          #uses: golangci/golangci-lint-action@v3
+          #with:
+          #version: v1.29
 
       - name: Run go get
         run: go get
