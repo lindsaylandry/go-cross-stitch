@@ -1,0 +1,29 @@
+name: Lint and Test App
+
+on: push
+
+jobs:
+  lint:
+    name: Lint and Test App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run go fmt
+        run: test -z $(gofmt -l .)
+
+      - name: Download golangci-lint
+        run: wget -O - -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.27.0
+
+      - name: Run golangci-lint
+        run: golangci-lint --timeout 10m run
+
+      - name: Run go get
+        run: go get
+
+      - name: Run go vet
+        run: go vet -all ./...
+
+      - name: Test app
+        run: go test ./...
