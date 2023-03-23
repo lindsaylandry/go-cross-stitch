@@ -63,11 +63,7 @@ func (c *Converter) floydSteinbergDither() {
 
 			// convert pixel to nearest palette color
 			minIndex := c.setNewPixel(xx, y)
-			if _, ok := c.newData.Count[c.pc[minIndex]]; ok {
-				c.newData.Count[c.pc[minIndex]] += 1
-			} else {
-				c.newData.Count[c.pc[minIndex]] = 1
-			}
+			c.newData.Count[c.pc[minIndex]] += 1
 
 			// get new pixel values
 			r32, g32, b32, _ := c.newData.Image.At(xx, y).RGBA()

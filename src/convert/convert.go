@@ -207,11 +207,7 @@ func (c *Converter) convertImage() error {
 		for i := 0; i < n*n; i++ {
 			count := <-countChan
 			for k, v := range count {
-				if _, ok := c.newData.Count[k]; ok {
-					c.newData.Count[k] += v
-				} else {
-					c.newData.Count[k] = v
-				}
+				c.newData.Count[k] += v
 			}
 		}
 	}
@@ -232,11 +228,7 @@ func (c *Converter) convertImageChunk(xlow, xhigh, ylow, yhigh int) map[palette.
 		for x := xlow; x < xhigh; x++ {
 			minIndex := c.setNewPixel(x, y)
 
-			if _, ok := count[c.pc[minIndex]]; ok {
-				count[c.pc[minIndex]] += 1
-			} else {
-				count[c.pc[minIndex]] = 1
-			}
+			count[c.pc[minIndex]] += 1
 		}
 	}
 	return count

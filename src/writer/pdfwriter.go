@@ -184,7 +184,7 @@ func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, color bool) {
 				pdf.CellFormat(2.5, 2.5, yLabel, "1", ln, "CM", true, 0, "")
 			} else {
 				fill := false
-				if color == true {
+				if color {
 					// TODO: set text color
 					brightness := (int(w.data.Symbols[y-1][x-1].Color.RGB.R) + int(w.data.Symbols[y-1][x-1].Color.RGB.G) + int(w.data.Symbols[y-1][x-1].Color.RGB.B)) / 3
 					if brightness < 100 {
