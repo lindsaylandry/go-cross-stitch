@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/lindsaylandry/go-cross-stitch/src/convert"
+	"github.com/lindsaylandry/go-cross-stitch/src/writer"
 )
 
 func main() {
@@ -29,7 +30,13 @@ func main() {
 		panic(err)
 	}
 
-	if err := c.Convert(); err != nil {
+	d, err := c.Convert()
+	if err != nil {
+		panic(err)
+	}
+
+	w := writer.NewWriter(d)
+	if err := w.WriteFiles(); err != nil {
 		panic(err)
 	}
 }

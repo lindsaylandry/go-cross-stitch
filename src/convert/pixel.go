@@ -26,7 +26,7 @@ func (c *Converter) pixel() []colorConverter.SRGB {
 	for k, v := range colors {
 		fmt.Printf("%+v:%d\n", k, v)
 		r, g, b, _ := k.RGBA()
-		bestColors = append(bestColors, colorConverter.SRGB{uint8(r), uint8(g), uint8(b)})
+		bestColors = append(bestColors, colorConverter.SRGB{R: uint8(r), G: uint8(g), B: uint8(b)})
 	}
 	fmt.Printf("Number Colors: %d\n", len(bestColors))
 

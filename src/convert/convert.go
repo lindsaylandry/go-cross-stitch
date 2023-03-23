@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
-	"strings"
 
 	"github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
 	"github.com/lindsaylandry/go-cross-stitch/src/palette"
@@ -28,65 +27,48 @@ type ColorSymbol struct {
 	Text   string
 }
 
+type NewData struct {
+	Image   *image.RGBA
+	Count   map[palette.Thread]int
+	Legend  []Legend
+	Symbols [][]ColorSymbol
+	Path    string
+	Extra   string
+	Scheme  string
+}
+
 type Converter struct {
-	image    image.Image
-	newImage struct {
-		image   *image.RGBA
-		p       int
-		count   map[palette.Thread]int
-		legend  []Legend
-		symbols [][]ColorSymbol
-	}
-	path      string
-	symbols   []palette.SymbolRune
+	image     image.Image
+	newData   NewData
 	limit     int
 	rgb       bool
 	pc        []palette.Thread
-	scheme    string
 	dither    bool
 	greyscale bool
-	title     string
 	colorgrid bool
-	extra     string
-}
-
-func (c *Converter) getImage() error {
-	data, err := ioutil.ReadFile(c.path)
-	if err != nil {
-		return err
-	}
-
-	image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
-	image.RegisterFormat("jpeg", "jpeg", jpeg.Decode, jpeg.DecodeConfig)
-	image.RegisterFormat("gif", "gif", gif.Decode, gif.DecodeConfig)
-
-	c.image, _, err = image.Decode(bytes.NewReader(data))
-	return err
 }
 
 func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre, pix, col bool) (*Converter, error) {
 	c := Converter{}
 
-	c.newImage.p = 10
-	c.path = filename
+	c.newData.Path = filename
 
 	if err := c.getImage(); err != nil {
 		return &c, err
 	}
 
 	bounds := c.image.Bounds()
-	c.newImage.image = image.NewRGBA(bounds)
+	c.newData.Image = image.NewRGBA(bounds)
 
-	c.newImage.symbols = make([][]ColorSymbol, bounds.Dy()-bounds.Min.Y)
+	c.newData.Symbols = make([][]ColorSymbol, bounds.Dy()-bounds.Min.Y)
 	for y := bounds.Min.Y; y < bounds.Dy(); y++ {
-		c.newImage.symbols[y] = make([]ColorSymbol, bounds.Dx()-bounds.Min.X)
+		c.newData.Symbols[y] = make([]ColorSymbol, bounds.Dx()-bounds.Min.X)
 		for x := bounds.Min.X; x < bounds.Dx(); x++ {
 			pixel := c.image.At(x, y)
-			c.newImage.image.Set(x, y, pixel)
+			c.newData.Image.Set(x, y, pixel)
 		}
 	}
 
-	c.symbols = palette.GetSymbolRunes()
 	c.limit = num
 	c.rgb = rgb
 	c.dither = dit
@@ -94,19 +76,19 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 	c.colorgrid = col
 
 	if c.rgb {
-		c.extra = "-" + pal + "-rgb"
+		c.newData.Extra = "-" + pal + "-rgb"
 	} else {
-		c.extra = "-" + pal + "-lab"
+		c.newData.Extra = "-" + pal + "-lab"
 	}
 	if pal == "lego" {
-		c.scheme = "LEGO"
+		c.newData.Scheme = "LEGO"
 		c.pc = palette.GetLEGOColors()
 	} else if pal == "dmc" || pal == "anchor" {
 		if pal == "dmc" {
-			c.scheme = "DMC"
+			c.newData.Scheme = "DMC"
 			c.pc = palette.GetDMCColors()
 		} else {
-			c.scheme = "Anchor"
+			c.newData.Scheme = "Anchor"
 			c.pc = palette.GetAnchorColors()
 		}
 
@@ -129,41 +111,40 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 		log.Fatalf("ERROR: -color not recognized")
 	}
 
-	c.newImage.count = make(map[palette.Thread]int)
-	c.getTitle(filename)
+	c.newData.Count = make(map[palette.Thread]int)
 
 	return &c, nil
 }
 
-func (c *Converter) getTitle(filename string) {
-	fn := strings.SplitAfter(filename, "/")
-	n := strings.Split(fn[len(fn)-1], ".")
-	name := strings.ReplaceAll(n[0], "-", " ")
-	name2 := strings.ReplaceAll(name, "_", " ")
-
-	c.title = strings.ToUpper(name2)
-}
-
 func (c *Converter) Greyscale() {
-	bounds := c.newImage.image.Bounds()
+	bounds := c.newData.Image.Bounds()
 	for x := bounds.Min.X; x < bounds.Dx(); x++ {
 		for y := bounds.Min.Y; y < bounds.Dy(); y++ {
-			r32, g32, b32, a := c.newImage.image.At(x, y).RGBA()
+			r32, g32, b32, a := c.newData.Image.At(x, y).RGBA()
 			r, g, b := uint8(r32), uint8(g32), uint8(b32)
 
 			gg := colorConverter.Greyscale(r, g, b)
-			c.newImage.image.Set(x, y, color.RGBA{gg, gg, gg, uint8(a)})
+			c.newData.Image.Set(x, y, color.RGBA{gg, gg, gg, uint8(a)})
 		}
 	}
 }
 
-func (c *Converter) Convert() error {
-	if err := c.convertImage(); err != nil {
+func (c *Converter) Convert() (NewData, error) {
+	err := c.convertImage()
+	return c.newData, err
+}
+
+func (c *Converter) getImage() error {
+	data, err := ioutil.ReadFile(c.newData.Path)
+	if err != nil {
 		return err
 	}
 
-	err := c.WriteFiles()
+	image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
+	image.RegisterFormat("jpeg", "jpeg", jpeg.Decode, jpeg.DecodeConfig)
+	image.RegisterFormat("gif", "gif", gif.Decode, gif.DecodeConfig)
 
+	c.image, _, err = image.Decode(bytes.NewReader(data))
 	return err
 }
 
@@ -202,7 +183,6 @@ func (c *Converter) convertImage() error {
 	if c.dither {
 		c.floydSteinbergDither()
 	} else {
-
 		bounds := c.image.Bounds()
 
 		n := 4
@@ -227,20 +207,22 @@ func (c *Converter) convertImage() error {
 		for i := 0; i < n*n; i++ {
 			count := <-countChan
 			for k, v := range count {
-				if _, ok := c.newImage.count[k]; ok {
-					c.newImage.count[k] += v
+				if _, ok := c.newData.Count[k]; ok {
+					c.newData.Count[k] += v
 				} else {
-					c.newImage.count[k] = v
+					c.newData.Count[k] = v
 				}
 			}
 		}
 	}
 
+	symbols := palette.GetSymbolRunes()
+
 	for i, v := range c.pc {
-		l := Legend{v, c.newImage.count[v], c.symbols[i].Code}
-		c.newImage.legend = append(c.newImage.legend, l)
+		l := Legend{v, c.newData.Count[v], symbols[i].Code}
+		c.newData.Legend = append(c.newData.Legend, l)
 	}
-	quickSortLegend(c.newImage.legend)
+	quickSortLegend(c.newData.Legend)
 	return nil
 }
 
@@ -261,8 +243,10 @@ func (c *Converter) convertImageChunk(xlow, xhigh, ylow, yhigh int) map[palette.
 }
 
 func (c *Converter) setNewPixel(x, y int) int {
-	r32, g32, b32, a := c.newImage.image.At(x, y).RGBA()
+	r32, g32, b32, a := c.newData.Image.At(x, y).RGBA()
 	r, g, b := uint8(r32), uint8(g32), uint8(b32)
+
+	symbols := palette.GetSymbolRunes()
 
 	minLen := math.MaxFloat64
 	minIndex := 0
@@ -271,7 +255,7 @@ func (c *Converter) setNewPixel(x, y int) int {
 		if c.rgb || colorConverter.Greyscale(r, g, b) < 100 {
 			dist = rgbDistance(float64(r), float64(g), float64(b), float64(c.pc[i].RGB.R), float64(c.pc[i].RGB.G), float64(c.pc[i].RGB.B))
 		} else {
-			cie := colorConverter.SRGBToCIELab(colorConverter.SRGB{r, g, b})
+			cie := colorConverter.SRGBToCIELab(colorConverter.SRGB{R: r, G: g, B: b})
 			dist = labDistance(c.pc[i].LAB.L, c.pc[i].LAB.A, c.pc[i].LAB.B, cie.L, cie.A, cie.B)
 		}
 		if dist < minLen {
@@ -280,10 +264,10 @@ func (c *Converter) setNewPixel(x, y int) int {
 		}
 	}
 
-	c.newImage.symbols[y][x].Symbol = c.symbols[minIndex]
-	c.newImage.symbols[y][x].Color = c.pc[minIndex]
-	c.newImage.symbols[y][x].Text = getTextColor(c.pc[minIndex])
-	c.newImage.image.Set(x, y, color.RGBA{uint8(c.pc[minIndex].RGB.R), uint8(c.pc[minIndex].RGB.G), uint8(c.pc[minIndex].RGB.B), uint8(a)})
+	c.newData.Symbols[y][x].Symbol = symbols[minIndex]
+	c.newData.Symbols[y][x].Color = c.pc[minIndex]
+	c.newData.Symbols[y][x].Text = getTextColor(c.pc[minIndex])
+	c.newData.Image.Set(x, y, color.RGBA{uint8(c.pc[minIndex].RGB.R), uint8(c.pc[minIndex].RGB.G), uint8(c.pc[minIndex].RGB.B), uint8(a)})
 
 	return minIndex
 }
@@ -304,8 +288,8 @@ func (c *Converter) colorQuant() []colorConverter.SRGB {
 	allcolors := make([]colorConverter.SRGB, (bounds.Dy()-bounds.Min.Y)*(bounds.Dx()-bounds.Min.X))
 	for y := bounds.Min.Y; y < bounds.Dy(); y++ {
 		for x := bounds.Min.X; x < bounds.Dx(); x++ {
-			r32, g32, b32, _ := c.newImage.image.At(x, y).RGBA()
-			allcolors[y*(bounds.Dx()-bounds.Min.X)+x] = colorConverter.SRGB{uint8(r32), uint8(g32), uint8(b32)}
+			r32, g32, b32, _ := c.newData.Image.At(x, y).RGBA()
+			allcolors[y*(bounds.Dx()-bounds.Min.X)+x] = colorConverter.SRGB{R: uint8(r32), G: uint8(g32), B: uint8(b32)}
 		}
 	}
 
@@ -378,7 +362,7 @@ func (c *Converter) colorQuant() []colorConverter.SRGB {
 			avgB = avgB + math.Pow(float64(s[c].B), 2)
 		}
 
-		bestColors[i] = colorConverter.SRGB{uint8(math.Sqrt(avgR / float64(len(s)))), uint8(math.Sqrt(avgG / float64(len(s)))), uint8(math.Sqrt(avgB / float64(len(s))))}
+		bestColors[i] = colorConverter.SRGB{R: uint8(math.Sqrt(avgR / float64(len(s)))), G: uint8(math.Sqrt(avgG / float64(len(s)))), B: uint8(math.Sqrt(avgB / float64(len(s))))}
 	}
 
 	return bestColors

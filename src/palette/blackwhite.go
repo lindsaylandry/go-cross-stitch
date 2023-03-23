@@ -6,8 +6,8 @@ import (
 
 func GetBWColors() []Thread {
 	bwColors := []Thread{
-		{1, "1", "White", colorConverter.SRGB{255, 255, 255}, colorConverter.CIELab{}},
-		{26, "26", "Black", colorConverter.SRGB{0, 0, 0}, colorConverter.CIELab{}},
+		{ID: 1, StringID: "1", Name: "White", RGB: colorConverter.SRGB{R: 255, G: 255, B: 255}, LAB: colorConverter.CIELab{}},
+		{ID: 26, StringID: "26", Name: "Black", RGB: colorConverter.SRGB{R: 0, G: 0, B: 0}, LAB: colorConverter.CIELab{}},
 	}
 
 	for i, c := range bwColors {

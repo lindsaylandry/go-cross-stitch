@@ -23,7 +23,7 @@ func (c *Converter) floydSteinbergDither() {
 
 	for y := bounds.Min.Y; y < bounds.Dy(); y++ {
 		for x := bounds.Min.X; x < bounds.Dx(); x++ {
-			r32, g32, b32, _ := c.newImage.image.At(x, y).RGBA()
+			r32, g32, b32, _ := c.newData.Image.At(x, y).RGBA()
 			errs[y][x] = errorPix{float64(uint8(r32)), float64(uint8(g32)), float64(uint8(b32))}
 		}
 	}
@@ -59,18 +59,18 @@ func (c *Converter) floydSteinbergDither() {
 
 			a := 255
 
-			c.newImage.image.Set(xx, y, color.RGBA{uint8(r1), uint8(g1), uint8(b1), uint8(a)})
+			c.newData.Image.Set(xx, y, color.RGBA{uint8(r1), uint8(g1), uint8(b1), uint8(a)})
 
 			// convert pixel to nearest palette color
 			minIndex := c.setNewPixel(xx, y)
-			if _, ok := c.newImage.count[c.pc[minIndex]]; ok {
-				c.newImage.count[c.pc[minIndex]] += 1
+			if _, ok := c.newData.Count[c.pc[minIndex]]; ok {
+				c.newData.Count[c.pc[minIndex]] += 1
 			} else {
-				c.newImage.count[c.pc[minIndex]] = 1
+				c.newData.Count[c.pc[minIndex]] = 1
 			}
 
 			// get new pixel values
-			r32, g32, b32, _ := c.newImage.image.At(xx, y).RGBA()
+			r32, g32, b32, _ := c.newData.Image.At(xx, y).RGBA()
 			r2, g2, b2 := float64(uint8(r32)), float64(uint8(g32)), float64(uint8(b32))
 
 			// quantization error
