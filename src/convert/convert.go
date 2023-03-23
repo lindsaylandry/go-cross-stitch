@@ -339,7 +339,7 @@ func (c *Converter) colorQuant() []colorConverter.SRGB {
 		for k := 0; k < max; k++ {
 			slices = append(slices, (slices[k+1]+slices[k])/2)
 		}
-		quickSort(slices)
+		sort.Ints(slices)
 	}
 
 	// Average all sliced colors and insert into bestcolors
