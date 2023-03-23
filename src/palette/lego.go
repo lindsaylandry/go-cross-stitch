@@ -6,12 +6,11 @@ import (
 
 func GetLEGOColors() []Thread {
 	legoColors := []Thread{
-		{1, "1", "White", colorConverter.SRGB{255, 255, 255}, colorConverter.CIELab{}},
-		{21, "21", "Bright Red", colorConverter.SRGB{255, 0, 0}, colorConverter.CIELab{}},
-		{23, "23", "Bright Blue", colorConverter.SRGB{0, 0, 255}, colorConverter.CIELab{}},
-		{24, "24", "Bright Yellow", colorConverter.SRGB{255, 255, 0}, colorConverter.CIELab{}},
-		{26, "26", "Black", colorConverter.SRGB{0, 0, 0}, colorConverter.CIELab{}},
-		//		{"28", "Dark Green", colorConverter.SRGB{0, 153, 0}, colorConverter.CIELab{}},
+		{ID: 1, StringID: "1", Name: "White", RGB: colorConverter.SRGB{R: 255, G: 255, B: 255}, LAB: colorConverter.CIELab{}},
+		{ID: 21, StringID: "21", Name: "Bright Red", RGB: colorConverter.SRGB{R: 255, G: 0, B: 0}, LAB: colorConverter.CIELab{}},
+		{ID: 23, StringID: "23", Name: "Bright Blue", RGB: colorConverter.SRGB{R: 0, G: 0, B: 255}, LAB: colorConverter.CIELab{}},
+		{ID: 24, StringID: "24", Name: "Bright Yellow", RGB: colorConverter.SRGB{R: 255, G: 255, B: 0}, LAB: colorConverter.CIELab{}},
+		{ID: 26, StringID: "26", Name: "Black", RGB: colorConverter.SRGB{R: 0, G: 0, B: 0}, LAB: colorConverter.CIELab{}},
 	}
 
 	for i, c := range legoColors {

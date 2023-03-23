@@ -1,15 +1,15 @@
-package convert
+package colorConverter
 
 import (
 	"math"
-	//"fmt"
 )
 
-func labDistance76(l1, a1, b1, l2, a2, b2 float64) float64 {
+/*
+func LABDistance76(l1, a1, b1, l2, a2, b2 float64) float64 {
 	return square(l2-l1) + square(a2-a1) + square(b2-b1)
 }
 
-func labDistance94(l1, a1, b1, l2, a2, b2 float64) float64 {
+func LABDistance94(l1, a1, b1, l2, a2, b2 float64) float64 {
 	dL := l1 - l2
 	dA := a1 - a2
 	dB := b1 - b2
@@ -35,12 +35,9 @@ func labDistance94(l1, a1, b1, l2, a2, b2 float64) float64 {
 	e := math.Sqrt(square(dL/(kL*sL)) + square(dCab/(kC*sC)) + square(dHab/(kH*sH)))
 	return e
 }
+*/
 
-func labDistance(l1, a1, b1, l2, a2, b2 float64) float64 {
-	//fmt.Printf("%f %f %f\n", l2, a2, b2)
-	//l1, a1, b1 = l1*100.0, a1*100.0, b1*100.0
-	//l2, a2, b2 = l2*100.0, a2*100.0, b2*100.0
-
+func LABDistance(l1, a1, b1, l2, a2, b2 float64) float64 {
 	kL := 1.0
 	kC := 1.0
 	kH := 1.0
@@ -119,7 +116,7 @@ func labDistance(l1, a1, b1, l2, a2, b2 float64) float64 {
 	return e
 }
 
-func rgbDistance(r1, g1, b1, r2, g2, b2 float64) float64 {
+func RGBDistance(r1, g1, b1, r2, g2, b2 float64) float64 {
 	return math.Sqrt(2*square(r2-r1) + 4*square(g2-g1) + 3*square(b2-b1) + (r2+r1)/2*(square(r2-r1)-square(b2-b1))/256)
 }
 

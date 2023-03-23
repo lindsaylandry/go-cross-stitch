@@ -1,4 +1,4 @@
-package convert
+package writer
 
 import (
 	"github.com/jung-kurt/gofpdf"
@@ -13,21 +13,21 @@ type Grid struct {
 	Xend, Yend     int
 }
 
-func (c *Converter) writePDF(imgPath string) (string, error) {
+func (w *Writer) writePDF(imgPath string) (string, error) {
 	// Setup pdf
-	path := c.getPath("pdf")
+	path := w.getPath("pdf")
 
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddUTF8Font("aaa", "", "fonts/arial-unicode.ttf")
 	//pdf.AddUTF8Font("aaa", "", "fonts/NotoSansSymbols.ttf")
 	pdf.SetAutoPageBreak(true, 1.5)
 
-	bounds := c.newImage.image.Bounds()
+	bounds := w.data.Image.Bounds()
 
 	// Title
 	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 32)
-	pdf.CellFormat(100, 30.0, c.title, "", 1, "LM", false, 0, "")
+	pdf.CellFormat(100, 30.0, w.title, "", 1, "LM", false, 0, "")
 
 	// Image
 	pdf.Image(imgPath, 10, 20, 190, 0, true, "", 0, "")
@@ -55,12 +55,12 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 	pdf.SetFont("Arial", "B", 12)
 	pdf.CellFormat(90.0, 5.5, "Color Scheme:", "", 0, "LM", false, 0, "")
 	pdf.SetFont("Arial", "", 12)
-	pdf.CellFormat(100.0, 5.5, c.scheme, "", 1, "RM", false, 0, "")
+	pdf.CellFormat(100.0, 5.5, w.data.Scheme, "", 1, "RM", false, 0, "")
 
 	pdf.SetFont("Arial", "B", 12)
 	pdf.CellFormat(90.0, 5.5, "Number of Colors:", "", 0, "LM", false, 0, "")
 	pdf.SetFont("Arial", "", 12)
-	pdf.CellFormat(100.0, 5.5, strconv.Itoa(len(c.newImage.legend)), "", 1, "RM", false, 0, "")
+	pdf.CellFormat(100.0, 5.5, strconv.Itoa(len(w.data.Legend)), "", 1, "RM", false, 0, "")
 
 	// TODO: figure out how far down to put the info box
 	ratio := 190 * float64(bounds.Max.Y) / float64(bounds.Max.X)
@@ -81,19 +81,19 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 
 	// body cells
 	pdf.SetFont("aaa", "", 8)
-	for i := 0; i < len(c.newImage.legend); i++ {
+	for i := 0; i < len(w.data.Legend); i++ {
 		fill := false
-		pdf.SetFillColor(int(c.newImage.legend[i].Color.RGB.R), int(c.newImage.legend[i].Color.RGB.G), int(c.newImage.legend[i].Color.RGB.B))
+		pdf.SetFillColor(int(w.data.Legend[i].Color.RGB.R), int(w.data.Legend[i].Color.RGB.G), int(w.data.Legend[i].Color.RGB.B))
 		pdf.CellFormat(10.0, 4.5, "", "", 0, "CM", true, 0, "")
 
 		if i%2 == 0 {
 			pdf.SetFillColor(200, 200, 200)
 			fill = true
 		}
-		pdf.CellFormat(15.0, 4.5, string(c.newImage.legend[i].Symbol), "", 0, "CM", fill, 0, "")
-		pdf.CellFormat(15.0, 4.5, c.newImage.legend[i].Color.StringID, "", 0, "RM", fill, 0, "")
-		pdf.CellFormat(15.0, 4.5, strconv.Itoa(c.newImage.legend[i].Count), "", 0, "RM", fill, 0, "")
-		pdf.CellFormat(35.0, 4.5, c.newImage.legend[i].Color.Name, "", 1, "LM", fill, 0, "")
+		pdf.CellFormat(15.0, 4.5, string(w.data.Legend[i].Symbol), "", 0, "CM", fill, 0, "")
+		pdf.CellFormat(15.0, 4.5, w.data.Legend[i].Color.StringID, "", 0, "RM", fill, 0, "")
+		pdf.CellFormat(15.0, 4.5, strconv.Itoa(w.data.Legend[i].Count), "", 0, "RM", fill, 0, "")
+		pdf.CellFormat(35.0, 4.5, w.data.Legend[i].Color.Name, "", 1, "LM", fill, 0, "")
 
 		if i == 0 {
 			pdf.SetLineWidth(0.4)
@@ -141,14 +141,14 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 	// Create Cells (bw)
 	for _, grid := range grids {
 		pdf.AddPage()
-		c.CreateGrid(pdf, grid, false)
+		w.CreateGrid(pdf, grid, false)
 		setGridLines(pdf, grid)
 	}
 
 	// Create Cells (color)
 	for _, grid := range grids {
 		pdf.AddPage()
-		c.CreateGrid(pdf, grid, true)
+		w.CreateGrid(pdf, grid, true)
 		setGridLines(pdf, grid)
 	}
 
@@ -157,7 +157,7 @@ func (c *Converter) writePDF(imgPath string) (string, error) {
 	return path, err
 }
 
-func (c *Converter) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, color bool) {
+func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, color bool) {
 	pdf.SetLineWidth(0.1)
 	for y := grid.Ystart; y <= grid.Yend; y++ {
 		for x := grid.Xstart; x <= grid.Xend; x++ {
@@ -184,17 +184,17 @@ func (c *Converter) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, color bool) {
 				pdf.CellFormat(2.5, 2.5, yLabel, "1", ln, "CM", true, 0, "")
 			} else {
 				fill := false
-				if color == true {
+				if color {
 					// TODO: set text color
-					brightness := (int(c.newImage.symbols[y-1][x-1].Color.RGB.R) + int(c.newImage.symbols[y-1][x-1].Color.RGB.G) + int(c.newImage.symbols[y-1][x-1].Color.RGB.B)) / 3
+					brightness := (int(w.data.Symbols[y-1][x-1].Color.RGB.R) + int(w.data.Symbols[y-1][x-1].Color.RGB.G) + int(w.data.Symbols[y-1][x-1].Color.RGB.B)) / 3
 					if brightness < 100 {
 						pdf.SetTextColor(255, 255, 255)
 					}
-					pdf.SetFillColor(int(c.newImage.symbols[y-1][x-1].Color.RGB.R), int(c.newImage.symbols[y-1][x-1].Color.RGB.G), int(c.newImage.symbols[y-1][x-1].Color.RGB.B))
+					pdf.SetFillColor(int(w.data.Symbols[y-1][x-1].Color.RGB.R), int(w.data.Symbols[y-1][x-1].Color.RGB.G), int(w.data.Symbols[y-1][x-1].Color.RGB.B))
 					fill = true
 				}
 				pdf.SetFont("aaa", "", 6)
-				pdf.CellFormat(2.5, 2.5, string(c.newImage.symbols[y-1][x-1].Symbol.Code), "1", ln, "CM", fill, 0, "")
+				pdf.CellFormat(2.5, 2.5, string(w.data.Symbols[y-1][x-1].Symbol.Code), "1", ln, "CM", fill, 0, "")
 			}
 		}
 	}
