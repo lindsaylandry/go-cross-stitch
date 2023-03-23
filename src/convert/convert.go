@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"sort"
 
 	"github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
 	"github.com/lindsaylandry/go-cross-stitch/src/palette"
@@ -210,7 +211,7 @@ func (c *Converter) convertImage() error {
 		l := Legend{v, c.newData.Count[v], symbols[i].Code}
 		c.newData.Legend = append(c.newData.Legend, l)
 	}
-	quickSortLegend(c.newData.Legend)
+	sort.Slice(c.newData.Legend, func(i, j int) bool { return c.newData.Legend[i].Color.ID < c.newData.Legend[j].Color.ID })
 	return nil
 }
 
@@ -319,11 +320,11 @@ func (c *Converter) colorQuant() []colorConverter.SRGB {
 
 			// Sort channel that has greatest variance
 			if xr > yr && xr > zr {
-				quickSortRed(s)
+				sort.Slice(s, func(i, j int) bool { return s[i].R < s[j].R })
 			} else if yr > xr && yr > zr {
-				quickSortGreen(s)
+				sort.Slice(s, func(i, j int) bool { return s[i].G < s[j].G })
 			} else {
-				quickSortBlue(s)
+				sort.Slice(s, func(i, j int) bool { return s[i].B < s[j].B })
 			}
 		}
 
@@ -332,7 +333,7 @@ func (c *Converter) colorQuant() []colorConverter.SRGB {
 		for k := 0; k < max; k++ {
 			slices = append(slices, (slices[k+1]+slices[k])/2)
 		}
-		quickSort(slices)
+		sort.Ints(slices)
 	}
 
 	// Average all sliced colors and insert into bestcolors
