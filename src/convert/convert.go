@@ -16,17 +16,11 @@ import (
 	"github.com/lindsaylandry/go-cross-stitch/src/palette"
 )
 
-type LegendRow struct {
+type Legend struct {
 	Color  palette.Thread
 	Count  int
 	Symbol rune
 }
-
-type Legend []LegendRow
-
-func (l Legend) Len() int           { return len(l) }
-func (l Legend) Swap(i, j int)      { l[i], l[j] = l[j], l[i] }
-func (l Legend) Less(i, j int) bool { return l[i].Color.ID < l[j].Color.ID }
 
 type ColorSymbol struct {
 	Symbol palette.SymbolRune
@@ -37,7 +31,7 @@ type ColorSymbol struct {
 type NewData struct {
 	Image   *image.RGBA
 	Count   map[palette.Thread]int
-	Legend  Legend
+	Legend  []Legend
 	Symbols [][]ColorSymbol
 	Path    string
 	Extra   string
@@ -214,10 +208,10 @@ func (c *Converter) convertImage() error {
 	symbols := palette.GetSymbolRunes()
 
 	for i, v := range c.pc {
-		l := LegendRow{v, c.newData.Count[v], symbols[i].Code}
+		l := Legend{v, c.newData.Count[v], symbols[i].Code}
 		c.newData.Legend = append(c.newData.Legend, l)
 	}
-	sort.Sort(c.newData.Legend)
+	sort.Slice(c.newData.Legend, func(i, j int) bool { return c.newData.Legend[i].Color.ID < c.newData.Legend[j].Color.ID })
 	return nil
 }
 
