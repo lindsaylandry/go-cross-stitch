@@ -326,11 +326,11 @@ func (c *Converter) colorQuant() []colorConverter.SRGB {
 
 			// Sort channel that has greatest variance
 			if xr > yr && xr > zr {
-				quickSortRed(s)
+				sort.Slice(s, func(i, j int) bool { return s[i].R < s[j].R })
 			} else if yr > xr && yr > zr {
-				quickSortGreen(s)
+				sort.Slice(s, func(i, j int) bool { return s[i].G < s[j].G })
 			} else {
-				quickSortBlue(s)
+				sort.Slice(s, func(i, j int) bool { return s[i].B < s[j].B })
 			}
 		}
 
