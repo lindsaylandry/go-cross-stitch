@@ -63,10 +63,6 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 	c.newData.Symbols = make([][]ColorSymbol, bounds.Dy()-bounds.Min.Y)
 	for y := bounds.Min.Y; y < bounds.Dy(); y++ {
 		c.newData.Symbols[y] = make([]ColorSymbol, bounds.Dx()-bounds.Min.X)
-		for x := bounds.Min.X; x < bounds.Dx(); x++ {
-			pixel := c.image.At(x, y)
-			c.newData.Image.Set(x, y, pixel)
-		}
 	}
 
 	c.limit = num
@@ -93,17 +89,13 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 		}
 
 		if !all {
-			bcrgb := []colorConverter.SRGB{}
 			if pix {
 				// most colors rgb
-				bcrgb = c.pixel()
+				c.pc = c.convertPalette(c.pixel())
 			} else {
 				//best colors rgb
-				bcrgb = c.colorQuant()
+				c.pc = c.convertPalette(c.colorQuant())
 			}
-
-			// Convert best-colors to thread palette
-			c.pc = c.convertPalette(bcrgb)
 		}
 	} else if pal == "bw" {
 		c.pc = palette.GetBWColors()
