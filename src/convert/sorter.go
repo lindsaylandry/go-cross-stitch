@@ -34,7 +34,7 @@ func quickSort(c []int) {
 
 	quickSort(c[0:piv])
 	if piv+1 <= len(c)-1 {
-		quickSort(c[piv+1 : len(c)])
+		quickSort(c[piv+1:])
 	}
 }
 
@@ -68,7 +68,7 @@ func quickSortLegend(c []Legend) {
 
 	quickSortLegend(c[0:piv])
 	if piv+1 <= len(c)-1 {
-		quickSortLegend(c[piv+1 : len(c)])
+		quickSortLegend(c[piv+1:])
 	}
 }
 
@@ -102,7 +102,7 @@ func quickSortRed(c []colorConverter.SRGB) {
 
 	quickSortRed(c[0:piv])
 	if piv+1 <= len(c)-1 {
-		quickSortRed(c[piv+1 : len(c)])
+		quickSortRed(c[piv+1:])
 	}
 }
 
@@ -136,7 +136,7 @@ func quickSortGreen(c []colorConverter.SRGB) {
 
 	quickSortGreen(c[0:piv])
 	if piv+1 <= len(c)-1 {
-		quickSortGreen(c[piv+1 : len(c)])
+		quickSortGreen(c[piv+1:])
 	}
 }
 
@@ -170,6 +170,6 @@ func quickSortBlue(c []colorConverter.SRGB) {
 
 	quickSortBlue(c[0:piv])
 	if piv+1 <= len(c)-1 {
-		quickSortBlue(c[piv+1 : len(c)])
+		quickSortBlue(c[piv+1:])
 	}
 }
