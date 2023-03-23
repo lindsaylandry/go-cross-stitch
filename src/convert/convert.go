@@ -10,16 +10,23 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"sort"
 
 	"github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
 	"github.com/lindsaylandry/go-cross-stitch/src/palette"
 )
 
-type Legend struct {
+type LegendRow struct {
 	Color  palette.Thread
 	Count  int
 	Symbol rune
 }
+
+type Legend []LegendRow
+
+func (l Legend) Len() int           { return len(l) }
+func (l Legend) Swap(i, j int)      { l[i], l[j] = l[j], l[i] }
+func (l Legend) Less(i, j int) bool { return l[i].Color.ID < l[j].Color.ID }
 
 type ColorSymbol struct {
 	Symbol palette.SymbolRune
@@ -30,7 +37,7 @@ type ColorSymbol struct {
 type NewData struct {
 	Image   *image.RGBA
 	Count   map[palette.Thread]int
-	Legend  []Legend
+	Legend  Legend
 	Symbols [][]ColorSymbol
 	Path    string
 	Extra   string
@@ -207,10 +214,10 @@ func (c *Converter) convertImage() error {
 	symbols := palette.GetSymbolRunes()
 
 	for i, v := range c.pc {
-		l := Legend{v, c.newData.Count[v], symbols[i].Code}
+		l := LegendRow{v, c.newData.Count[v], symbols[i].Code}
 		c.newData.Legend = append(c.newData.Legend, l)
 	}
-	quickSortLegend(c.newData.Legend)
+	sort.Sort(c.newData.Legend)
 	return nil
 }
 
