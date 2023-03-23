@@ -159,10 +159,10 @@ func (c *Converter) convertPalette(colors []colorConverter.SRGB) []palette.Threa
 		for x := 0; x < len(c.pc); x++ {
 			var dist float64
 			if c.rgb {
-				dist = rgbDistance(float64(c.pc[x].RGB.R), float64(c.pc[x].RGB.G), float64(c.pc[x].RGB.B), float64(colors[i].R), float64(colors[i].G), float64(colors[i].B))
+				dist = colorConverter.RGBDistance(float64(c.pc[x].RGB.R), float64(c.pc[x].RGB.G), float64(c.pc[x].RGB.B), float64(colors[i].R), float64(colors[i].G), float64(colors[i].B))
 			} else {
 				cie := colorConverter.SRGBToCIELab(colors[i])
-				dist = labDistance(c.pc[x].LAB.L, c.pc[x].LAB.A, c.pc[x].LAB.B, cie.L, cie.A, cie.B)
+				dist = colorConverter.LABDistance(c.pc[x].LAB.L, c.pc[x].LAB.A, c.pc[x].LAB.B, cie.L, cie.A, cie.B)
 			}
 			if dist < minLen {
 				minLen = dist
@@ -245,10 +245,10 @@ func (c *Converter) setNewPixel(x, y int) int {
 	for i := 0; i < len(c.pc); i++ {
 		var dist float64
 		if c.rgb || colorConverter.Greyscale(r, g, b) < 100 {
-			dist = rgbDistance(float64(r), float64(g), float64(b), float64(c.pc[i].RGB.R), float64(c.pc[i].RGB.G), float64(c.pc[i].RGB.B))
+			dist = colorConverter.RGBDistance(float64(r), float64(g), float64(b), float64(c.pc[i].RGB.R), float64(c.pc[i].RGB.G), float64(c.pc[i].RGB.B))
 		} else {
 			cie := colorConverter.SRGBToCIELab(colorConverter.SRGB{R: r, G: g, B: b})
-			dist = labDistance(c.pc[i].LAB.L, c.pc[i].LAB.A, c.pc[i].LAB.B, cie.L, cie.A, cie.B)
+			dist = colorConverter.LABDistance(c.pc[i].LAB.L, c.pc[i].LAB.A, c.pc[i].LAB.B, cie.L, cie.A, cie.B)
 		}
 		if dist < minLen {
 			minLen = dist
