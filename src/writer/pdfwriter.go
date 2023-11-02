@@ -64,7 +64,6 @@ func (w *Writer) writePDF(imgPath string) (string, error) {
 
 	// TODO: figure out how far down to put the info box
 	ratio := 190 * float64(bounds.Max.Y) / float64(bounds.Max.X)
-	fmt.Println(ratio)
 	pdf.Rect(10, 10+ratio+20+25, 190, 30, "D")
 
 	// Legend
