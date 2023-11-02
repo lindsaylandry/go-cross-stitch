@@ -77,6 +77,7 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 	} else {
 		c.newData.Extra = "-" + pal + "-lab"
 	}
+
 	if pal == "lego" {
 		c.newData.Scheme = "LEGO"
 		c.pc = palette.GetLEGOColors()
@@ -90,8 +91,8 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 		}
 
 		if !all {
-			if pix {
-				// most colors rgb
+			if !pix {
+				//most colors rgb
 				c.pc = c.convertPalette(c.pixel())
 			} else {
 				//best colors rgb
@@ -220,7 +221,6 @@ func (c *Converter) convertImageChunk(xlow, xhigh, ylow, yhigh int) map[palette.
 	for y := ylow; y < yhigh; y++ {
 		for x := xlow; x < xhigh; x++ {
 			minIndex := c.setNewPixel(x, y)
-
 			count[c.pc[minIndex]] += 1
 		}
 	}
@@ -228,7 +228,7 @@ func (c *Converter) convertImageChunk(xlow, xhigh, ylow, yhigh int) map[palette.
 }
 
 func (c *Converter) setNewPixel(x, y int) int {
-	r32, g32, b32, a := c.newData.Image.At(x, y).RGBA()
+	r32, g32, b32, a := c.image.At(x, y).RGBA()
 	r, g, b := uint8(r32), uint8(g32), uint8(b32)
 
 	symbols := palette.GetSymbolRunes()
@@ -273,7 +273,7 @@ func (c *Converter) colorQuant() []colorConverter.SRGB {
 	allcolors := make([]colorConverter.SRGB, (bounds.Dy()-bounds.Min.Y)*(bounds.Dx()-bounds.Min.X))
 	for y := bounds.Min.Y; y < bounds.Dy(); y++ {
 		for x := bounds.Min.X; x < bounds.Dx(); x++ {
-			r32, g32, b32, _ := c.newData.Image.At(x, y).RGBA()
+			r32, g32, b32, _ := c.image.At(x, y).RGBA()
 			allcolors[y*(bounds.Dx()-bounds.Min.X)+x] = colorConverter.SRGB{R: uint8(r32), G: uint8(g32), B: uint8(b32)}
 		}
 	}
