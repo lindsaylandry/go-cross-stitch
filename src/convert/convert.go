@@ -84,7 +84,11 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 	} else if pal == "dmc" || pal == "anchor" {
 		if pal == "dmc" {
 			c.newData.Scheme = "DMC"
-			c.pc = palette.GetDMCColors()
+			pc, err := palette.GetDMCColors()
+			if err != nil {
+				return &c, err
+			}
+			c.pc = pc
 		} else {
 			c.newData.Scheme = "Anchor"
 			c.pc = palette.GetAnchorColors()

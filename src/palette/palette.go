@@ -5,21 +5,24 @@ import (
 )
 
 type Thread struct {
-	ID       int
-	StringID string
-	Name     string
-	RGB      colorConverter.SRGB
-	LAB      colorConverter.CIELab
+	ID       int 
+	StringID string `csv:"id"`
+	Name     string `csv:"name"`
+	R        uint8  `csv:"r"`
+  G        uint8  `csv:"g"`
+	B        uint8  `csv:"b"`
+	RGB      colorConverter.SRGB `csv:"-"`
+	LAB      colorConverter.CIELab `csv:"-"`
 }
 
 func GreyPalette() ([]Thread, error) {
 	return palette("../../palette/black-white-grey.csv")
 }
 
-func DMCPalette() []Thread {
+func DMCPalette() ([]Thread, error) {
 	return GetDMCColors()
 }
 
 func palette(path string) ([]Thread, error) {
-	return GetDMCColors(), nil
+	return GetDMCColors()
 }
