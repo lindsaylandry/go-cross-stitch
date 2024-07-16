@@ -3,6 +3,7 @@ package palette
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/gocarina/gocsv"
 	"github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
@@ -35,10 +36,17 @@ func ReadCSV(filename string) ([]Thread, error) {
 		return nil, err
 	}
 
+	maxID := 10000
 	for i, c := range dmcColors {
 		dmcColors[i].RGB = colorConverter.SRGB{R: c.R, G: c.G, B: c.B}
 		dmcColors[i].LAB = colorConverter.SRGBToCIELab(dmcColors[i].RGB)
-		fmt.Println(dmcColors[i])
+
+		dmcColors[i].ID, err = strconv.Atoi(dmcColors[i].StringID)
+		if err != nil {
+			// TODO: convert string ID to a high number so it goes on the bottom of the legend
+			dmcColors[i].ID = maxID
+			maxID += 1
+		}
 	}
 
 	return dmcColors, nil
