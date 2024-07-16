@@ -78,20 +78,19 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 		c.newData.Extra = "-" + pal + "-lab"
 	}
 
+	pc, err := palette.ReadCSV(pal)
+  if err != nil {
+    return &c, err
+  }
+  c.pc = pc
+
 	if pal == "lego" {
 		c.newData.Scheme = "LEGO"
-		c.pc = palette.GetLEGOColors()
 	} else if pal == "dmc" || pal == "anchor" {
 		if pal == "dmc" {
 			c.newData.Scheme = "DMC"
-			pc, err := palette.GetDMCColors()
-			if err != nil {
-				return &c, err
-			}
-			c.pc = pc
 		} else {
 			c.newData.Scheme = "Anchor"
-			c.pc = palette.GetAnchorColors()
 		}
 
 		if !all {
@@ -104,7 +103,7 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 			}
 		}
 	} else if pal == "bw" {
-		c.pc = palette.GetBWColors()
+		c.newData.Scheme = "Black&White"
 	} else {
 		log.Fatalf("ERROR: -color not recognized")
 	}

@@ -1,7 +1,11 @@
 package palette
 
 import (
-	"github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
+	"os"
+  "fmt"
+
+  "github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
+  "github.com/gocarina/gocsv"
 )
 
 type Thread struct {
@@ -15,14 +19,29 @@ type Thread struct {
 	LAB      colorConverter.CIELab `csv:"-"`
 }
 
-func GreyPalette() ([]Thread, error) {
-	return palette("../../palette/black-white-grey.csv")
+func ReadCSV(filename string) ([]Thread, error) {
+  // TODO: read CSV file
+  dmcColors := []Thread{}
+
+  path := fmt.Sprintf("palette/%s.csv", filename)
+
+  file, err := os.Open(path)
+  if err != nil {
+    return nil, err
+  }
+  defer file.Close()
+
+  if err := gocsv.UnmarshalFile(file, &dmcColors); err != nil {
+    return nil, err
+  }
+
+
+  for i, c := range dmcColors {
+    dmcColors[i].RGB = colorConverter.SRGB{R: c.R, G: c.G, B: c.B}
+    dmcColors[i].LAB = colorConverter.SRGBToCIELab(dmcColors[i].RGB)
+    fmt.Println(dmcColors[i])
+  }
+
+  return dmcColors, nil
 }
 
-func DMCPalette() ([]Thread, error) {
-	return GetDMCColors()
-}
-
-func palette(path string) ([]Thread, error) {
-	return GetDMCColors()
-}
