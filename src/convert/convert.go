@@ -79,10 +79,10 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 	}
 
 	pc, err := palette.ReadCSV(pal)
-  if err != nil {
-    return &c, err
-  }
-  c.pc = pc
+	if err != nil {
+		return &c, err
+	}
+	c.pc = pc
 
 	if pal == "lego" {
 		c.newData.Scheme = "LEGO"
