@@ -4,7 +4,6 @@ import (
 	"github.com/jung-kurt/gofpdf"
 
 	"strconv"
-	//"unicode/utf8"
 	"fmt"
 )
 
@@ -13,11 +12,31 @@ type Grid struct {
 	Xend, Yend     int
 }
 
-func (w *Writer) writePDF(imgPath string) (string, error) {
-	// Setup pdf
-	path := w.getPath("pdf")
+func (w *Writer) writePDF(imgPath string, paperSize string) (string, error) {
+	// TODO: multiplier for paper sizes
+	var mult float64
+	var maxChunkX, maxChunkY int
 
-	pdf := gofpdf.New("P", "mm", "A4", "")
+	switch paperSize {
+  case "A4":
+  	mult = 1.0
+	  maxChunkX = 70
+    maxChunkY = 100
+  case "A2":
+		mult = 2.0
+    maxChunkX = 200
+    maxChunkY = 200
+  case "A1":
+		mult = 2.5
+    maxChunkX = 200
+    maxChunkY = 400
+  default:
+    maxChunkX = 100
+    maxChunkY = 100
+  }
+
+	// Setup pdf
+	pdf := gofpdf.New("P", "mm", paperSize, "")
 	pdf.AddUTF8Font("aaa", "", "fonts/arial-unicode.ttf")
 	//pdf.AddUTF8Font("aaa", "", "fonts/NotoSansSymbols.ttf")
 	pdf.SetAutoPageBreak(true, 1.5)
@@ -26,11 +45,11 @@ func (w *Writer) writePDF(imgPath string) (string, error) {
 
 	// Title
 	pdf.AddPage()
-	pdf.SetFont("Arial", "B", 32)
+	pdf.SetFont("Arial", "B", 32.0*mult)
 	pdf.CellFormat(100, 30.0, w.title, "", 1, "LM", false, 0, "")
 
 	// Image
-	pdf.Image(imgPath, 10, 20, 190, 0, true, "", 0, "")
+	pdf.Image(imgPath, 10, 20, 190.0*mult, 0, true, "", 0, "")
 
 	// Info
 	aida := 14
@@ -39,32 +58,32 @@ func (w *Writer) writePDF(imgPath string) (string, error) {
 	widthInches := float64(bounds.Max.X) / float64(aida)
 	heightInches := float64(bounds.Max.Y) / float64(aida)
 
-	pdf.SetFont("Arial", "B", 18)
-	pdf.CellFormat(100.0, 20.0, "INFO", "", 1, "LM", false, 0, "")
+	pdf.SetFont("Arial", "B", 18*mult)
+	pdf.CellFormat(100.0*mult, 20.0*mult, "INFO", "", 1, "LM", false, 0, "")
 
-	pdf.SetFont("Arial", "B", 12)
-	pdf.CellFormat(90.0, 5.5, "Fabric:", "", 0, "LM", false, 0, "")
-	pdf.SetFont("Arial", "", 12)
-	pdf.CellFormat(100.0, 5.5, fmt.Sprintf("%dct Aida %s", aida, aidaColor), "", 1, "RM", false, 0, "")
+	pdf.SetFont("Arial", "B", 12*mult)
+	pdf.CellFormat(90.0*mult, 5.5*mult, "Fabric:", "", 0, "LM", false, 0, "")
+	pdf.SetFont("Arial", "", 12*mult)
+	pdf.CellFormat(100.0*mult, 5.5*mult, fmt.Sprintf("%dct Aida %s", aida, aidaColor), "", 1, "RM", false, 0, "")
 
-	pdf.SetFont("Arial", "B", 12)
-	pdf.CellFormat(90.0, 5.5, "Size:", "", 0, "LM", false, 0, "")
-	pdf.SetFont("Arial", "", 12)
-	pdf.CellFormat(100.0, 5.5, fmt.Sprintf("%.1fx%.1fin", widthInches, heightInches), "", 1, "RM", false, 0, "")
+	pdf.SetFont("Arial", "B", 12*mult)
+	pdf.CellFormat(90.0*mult, 5.5*mult, "Size:", "", 0, "LM", false, 0, "")
+	pdf.SetFont("Arial", "", 12*mult)
+	pdf.CellFormat(100.0*mult, 5.5*mult, fmt.Sprintf("%.1fx%.1fin", widthInches, heightInches), "", 1, "RM", false, 0, "")
 
-	pdf.SetFont("Arial", "B", 12)
-	pdf.CellFormat(90.0, 5.5, "Color Scheme:", "", 0, "LM", false, 0, "")
-	pdf.SetFont("Arial", "", 12)
-	pdf.CellFormat(100.0, 5.5, w.data.Scheme, "", 1, "RM", false, 0, "")
+	pdf.SetFont("Arial", "B", 12*mult)
+	pdf.CellFormat(90.0*mult, 5.5*mult, "Color Scheme:", "", 0, "LM", false, 0, "")
+	pdf.SetFont("Arial", "", 12*mult)
+	pdf.CellFormat(100.0*mult, 5.5*mult, w.data.Scheme, "", 1, "RM", false, 0, "")
 
-	pdf.SetFont("Arial", "B", 12)
-	pdf.CellFormat(90.0, 5.5, "Number of Colors:", "", 0, "LM", false, 0, "")
-	pdf.SetFont("Arial", "", 12)
-	pdf.CellFormat(100.0, 5.5, strconv.Itoa(len(w.data.Legend)), "", 1, "RM", false, 0, "")
+	pdf.SetFont("Arial", "B", 12*mult)
+	pdf.CellFormat(90.0*mult, 5.5*mult, "Number of Colors:", "", 0, "LM", false, 0, "")
+	pdf.SetFont("Arial", "", 12*mult)
+	pdf.CellFormat(100.0*mult, 5.5*mult, strconv.Itoa(len(w.data.Legend)), "", 1, "RM", false, 0, "")
 
 	// TODO: figure out how far down to put the info box
-	ratio := 190 * float64(bounds.Max.Y) / float64(bounds.Max.X)
-	pdf.Rect(10, 10+ratio+20+25, 190, 30, "D")
+	ratio := 190*mult * float64(bounds.Max.Y) / float64(bounds.Max.X)
+	pdf.Rect(10, 10+ratio+20*mult+25*mult, 190*mult, 30*mult, "D")
 
 	// Legend
 	pdf.AddPage()
@@ -100,10 +119,6 @@ func (w *Writer) writePDF(imgPath string) (string, error) {
 		}
 	}
 
-	// TODO: 70x100 chunks
-	maxChunkX := 70
-	maxChunkY := 100
-
 	xnum := bounds.Max.X / maxChunkX
 	if bounds.Max.X%maxChunkX != 0 {
 		xnum += 1
@@ -137,26 +152,32 @@ func (w *Writer) writePDF(imgPath string) (string, error) {
 		}
 	}
 
+	// Find Middle Triangles
+	midX := float64(bounds.Max.X) / 2.0
+	midY := float64(bounds.Max.Y) / 2.0
+
 	// Create Cells (bw)
 	for _, grid := range grids {
 		pdf.AddPage()
-		w.CreateGrid(pdf, grid, false)
+		w.CreateGrid(pdf, grid, midX, midY, false)
 		setGridLines(pdf, grid)
 	}
 
 	// Create Cells (color)
 	for _, grid := range grids {
 		pdf.AddPage()
-		w.CreateGrid(pdf, grid, true)
+		w.CreateGrid(pdf, grid, midX, midY, true)
 		setGridLines(pdf, grid)
 	}
 
+	// Write PDF file
+	path := w.getPath("pdf", "-" + paperSize)
 	err := pdf.OutputFileAndClose(path)
 
 	return path, err
 }
 
-func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, color bool) {
+func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, midX, midY float64, color bool) {
 	pdf.SetLineWidth(0.1)
 	for y := grid.Ystart; y <= grid.Yend; y++ {
 		for x := grid.Xstart; x <= grid.Xend; x++ {
@@ -165,26 +186,27 @@ func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, color bool) {
 			if x == grid.Xend {
 				ln = 1
 			}
+			// x-axis labels
 			if y == grid.Ystart {
-				pdf.SetFillColor(200, 200, 200)
+				fill := false
 				xLabel := ""
 				if x%10 == 0 {
 					xLabel = strconv.Itoa(x)
 				}
 				pdf.SetFont("Arial", "B", 5)
-				pdf.CellFormat(2.5, 2.5, xLabel, "1", ln, "CM", true, 0, "")
+				pdf.CellFormat(2.5, 2.5, xLabel, "", ln, "CM", fill, 0, "")
+			// y-axis labels
 			} else if x == grid.Xstart {
-				pdf.SetFillColor(200, 200, 200)
+				fill := false
 				yLabel := ""
 				if y%10 == 0 {
 					yLabel = strconv.Itoa(y)
 				}
 				pdf.SetFont("Arial", "B", 5)
-				pdf.CellFormat(2.5, 2.5, yLabel, "1", ln, "CM", true, 0, "")
+				pdf.CellFormat(2.5, 2.5, yLabel, "", ln, "CM", fill, 0, "")
 			} else {
 				fill := false
 				if color {
-					// TODO: set text color
 					brightness := (int(w.data.Symbols[y-1][x-1].Color.RGB.R) + int(w.data.Symbols[y-1][x-1].Color.RGB.G) + int(w.data.Symbols[y-1][x-1].Color.RGB.B)) / 3
 					if brightness < 100 {
 						pdf.SetTextColor(255, 255, 255)
@@ -197,6 +219,34 @@ func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, color bool) {
 			}
 		}
 	}
+
+	if midX >= float64(grid.Xstart) && midX <= float64(grid.Xend) {
+		x := midX - float64(grid.Xstart)
+    pt1 := gofpdf.PointType{X: float64(x + 1)*2.5 - 1, Y: 10}
+		pt2 := gofpdf.PointType{X: float64(x + 1)*2.5, Y: 10+2.5}
+		pt3 := gofpdf.PointType{X: float64(x + 1)*2.5 + 1, Y: 10}
+		pts := make([]gofpdf.PointType, 0, 3)
+		pts = append(pts,	pt1)
+		pts = append(pts, pt2)
+		pts = append(pts, pt3)
+		
+		pdf.SetFillColor(0, 0, 0)
+		pdf.Polygon(pts, "FD")
+  }
+
+	if midY >= float64(grid.Ystart) && midY <= float64(grid.Yend) {
+    y := midY - float64(grid.Ystart)
+    pt1 := gofpdf.PointType{X: 10, Y: float64(y + 1)*2.5 - 1}
+    pt2 := gofpdf.PointType{X: 10+2.5, Y: float64(y + 1)*2.5}
+    pt3 := gofpdf.PointType{X: 10, Y: float64(y + 1)*2.5 + 1}
+    pts := make([]gofpdf.PointType, 0, 3)
+    pts = append(pts, pt1)
+    pts = append(pts, pt2)
+    pts = append(pts, pt3)
+ 
+    pdf.SetFillColor(0, 0, 0)
+    pdf.Polygon(pts, "FD")
+  }
 }
 
 func setGridLines(pdf *gofpdf.Fpdf, grid Grid) {
@@ -206,23 +256,13 @@ func setGridLines(pdf *gofpdf.Fpdf, grid Grid) {
 	endX := 10.0 + 2.5*float64(xRange+1)
 	endY := 10.0 + 2.5*float64(yRange+1)
 	for x := 0; x <= xRange; x += 10 {
-		if x == 0 {
-			pdf.Line(10.0, 10.0, 10.0, endY)
-			pdf.Line(10.0+2.5, 10.0, 10.0+2.5, endY)
-		} else {
-			pdf.Line(10.0+2.5+2.5*float64(x), 10.0, 10.0+2.5+2.5*float64(x), endY)
-		}
+		pdf.Line(10.0+2.5*float64(x+1), 10.0+2.5, 10.0+2.5*float64(x+1), endY)
 	}
 
 	for y := 0; y <= yRange; y += 10 {
-		if y == 0 {
-			pdf.Line(10.0, 10.0, endX, 10.0)
-			pdf.Line(10.0, 10.0+2.5, endX, 10.0+2.5)
-		} else {
-			pdf.Line(10.0, 10.0+2.5+2.5*float64(y), endX, 10.0+2.5+2.5*float64(y))
-		}
+		pdf.Line(10.0+2.5, 10.0+2.5*float64(y+1), endX, 10.0+2.5*float64(y+1))
 	}
 	// R and B borders
-	pdf.Line(endX, 10.0, endX, endY)
-	pdf.Line(10.0, endY, endX, endY)
+	pdf.Line(endX, 10.0+2.5, endX, endY)
+	pdf.Line(10.0+2.5, endY, endX, endY)
 }

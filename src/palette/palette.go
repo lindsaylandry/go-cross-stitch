@@ -3,6 +3,7 @@ package palette
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/gocarina/gocsv"
 	"github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
@@ -36,6 +37,10 @@ func ReadCSV(filename string) ([]Thread, error) {
 	}
 
 	for i, c := range dmcColors {
+		dmcColors[i].ID, err = strconv.Atoi(dmcColors[i].StringID)
+		if err != nil {
+			dmcColors[i].ID = 10000000
+		}
 		dmcColors[i].RGB = colorConverter.SRGB{R: c.R, G: c.G, B: c.B}
 		dmcColors[i].LAB = colorConverter.SRGBToCIELab(dmcColors[i].RGB)
 		fmt.Println(dmcColors[i])

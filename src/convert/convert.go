@@ -215,6 +215,7 @@ func (c *Converter) convertImage() error {
 		l := Legend{v, c.newData.Count[v], symbols[i].Code}
 		c.newData.Legend = append(c.newData.Legend, l)
 	}
+
 	sort.Slice(c.newData.Legend, func(i, j int) bool { return c.newData.Legend[i].Color.ID < c.newData.Legend[j].Color.ID })
 	return nil
 }

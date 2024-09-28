@@ -33,11 +33,17 @@ func (w *Writer) WriteFiles() error {
 	fmt.Printf("Wrote new PNG to %s\n", imgPath)
 
 	// write PDF instructions
-	pdfPath, pdfErr := w.writePDF(imgPath)
+	pdfPath, pdfErr := w.writePDF(imgPath, "A4")
 	if pdfErr != nil {
 		return pdfErr
 	}
 	fmt.Printf("Wrote PDF to %s\n", pdfPath)
+
+	aPath, aErr := w.writePDF(imgPath, "A2")
+  if aErr != nil {
+    return aErr
+  }
+  fmt.Printf("Wrote PDF to %s\n", aPath)
 
 	return nil
 }
@@ -50,7 +56,7 @@ func (w *Writer) writePNG() (string, *image.RGBA, error) {
 	bounds.Max.Y = bounds.Max.Y * p
 	img := image.NewRGBA(bounds)
 
-	newPath := w.getPath("png")
+	newPath := w.getPath("png", "")
 	place, err := os.Create(newPath)
 	if err != nil {
 		return "", img, err
@@ -86,11 +92,9 @@ func getTitle(filename string) string {
 	return strings.ToUpper(name2)
 }
 
-func (w *Writer) getPath(extension string) string {
-	// Write new image to png file
+func (w *Writer) getPath(extension string, extra string) string {
 	split := strings.Split(w.data.Path, ".")
-
-	newPath := split[0] + w.data.Extra + "." + extension
+	newPath := split[0] + w.data.Extra + extra + "." + extension
 
 	return newPath
 }
