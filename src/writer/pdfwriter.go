@@ -182,15 +182,15 @@ func (w *Writer) writePDF(imgPath string, paperSize string) (string, error) {
 }
 
 func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, midX, midY float64, color bool) {
-	for y := grid.Ystart; y <= grid.Yend; y++ {
-		for x := grid.Xstart; x <= grid.Xend; x++ {
+	for y := grid.Ystart; y <= grid.Yend+1; y++ {
+		for x := grid.Xstart; x <= grid.Xend+1; x++ {
 			pdf.SetTextColor(0, 0, 0)
 			ln := 0
-			if x == grid.Xend {
+			if x == grid.Xend+1 {
 				ln = 1
 			}
 			// x-axis labels
-			if y == grid.Ystart {
+			if y == grid.Ystart || y == grid.Yend+1 {
 				fill := false
 				xLabel := ""
 				if x%10 == 0 {
@@ -198,15 +198,22 @@ func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, midX, midY float64, col
 				}
 				pdf.SetFont("Arial", "B", 6)
 				pdf.CellFormat(cell, cell, xLabel, "", ln, "CM", fill, 0, "")
-				// y-axis labels
-			} else if x == grid.Xstart {
+			// y-axis labels
+			} else if x == grid.Xstart || x == grid.Xend+1 {
 				fill := false
 				yLabel := ""
 				if y%10 == 0 {
 					yLabel = strconv.Itoa(y)
 				}
 				pdf.SetFont("Arial", "B", 6)
-				pdf.CellFormat(cell, cell, yLabel, "", ln, "CM", fill, 0, "")
+				if x == grid.Xstart {
+					pdf.TransformBegin()
+					pdf.TransformRotate(90, margin+cell/2, margin+cell/2+float64(y-grid.Ystart)*cell)
+					pdf.CellFormat(cell, cell, yLabel, "", ln, "CM", fill, 0, "")
+					pdf.TransformEnd()
+				} else {
+					pdf.CellFormat(cell, cell, yLabel, "", ln, "CM", fill, 0, "")
+				}
 			} else {
 				fill := false
 				if color {
@@ -231,10 +238,7 @@ func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, midX, midY float64, col
 		ptX1 := gofpdf.PointType{X: margin + float64(x+0.5)*cell - 1, Y: margin}
 		ptX2 := gofpdf.PointType{X: margin + float64(x+0.5)*cell, Y: margin + cell}
 		ptX3 := gofpdf.PointType{X: margin + float64(x+0.5)*cell + 1, Y: margin}
-		xPts := make([]gofpdf.PointType, 0, 3)
-		xPts = append(xPts, ptX1)
-		xPts = append(xPts, ptX2)
-		xPts = append(xPts, ptX3)
+		xPts := []gofpdf.PointType{ptX1, ptX2, ptX3}
 
 		pdf.Polygon(xPts, "FD")
 
@@ -242,10 +246,7 @@ func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, midX, midY float64, col
 		ptY1 := gofpdf.PointType{X: margin, Y: margin + float64(y+0.5)*cell - 1}
 		ptY2 := gofpdf.PointType{X: margin + cell, Y: margin + float64(y+0.5)*cell}
 		ptY3 := gofpdf.PointType{X: margin, Y: margin + float64(y+0.5)*cell + 1}
-		yPts := make([]gofpdf.PointType, 0, 3)
-		yPts = append(yPts, ptY1)
-		yPts = append(yPts, ptY2)
-		yPts = append(yPts, ptY3)
+		yPts := []gofpdf.PointType{ptY1, ptY2, ptY3}
 
 		pdf.Polygon(yPts, "FD")
 	}
