@@ -206,14 +206,18 @@ func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, midX, midY float64, col
 					yLabel = strconv.Itoa(y)
 				}
 				pdf.SetFont("Arial", "B", 6)
-				if x == grid.Xstart {
-					pdf.TransformBegin()
-					pdf.TransformRotate(90, margin+cell/2, margin+cell/2+float64(y-grid.Ystart)*cell)
-					pdf.CellFormat(cell, cell, yLabel, "", ln, "CM", fill, 0, "")
-					pdf.TransformEnd()
-				} else {
-					pdf.CellFormat(cell, cell, yLabel, "", ln, "CM", fill, 0, "")
+
+				xTransform := margin+cell/2
+				angle := 90.0
+				if x == grid.Xend+1 {
+					angle = 270.0
+					xTransform = margin+cell/2+float64(x-grid.Xstart)*cell
 				}
+
+				pdf.TransformBegin()
+				pdf.TransformRotate(angle, xTransform, margin+cell/2+float64(y-grid.Ystart)*cell)
+				pdf.CellFormat(cell, cell, yLabel, "", ln, "CM", fill, 0, "")
+				pdf.TransformEnd()
 			} else {
 				fill := false
 				if color {

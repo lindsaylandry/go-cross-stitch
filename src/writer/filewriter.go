@@ -47,8 +47,7 @@ func (w *Writer) WriteFiles() error {
 }
 
 func (w *Writer) writePNG() (string, *image.RGBA, error) {
-	p := 10
-	// Make each pixel 3x3
+	p := 12
 	bounds := w.data.Image.Bounds()
 	bounds.Max.X = bounds.Max.X * p
 	bounds.Max.Y = bounds.Max.Y * p
@@ -63,14 +62,13 @@ func (w *Writer) writePNG() (string, *image.RGBA, error) {
 
 	for x := 0; x < bounds.Max.X; x++ {
 		for y := 0; y < bounds.Max.Y; y++ {
-			pixel := w.data.Image.At(x, y)
+			px := w.data.Image.At(x, y)
 			for xx := 0; xx < p; xx++ {
 				for yy := 0; yy < p; yy++ {
 					if xx == p-1 || yy == p-1 {
-						px := color.Gray16{0}
-						img.Set(x*p+xx, y*p+yy, px)
+						img.Set(x*p+xx, y*p+yy, color.Gray16{0})
 					} else {
-						img.Set(x*p+xx, y*p+yy, pixel)
+						img.Set(x*p+xx, y*p+yy, px)
 					}
 				}
 			}
