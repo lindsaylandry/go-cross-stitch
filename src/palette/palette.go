@@ -35,13 +35,16 @@ func ReadCSV(filename string) ([]Thread, error) {
 		return nil, err
 	}
 
+	maxID := 10000
 	for i, c := range dmcColors {
-		dmcColors[i].ID, err = strconv.Atoi(dmcColors[i].StringID)
-		if err != nil {
-			dmcColors[i].ID = 10000000
-		}
 		dmcColors[i].RGB = colorConverter.SRGB{R: c.R, G: c.G, B: c.B}
 		dmcColors[i].LAB = colorConverter.SRGBToCIELab(dmcColors[i].RGB)
+
+		dmcColors[i].ID, err = strconv.Atoi(dmcColors[i].StringID)
+		if err != nil {
+			dmcColors[i].ID = maxID
+			maxID += 1
+		}
 	}
 
 	return dmcColors, nil
