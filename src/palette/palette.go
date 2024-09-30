@@ -1,8 +1,8 @@
 package palette
 
 import (
-	"os"
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/gocarina/gocsv"

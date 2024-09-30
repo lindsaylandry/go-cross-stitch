@@ -3,8 +3,8 @@ package writer
 import (
 	"github.com/jung-kurt/gofpdf"
 
-	"strconv"
 	"fmt"
+	"strconv"
 )
 
 type Grid struct {
@@ -23,22 +23,22 @@ func (w *Writer) writePDF(imgPath string, paperSize string) (string, error) {
 	var maxChunkX, maxChunkY int
 
 	switch paperSize {
-  case "A4":
-  	mult = 1.0
-	  maxChunkX = 60
-    maxChunkY = 90
-  case "A2":
+	case "A4":
+		mult = 1.0
+		maxChunkX = 60
+		maxChunkY = 90
+	case "A2":
 		mult = 2.0
-    maxChunkX = 140
-    maxChunkY = 200
-  case "A1":
+		maxChunkX = 140
+		maxChunkY = 200
+	case "A1":
 		mult = 2.5
-    maxChunkX = 200
-    maxChunkY = 400
-  default:
-    maxChunkX = 100
-    maxChunkY = 100
-  }
+		maxChunkX = 200
+		maxChunkY = 400
+	default:
+		maxChunkX = 100
+		maxChunkY = 100
+	}
 
 	// Setup pdf
 	pdf := gofpdf.New("P", "mm", paperSize, "")
@@ -86,7 +86,7 @@ func (w *Writer) writePDF(imgPath string, paperSize string) (string, error) {
 	pdf.SetFont("Arial", "", 12*mult)
 	pdf.CellFormat(100.0*mult, 5.5*mult, strconv.Itoa(len(w.data.Legend)), "", 1, "RM", false, 0, "")
 
-	ratio := 190*mult * float64(bounds.Max.Y) / float64(bounds.Max.X)
+	ratio := 190 * mult * float64(bounds.Max.Y) / float64(bounds.Max.X)
 	pdf.Rect(margin, 10+(ratio+20+25)*mult, 190*mult, 30*mult, "D")
 
 	// Legend
@@ -119,7 +119,7 @@ func (w *Writer) writePDF(imgPath string, paperSize string) (string, error) {
 
 		if i == 0 {
 			pdf.SetLineWidth(0.4)
-			pdf.Line(margin, 10 + mult*(20.0+4.5), 10 + mult*(10.0+15.0+15.0+15.0+35.0), 10 + mult*(20.0+4.5))
+			pdf.Line(margin, 10+mult*(20.0+4.5), 10+mult*(10.0+15.0+15.0+15.0+35.0), 10+mult*(20.0+4.5))
 		}
 	}
 
@@ -175,7 +175,7 @@ func (w *Writer) writePDF(imgPath string, paperSize string) (string, error) {
 	}
 
 	// Write PDF file
-	path := w.getPath("pdf", "-" + paperSize)
+	path := w.getPath("pdf", "-"+paperSize)
 	err := pdf.OutputFileAndClose(path)
 
 	return path, err
@@ -198,7 +198,7 @@ func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, midX, midY float64, col
 				}
 				pdf.SetFont("Arial", "B", 6)
 				pdf.CellFormat(cell, cell, xLabel, "", ln, "CM", fill, 0, "")
-			// y-axis labels
+				// y-axis labels
 			} else if x == grid.Xstart {
 				fill := false
 				yLabel := ""
@@ -224,31 +224,31 @@ func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, midX, midY float64, col
 	}
 
 	if midX >= float64(grid.Xstart) && midX <= float64(grid.Xend) && midY >= float64(grid.Ystart) && midY <= float64(grid.Yend) {
-		pdf.SetLineWidth(0.1)		
+		pdf.SetLineWidth(0.1)
 		pdf.SetFillColor(0, 0, 0)
 
 		x := midX - float64(grid.Xstart)
-    ptX1 := gofpdf.PointType{X: margin + float64(x + 0.5)*cell - 1, Y: margin}
-		ptX2 := gofpdf.PointType{X: margin + float64(x + 0.5)*cell, Y: margin+cell}
-		ptX3 := gofpdf.PointType{X: margin + float64(x + 0.5)*cell + 1, Y: margin}
+		ptX1 := gofpdf.PointType{X: margin + float64(x+0.5)*cell - 1, Y: margin}
+		ptX2 := gofpdf.PointType{X: margin + float64(x+0.5)*cell, Y: margin + cell}
+		ptX3 := gofpdf.PointType{X: margin + float64(x+0.5)*cell + 1, Y: margin}
 		xPts := make([]gofpdf.PointType, 0, 3)
-		xPts = append(xPts,	ptX1)
+		xPts = append(xPts, ptX1)
 		xPts = append(xPts, ptX2)
 		xPts = append(xPts, ptX3)
-		
+
 		pdf.Polygon(xPts, "FD")
-    
+
 		y := midY - float64(grid.Ystart)
-    ptY1 := gofpdf.PointType{X: margin, Y: margin + float64(y + 0.5)*cell - 1}
-    ptY2 := gofpdf.PointType{X: margin+cell, Y: margin + float64(y + 0.5)*cell}
-    ptY3 := gofpdf.PointType{X: margin, Y: margin + float64(y + 0.5)*cell + 1}
-    yPts := make([]gofpdf.PointType, 0, 3)
-    yPts = append(yPts, ptY1)
-    yPts = append(yPts, ptY2)
-    yPts = append(yPts, ptY3)
- 
-    pdf.Polygon(yPts, "FD")
-  }
+		ptY1 := gofpdf.PointType{X: margin, Y: margin + float64(y+0.5)*cell - 1}
+		ptY2 := gofpdf.PointType{X: margin + cell, Y: margin + float64(y+0.5)*cell}
+		ptY3 := gofpdf.PointType{X: margin, Y: margin + float64(y+0.5)*cell + 1}
+		yPts := make([]gofpdf.PointType, 0, 3)
+		yPts = append(yPts, ptY1)
+		yPts = append(yPts, ptY2)
+		yPts = append(yPts, ptY3)
+
+		pdf.Polygon(yPts, "FD")
+	}
 }
 
 func setGridLines(pdf *gofpdf.Fpdf, grid Grid) {
