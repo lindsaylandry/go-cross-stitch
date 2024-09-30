@@ -32,18 +32,16 @@ func (w *Writer) WriteFiles() error {
 	}
 	fmt.Printf("Wrote new PNG to %s\n", imgPath)
 
-	// write PDF instructions
-	pdfPath, pdfErr := w.writePDF(imgPath, "A4")
-	if pdfErr != nil {
-		return pdfErr
-	}
-	fmt.Printf("Wrote PDF to %s\n", pdfPath)
+	paperSizes := [3]string{"A4", "A2", "A1"}
 
-	aPath, aErr := w.writePDF(imgPath, "A2")
-  if aErr != nil {
-    return aErr
-  }
-  fmt.Printf("Wrote PDF to %s\n", aPath)
+	// write PDF instructions
+	for _, p := range paperSizes {
+		pdfPath, pdfErr := w.writePDF(imgPath, p)
+		if pdfErr != nil {
+			return pdfErr
+		}
+		fmt.Printf("Wrote PDF to %s\n", pdfPath)
+	}
 
 	return nil
 }

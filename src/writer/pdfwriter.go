@@ -12,19 +12,24 @@ type Grid struct {
 	Xend, Yend     int
 }
 
+const margin = 10.0
+const cell = 2.8
+const legendColor = 10.0
+const legendSymbol = 15.0
+const legendDesc = 35.0
+
 func (w *Writer) writePDF(imgPath string, paperSize string) (string, error) {
-	// TODO: multiplier for paper sizes
 	var mult float64
 	var maxChunkX, maxChunkY int
 
 	switch paperSize {
   case "A4":
   	mult = 1.0
-	  maxChunkX = 70
-    maxChunkY = 100
+	  maxChunkX = 60
+    maxChunkY = 90
   case "A2":
 		mult = 2.0
-    maxChunkX = 200
+    maxChunkX = 140
     maxChunkY = 200
   case "A1":
 		mult = 2.5
@@ -81,41 +86,40 @@ func (w *Writer) writePDF(imgPath string, paperSize string) (string, error) {
 	pdf.SetFont("Arial", "", 12*mult)
 	pdf.CellFormat(100.0*mult, 5.5*mult, strconv.Itoa(len(w.data.Legend)), "", 1, "RM", false, 0, "")
 
-	// TODO: figure out how far down to put the info box
 	ratio := 190*mult * float64(bounds.Max.Y) / float64(bounds.Max.X)
-	pdf.Rect(10, 10+ratio+20*mult+25*mult, 190*mult, 30*mult, "D")
+	pdf.Rect(margin, 10+(ratio+20+25)*mult, 190*mult, 30*mult, "D")
 
 	// Legend
 	pdf.AddPage()
-	pdf.SetFont("Arial", "B", 20)
-	pdf.CellFormat(100.0, 20.0, "Legend", "", 1, "LM", false, 0, "")
-	pdf.SetFont("Arial", "B", 8)
+	pdf.SetFont("Arial", "B", 20*mult)
+	pdf.CellFormat(100.0*mult, 20.0*mult, "Legend", "", 1, "LM", false, 0, "")
+	pdf.SetFont("Arial", "B", 8*mult)
 	// header cells
-	pdf.CellFormat(10.0, 4.5, "Color", "", 0, "CM", false, 0, "")
-	pdf.CellFormat(15.0, 4.5, "Symbol", "", 0, "CM", false, 0, "")
-	pdf.CellFormat(15.0, 4.5, "Color ID", "", 0, "CM", false, 0, "")
-	pdf.CellFormat(15.0, 4.5, "Stitches", "", 0, "CM", false, 0, "")
-	pdf.CellFormat(35.0, 4.5, "Color Description", "", 1, "LM", false, 0, "")
+	pdf.CellFormat(legendColor*mult, 4.5*mult, "Color", "", 0, "CM", false, 0, "")
+	pdf.CellFormat(legendSymbol*mult, 4.5*mult, "Symbol", "", 0, "CM", false, 0, "")
+	pdf.CellFormat(legendSymbol*mult, 4.5*mult, "Color ID", "", 0, "CM", false, 0, "")
+	pdf.CellFormat(legendSymbol*mult, 4.5*mult, "Stitches", "", 0, "CM", false, 0, "")
+	pdf.CellFormat(legendDesc*mult, 4.5*mult, "Color Description", "", 1, "LM", false, 0, "")
 
 	// body cells
-	pdf.SetFont("aaa", "", 8)
+	pdf.SetFont("aaa", "", 8*mult)
 	for i := 0; i < len(w.data.Legend); i++ {
 		fill := false
 		pdf.SetFillColor(int(w.data.Legend[i].Color.RGB.R), int(w.data.Legend[i].Color.RGB.G), int(w.data.Legend[i].Color.RGB.B))
-		pdf.CellFormat(10.0, 4.5, "", "", 0, "CM", true, 0, "")
+		pdf.CellFormat(legendColor*mult, 4.5*mult, "", "", 0, "CM", true, 0, "")
 
 		if i%2 == 0 {
 			pdf.SetFillColor(200, 200, 200)
 			fill = true
 		}
-		pdf.CellFormat(15.0, 4.5, string(w.data.Legend[i].Symbol), "", 0, "CM", fill, 0, "")
-		pdf.CellFormat(15.0, 4.5, w.data.Legend[i].Color.StringID, "", 0, "RM", fill, 0, "")
-		pdf.CellFormat(15.0, 4.5, strconv.Itoa(w.data.Legend[i].Count), "", 0, "RM", fill, 0, "")
-		pdf.CellFormat(35.0, 4.5, w.data.Legend[i].Color.Name, "", 1, "LM", fill, 0, "")
+		pdf.CellFormat(legendSymbol*mult, 4.5*mult, string(w.data.Legend[i].Symbol), "", 0, "CM", fill, 0, "")
+		pdf.CellFormat(legendSymbol*mult, 4.5*mult, w.data.Legend[i].Color.StringID, "", 0, "RM", fill, 0, "")
+		pdf.CellFormat(legendSymbol*mult, 4.5*mult, strconv.Itoa(w.data.Legend[i].Count), "", 0, "RM", fill, 0, "")
+		pdf.CellFormat(legendDesc*mult, 4.5*mult, w.data.Legend[i].Color.Name, "", 1, "LM", fill, 0, "")
 
 		if i == 0 {
 			pdf.SetLineWidth(0.4)
-			pdf.Line(10.0, 10.0+20.0+4.5, 10.0+10.0+15.0+15.0+15.0+35.0, 10.0+20.0+4.5)
+			pdf.Line(margin, 10 + mult*(20.0+4.5), 10 + mult*(10.0+15.0+15.0+15.0+35.0), 10 + mult*(20.0+4.5))
 		}
 	}
 
@@ -178,7 +182,6 @@ func (w *Writer) writePDF(imgPath string, paperSize string) (string, error) {
 }
 
 func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, midX, midY float64, color bool) {
-	pdf.SetLineWidth(0.1)
 	for y := grid.Ystart; y <= grid.Yend; y++ {
 		for x := grid.Xstart; x <= grid.Xend; x++ {
 			pdf.SetTextColor(0, 0, 0)
@@ -193,8 +196,8 @@ func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, midX, midY float64, col
 				if x%10 == 0 {
 					xLabel = strconv.Itoa(x)
 				}
-				pdf.SetFont("Arial", "B", 5)
-				pdf.CellFormat(2.5, 2.5, xLabel, "", ln, "CM", fill, 0, "")
+				pdf.SetFont("Arial", "B", 6)
+				pdf.CellFormat(cell, cell, xLabel, "", ln, "CM", fill, 0, "")
 			// y-axis labels
 			} else if x == grid.Xstart {
 				fill := false
@@ -202,8 +205,8 @@ func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, midX, midY float64, col
 				if y%10 == 0 {
 					yLabel = strconv.Itoa(y)
 				}
-				pdf.SetFont("Arial", "B", 5)
-				pdf.CellFormat(2.5, 2.5, yLabel, "", ln, "CM", fill, 0, "")
+				pdf.SetFont("Arial", "B", 6)
+				pdf.CellFormat(cell, cell, yLabel, "", ln, "CM", fill, 0, "")
 			} else {
 				fill := false
 				if color {
@@ -214,38 +217,37 @@ func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, midX, midY float64, col
 					pdf.SetFillColor(int(w.data.Symbols[y-1][x-1].Color.RGB.R), int(w.data.Symbols[y-1][x-1].Color.RGB.G), int(w.data.Symbols[y-1][x-1].Color.RGB.B))
 					fill = true
 				}
-				pdf.SetFont("aaa", "", 6)
-				pdf.CellFormat(2.5, 2.5, string(w.data.Symbols[y-1][x-1].Symbol.Code), "1", ln, "CM", fill, 0, "")
+				pdf.SetFont("aaa", "", 7)
+				pdf.CellFormat(cell, cell, string(w.data.Symbols[y-1][x-1].Symbol.Code), "", ln, "CM", fill, 0, "")
 			}
 		}
 	}
 
-	if midX >= float64(grid.Xstart) && midX <= float64(grid.Xend) {
-		x := midX - float64(grid.Xstart)
-    pt1 := gofpdf.PointType{X: float64(x + 1)*2.5 - 1, Y: 10}
-		pt2 := gofpdf.PointType{X: float64(x + 1)*2.5, Y: 10+2.5}
-		pt3 := gofpdf.PointType{X: float64(x + 1)*2.5 + 1, Y: 10}
-		pts := make([]gofpdf.PointType, 0, 3)
-		pts = append(pts,	pt1)
-		pts = append(pts, pt2)
-		pts = append(pts, pt3)
-		
+	if midX >= float64(grid.Xstart) && midX <= float64(grid.Xend) && midY >= float64(grid.Ystart) && midY <= float64(grid.Yend) {
+		pdf.SetLineWidth(0.1)		
 		pdf.SetFillColor(0, 0, 0)
-		pdf.Polygon(pts, "FD")
-  }
 
-	if midY >= float64(grid.Ystart) && midY <= float64(grid.Yend) {
-    y := midY - float64(grid.Ystart)
-    pt1 := gofpdf.PointType{X: 10, Y: float64(y + 1)*2.5 - 1}
-    pt2 := gofpdf.PointType{X: 10+2.5, Y: float64(y + 1)*2.5}
-    pt3 := gofpdf.PointType{X: 10, Y: float64(y + 1)*2.5 + 1}
-    pts := make([]gofpdf.PointType, 0, 3)
-    pts = append(pts, pt1)
-    pts = append(pts, pt2)
-    pts = append(pts, pt3)
+		x := midX - float64(grid.Xstart)
+    ptX1 := gofpdf.PointType{X: margin + float64(x + 0.5)*cell - 1, Y: margin}
+		ptX2 := gofpdf.PointType{X: margin + float64(x + 0.5)*cell, Y: margin+cell}
+		ptX3 := gofpdf.PointType{X: margin + float64(x + 0.5)*cell + 1, Y: margin}
+		xPts := make([]gofpdf.PointType, 0, 3)
+		xPts = append(xPts,	ptX1)
+		xPts = append(xPts, ptX2)
+		xPts = append(xPts, ptX3)
+		
+		pdf.Polygon(xPts, "FD")
+    
+		y := midY - float64(grid.Ystart)
+    ptY1 := gofpdf.PointType{X: margin, Y: margin + float64(y + 0.5)*cell - 1}
+    ptY2 := gofpdf.PointType{X: margin+cell, Y: margin + float64(y + 0.5)*cell}
+    ptY3 := gofpdf.PointType{X: margin, Y: margin + float64(y + 0.5)*cell + 1}
+    yPts := make([]gofpdf.PointType, 0, 3)
+    yPts = append(yPts, ptY1)
+    yPts = append(yPts, ptY2)
+    yPts = append(yPts, ptY3)
  
-    pdf.SetFillColor(0, 0, 0)
-    pdf.Polygon(pts, "FD")
+    pdf.Polygon(yPts, "FD")
   }
 }
 
@@ -253,16 +255,24 @@ func setGridLines(pdf *gofpdf.Fpdf, grid Grid) {
 	pdf.SetLineWidth(0.3)
 	xRange := grid.Xend - grid.Xstart
 	yRange := grid.Yend - grid.Ystart
-	endX := 10.0 + 2.5*float64(xRange+1)
-	endY := 10.0 + 2.5*float64(yRange+1)
-	for x := 0; x <= xRange; x += 10 {
-		pdf.Line(10.0+2.5*float64(x+1), 10.0+2.5, 10.0+2.5*float64(x+1), endY)
+	endX := margin + cell*float64(xRange+1)
+	endY := margin + cell*float64(yRange+1)
+	for x := 0; x <= xRange; x++ {
+		pdf.SetLineWidth(0.1)
+		if x%10 == 0 {
+			pdf.SetLineWidth(0.3)
+		}
+		pdf.Line(margin+cell*float64(x+1), margin+cell, margin+cell*float64(x+1), endY)
 	}
 
-	for y := 0; y <= yRange; y += 10 {
-		pdf.Line(10.0+2.5, 10.0+2.5*float64(y+1), endX, 10.0+2.5*float64(y+1))
+	for y := 0; y <= yRange; y++ {
+		pdf.SetLineWidth(0.1)
+		if y%10 == 0 {
+			pdf.SetLineWidth(0.3)
+		}
+		pdf.Line(margin+cell, margin+cell*float64(y+1), endX, margin+cell*float64(y+1))
 	}
 	// R and B borders
-	pdf.Line(endX, 10.0+2.5, endX, endY)
-	pdf.Line(10.0+2.5, endY, endX, endY)
+	pdf.Line(endX, margin+cell, endX, endY)
+	pdf.Line(margin+cell, endY, endX, endY)
 }

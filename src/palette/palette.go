@@ -1,8 +1,8 @@
 package palette
 
 import (
-	"fmt"
 	"os"
+	"fmt"
 	"strconv"
 
 	"github.com/gocarina/gocsv"
@@ -21,7 +21,6 @@ type Thread struct {
 }
 
 func ReadCSV(filename string) ([]Thread, error) {
-	// TODO: read CSV file
 	dmcColors := []Thread{}
 
 	path := fmt.Sprintf("palette/%s.csv", filename)
@@ -43,7 +42,6 @@ func ReadCSV(filename string) ([]Thread, error) {
 		}
 		dmcColors[i].RGB = colorConverter.SRGB{R: c.R, G: c.G, B: c.B}
 		dmcColors[i].LAB = colorConverter.SRGBToCIELab(dmcColors[i].RGB)
-		fmt.Println(dmcColors[i])
 	}
 
 	return dmcColors, nil
