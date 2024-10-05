@@ -32,25 +32,28 @@ func (w *Writer) WriteFiles() error {
 	}
 	fmt.Printf("Wrote new PNG to %s\n", imgPath)
 
+	paperSizes := [3]string{"A4", "A2", "A1"}
+
 	// write PDF instructions
-	pdfPath, pdfErr := w.writePDF(imgPath)
-	if pdfErr != nil {
-		return pdfErr
+	for _, p := range paperSizes {
+		pdfPath, pdfErr := w.writePDF(imgPath, p)
+		if pdfErr != nil {
+			return pdfErr
+		}
+		fmt.Printf("Wrote PDF to %s\n", pdfPath)
 	}
-	fmt.Printf("Wrote PDF to %s\n", pdfPath)
 
 	return nil
 }
 
 func (w *Writer) writePNG() (string, *image.RGBA, error) {
-	p := 10
-	// Make each pixel 3x3
+	p := 12
 	bounds := w.data.Image.Bounds()
 	bounds.Max.X = bounds.Max.X * p
 	bounds.Max.Y = bounds.Max.Y * p
 	img := image.NewRGBA(bounds)
 
-	newPath := w.getPath("png")
+	newPath := w.getPath("png", "")
 	place, err := os.Create(newPath)
 	if err != nil {
 		return "", img, err
@@ -59,14 +62,13 @@ func (w *Writer) writePNG() (string, *image.RGBA, error) {
 
 	for x := 0; x < bounds.Max.X; x++ {
 		for y := 0; y < bounds.Max.Y; y++ {
-			pixel := w.data.Image.At(x, y)
+			px := w.data.Image.At(x, y)
 			for xx := 0; xx < p; xx++ {
 				for yy := 0; yy < p; yy++ {
 					if xx == p-1 || yy == p-1 {
-						px := color.Gray16{0}
-						img.Set(x*p+xx, y*p+yy, px)
+						img.Set(x*p+xx, y*p+yy, color.Gray16{0})
 					} else {
-						img.Set(x*p+xx, y*p+yy, pixel)
+						img.Set(x*p+xx, y*p+yy, px)
 					}
 				}
 			}
@@ -86,11 +88,9 @@ func getTitle(filename string) string {
 	return strings.ToUpper(name2)
 }
 
-func (w *Writer) getPath(extension string) string {
-	// Write new image to png file
+func (w *Writer) getPath(extension string, extra string) string {
 	split := strings.Split(w.data.Path, ".")
-
-	newPath := split[0] + w.data.Extra + "." + extension
+	newPath := split[0] + w.data.Extra + extra + "." + extension
 
 	return newPath
 }

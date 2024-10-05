@@ -21,7 +21,6 @@ type Thread struct {
 }
 
 func ReadCSV(filename string) ([]Thread, error) {
-	// TODO: read CSV file
 	dmcColors := []Thread{}
 
 	path := fmt.Sprintf("palette/%s.csv", filename)
@@ -43,7 +42,6 @@ func ReadCSV(filename string) ([]Thread, error) {
 
 		dmcColors[i].ID, err = strconv.Atoi(dmcColors[i].StringID)
 		if err != nil {
-			// TODO: convert string ID to a high number so it goes on the bottom of the legend
 			dmcColors[i].ID = maxID
 			maxID += 1
 		}
