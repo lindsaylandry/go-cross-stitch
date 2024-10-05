@@ -24,7 +24,7 @@ func main() {
 	pix := flag.Bool("px", true, "quantize pixellated image (default true)")
 	col := flag.Bool("c", true, "include color grid instructions")
 	flag.Parse()
-	
+
 	c, err := convert.NewConverter(flag.Args()[0], *num, *rgb, *all, *pal, *dit, *gre, *pix, *col)
 	if err != nil {
 		panic(err)

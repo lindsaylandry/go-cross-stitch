@@ -198,7 +198,7 @@ func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, midX, midY float64, col
 				}
 				pdf.SetFont("Arial", "B", 6)
 				pdf.CellFormat(cell, cell, xLabel, "", ln, "CM", fill, 0, "")
-			// y-axis labels
+				// y-axis labels
 			} else if x == grid.Xstart || x == grid.Xend+1 {
 				fill := false
 				yLabel := ""
@@ -207,11 +207,11 @@ func (w *Writer) CreateGrid(pdf *gofpdf.Fpdf, grid Grid, midX, midY float64, col
 				}
 				pdf.SetFont("Arial", "B", 6)
 
-				xTransform := margin+cell/2
+				xTransform := margin + cell/2
 				angle := 90.0
 				if x == grid.Xend+1 {
 					angle = 270.0
-					xTransform = margin+cell/2+float64(x-grid.Xstart)*cell
+					xTransform = margin + cell/2 + float64(x-grid.Xstart)*cell
 				}
 
 				pdf.TransformBegin()
