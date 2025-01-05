@@ -1,42 +1,60 @@
 package main
 
 import (
-	"flag"
+	"errors"
 	"fmt"
-	"os"
+
+	"github.com/spf13/cobra"
 
 	"github.com/lindsaylandry/go-cross-stitch/src/convert"
 	"github.com/lindsaylandry/go-cross-stitch/src/writer"
 )
 
+var flags convert.Flags
+
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("No input image provided")
-		os.Exit(0)
-	}
+	rootCmd := &cobra.Command{
+    Use:   "cross-stitch",
+    Short: "Generate cross-stitch pattern",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 1 {
+				panic(errors.New("No input image provided"))
+			}
 
-	num := flag.Int("n", 10, "number of colors to attempt to match (2^n)")
-	rgb := flag.Bool("rgb", true, "use rgb color space (default true)")
-	all := flag.Bool("all", false, "use all thread colors available (currently broken)")
-	pal := flag.String("color", "dmc", "color palette to use (OPTIONS: dmc, anchor, lego, bw)")
-	dit := flag.Bool("d", false, "implement dithering (default false)")
-	gre := flag.Bool("g", false, "convert image to greyscale (default false)")
-	pix := flag.Bool("px", true, "quantize pixellated image (default true)")
-	col := flag.Bool("c", true, "include color grid instructions")
-	flag.Parse()
+			return CrossStitch(args[0])
+    },
+  }
 
-	c, err := convert.NewConverter(flag.Args()[0], *num, *rgb, *all, *pal, *dit, *gre, *pix, *col)
+	rootCmd.PersistentFlags().IntVarP(&flags.Num, "number", "n", 10, "number of colors to attempt to match (2^n)")
+	rootCmd.PersistentFlags().BoolVarP(&flags.RGB, "rgb", "r", true, "use rgb color space")
+	rootCmd.PersistentFlags().BoolVarP(&flags.All, "all", "a", false, "use all thread colors available")
+	rootCmd.PersistentFlags().StringVarP(&flags.Palette, "pal", "p", "dmc", "color palette to use (OPTIONS: dmc, anchor, lego, bw)")
+	rootCmd.PersistentFlags().BoolVarP(&flags.Dither, "dither", "d", false, "implement dithering")
+	rootCmd.PersistentFlags().BoolVarP(&flags.Greyscale, "greyscale", "g", false, "convert image to greyscale")
+	rootCmd.PersistentFlags().BoolVarP(&flags.Pixel, "px", "x", true, "quantize pixellated image")
+	rootCmd.PersistentFlags().BoolVarP(&flags.Color, "colorgrid", "c", true, "include color grid instructions")
+	rootCmd.PersistentFlags().StringVarP(&flags.CSV, "csv", "s", "", "csv filename (optional)")
+
+	err := rootCmd.Execute()
+  if err != nil {
+    panic(err)
+  }
+}
+
+func CrossStitch(filename string) error {
+	fmt.Println(flags.CSV)
+
+	c, err := convert.NewConverter(filename, flags)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	d, err := c.Convert()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	w := writer.NewWriter(d)
-	if err := w.WriteFiles(); err != nil {
-		panic(err)
-	}
+	
+	return w.WriteFiles()
 }
