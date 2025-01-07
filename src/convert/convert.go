@@ -50,15 +50,15 @@ type Converter struct {
 }
 
 type Flags struct {
-	Num int
-	RGB bool
-	All bool
-	Palette string
-	Dither bool
+	Num       int
+	RGB       bool
+	All       bool
+	Palette   string
+	Dither    bool
 	Greyscale bool
-	Pixel bool
-	Color bool
-	CSV string
+	Pixel     bool
+	Color     bool
+	CSV       string
 }
 
 func NewConverter(filename string, flags Flags) (*Converter, error) {
@@ -94,9 +94,9 @@ func NewConverter(filename string, flags Flags) (*Converter, error) {
 	if csvFile == "" {
 		csvFile = flags.Palette
 	}
-		
+
 	pc, err := palette.ReadCSV(csvFile)
-	
+
 	if err != nil {
 		return &c, err
 	}

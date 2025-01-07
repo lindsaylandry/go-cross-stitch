@@ -14,16 +14,16 @@ var flags convert.Flags
 
 func main() {
 	rootCmd := &cobra.Command{
-    Use:   "cross-stitch",
-    Short: "Generate cross-stitch pattern",
+		Use:   "cross-stitch",
+		Short: "Generate cross-stitch pattern",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				panic(errors.New("No input image provided"))
 			}
 
 			return CrossStitch(args[0])
-    },
-  }
+		},
+	}
 
 	rootCmd.PersistentFlags().IntVarP(&flags.Num, "number", "n", 10, "number of colors to attempt to match (2^n)")
 	rootCmd.PersistentFlags().BoolVarP(&flags.RGB, "rgb", "r", true, "use rgb color space")
@@ -36,9 +36,9 @@ func main() {
 	rootCmd.PersistentFlags().StringVarP(&flags.CSV, "csv", "s", "", "csv filename (optional)")
 
 	err := rootCmd.Execute()
-  if err != nil {
-    panic(err)
-  }
+	if err != nil {
+		panic(err)
+	}
 }
 
 func CrossStitch(filename string) error {
@@ -55,6 +55,6 @@ func CrossStitch(filename string) error {
 	}
 
 	w := writer.NewWriter(d)
-	
+
 	return w.WriteFiles()
 }
