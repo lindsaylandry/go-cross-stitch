@@ -49,7 +49,19 @@ type Converter struct {
 	colorgrid bool
 }
 
-func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre, pix, col bool) (*Converter, error) {
+type Flags struct {
+	Num       int
+	RGB       bool
+	All       bool
+	Palette   string
+	Dither    bool
+	Greyscale bool
+	Pixel     bool
+	Color     bool
+	CSV       string
+}
+
+func NewConverter(filename string, flags Flags) (*Converter, error) {
 	c := Converter{}
 
 	c.newData.Path = filename
@@ -66,35 +78,41 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 		c.newData.Symbols[y] = make([]ColorSymbol, bounds.Dx()-bounds.Min.X)
 	}
 
-	c.limit = num
-	c.rgb = rgb
-	c.dither = dit
-	c.greyscale = gre
-	c.colorgrid = col
+	c.limit = flags.Num
+	c.rgb = flags.RGB
+	c.dither = flags.Dither
+	c.greyscale = flags.Greyscale
+	c.colorgrid = flags.Color
 
 	if c.rgb {
-		c.newData.Extra = "-" + pal + "-rgb"
+		c.newData.Extra = "-" + flags.Palette + "-rgb"
 	} else {
-		c.newData.Extra = "-" + pal + "-lab"
+		c.newData.Extra = "-" + flags.Palette + "-lab"
 	}
 
-	pc, err := palette.ReadCSV(pal)
+	csvFile := flags.CSV
+	if csvFile == "" {
+		csvFile = flags.Palette
+	}
+
+	pc, err := palette.ReadCSV(csvFile)
+
 	if err != nil {
 		return &c, err
 	}
 	c.pc = pc
 
-	if pal == "lego" {
+	if flags.Palette == "lego" {
 		c.newData.Scheme = "LEGO"
-	} else if pal == "dmc" || pal == "anchor" {
-		if pal == "dmc" {
+	} else if flags.Palette == "dmc" || flags.Palette == "anchor" {
+		if flags.Palette == "dmc" {
 			c.newData.Scheme = "DMC"
 		} else {
 			c.newData.Scheme = "Anchor"
 		}
 
-		if !all {
-			if !pix {
+		if !flags.All {
+			if !flags.Pixel {
 				//most colors rgb
 				c.pc = c.convertPalette(c.pixel())
 			} else {
@@ -102,7 +120,7 @@ func NewConverter(filename string, num int, rgb, all bool, pal string, dit, gre,
 				c.pc = c.convertPalette(c.colorQuant())
 			}
 		}
-	} else if pal == "bw" {
+	} else if flags.Palette == "bw" {
 		c.newData.Scheme = "Black&White"
 	} else {
 		log.Fatalf("ERROR: -color not recognized")
@@ -212,6 +230,9 @@ func (c *Converter) convertImage() error {
 	symbols := palette.GetSymbolRunes()
 
 	for i, v := range c.pc {
+		if c.newData.Count[v] == 0 {
+			continue
+		}
 		l := Legend{v, c.newData.Count[v], symbols[i].Code}
 		c.newData.Legend = append(c.newData.Legend, l)
 	}
