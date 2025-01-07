@@ -230,6 +230,9 @@ func (c *Converter) convertImage() error {
 	symbols := palette.GetSymbolRunes()
 
 	for i, v := range c.pc {
+		if c.newData.Count[v] == 0 {
+			continue
+		}
 		l := Legend{v, c.newData.Count[v], symbols[i].Code}
 		c.newData.Legend = append(c.newData.Legend, l)
 	}
