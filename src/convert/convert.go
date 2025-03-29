@@ -59,6 +59,7 @@ type Flags struct {
 	Pixel     bool
 	Color     bool
 	CSV       string
+	Width     int
 }
 
 func NewConverter(filename string, flags Flags) (*Converter, error) {
@@ -70,7 +71,14 @@ func NewConverter(filename string, flags Flags) (*Converter, error) {
 		return &c, err
 	}
 
+	//TODO: resize here
+	if flags.Width > 0 {
+		dst := resize(c.image, flags.Width)
+		c.image = dst
+	}
+
 	bounds := c.image.Bounds()
+
 	c.newData.Image = image.NewRGBA(bounds)
 
 	c.newData.Symbols = make([][]ColorSymbol, bounds.Dy()-bounds.Min.Y)

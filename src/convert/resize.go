@@ -7,7 +7,7 @@ import (
 	"golang.org/x/image/draw"
 )
 
-func resize(src image.Image, width int) (image.Image) {
+func resize(src image.Image, width int) image.Image {
 	// TODO: do math to get image dimensions
 	bounds := src.Bounds()
 
