@@ -34,6 +34,7 @@ func main() {
 	rootCmd.PersistentFlags().BoolVarP(&flags.Pixel, "px", "x", true, "quantize pixellated image")
 	rootCmd.PersistentFlags().BoolVarP(&flags.Color, "colorgrid", "c", true, "include color grid instructions")
 	rootCmd.PersistentFlags().StringVarP(&flags.CSV, "csv", "s", "", "csv filename (optional)")
+	rootCmd.PersistentFlags().IntVarP(&flags.Width, "width", "w", 0, "resize image width (0 means do not resize)")
 
 	err := rootCmd.Execute()
 	if err != nil {
