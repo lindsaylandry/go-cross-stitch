@@ -11,7 +11,7 @@ func resize(src image.Image, width int) image.Image {
 	// TODO: do math to get image dimensions
 	bounds := src.Bounds()
 
-	dstHeight := int(float64(bounds.Max.X) / float64(bounds.Max.Y) * float64(width))
+	dstHeight := int(float64(bounds.Max.Y) / float64(bounds.Max.X) * float64(width))
 
 	fmt.Printf("Resizing image to %dx%d pixels... ", width, dstHeight)
 
