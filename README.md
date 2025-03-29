@@ -12,6 +12,12 @@ To build the binary, run the following:
 go build
 ```
 
+If this is your first time building, first run:
+
+```bash
+go mod init
+```
+
 ### General Usage
 Once the binary is compiled, use as follows:
 ```bash
@@ -30,6 +36,26 @@ the PDF is the instructions to stitch the pattern, with the DMC image included.
 Run the help command to see all flags available:
 ```bash
 ./go-cross-stitch --help
+```
+
+```bash
+Generate cross-stitch pattern
+
+Usage:
+  cross-stitch [flags]
+
+Flags:
+  -a, --all          use all thread colors available
+  -c, --colorgrid    include color grid instructions (default true)
+  -s, --csv string   csv filename (optional)
+  -d, --dither       implement dithering
+  -g, --greyscale    convert image to greyscale
+  -h, --help         help for cross-stitch
+  -n, --number int   number of colors to attempt to match (2^n) (default 10)
+  -p, --pal string   color palette to use (OPTIONS: dmc, anchor, lego, bw) (default "dmc")
+  -x, --px           quantize pixellated image (default true)
+  -r, --rgb          use rgb color space (default true)
+  -w, --width int    resize image width (0 means do not resize)
 ```
 
 ### Render all test images
