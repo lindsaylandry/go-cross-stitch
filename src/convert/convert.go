@@ -71,7 +71,6 @@ func NewConverter(filename string, flags Flags) (*Converter, error) {
 		return &c, err
 	}
 
-	//TODO: resize here
 	if flags.Width > 0 {
 		dst := resize(c.image, flags.Width)
 		c.image = dst
