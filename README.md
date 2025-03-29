@@ -12,10 +12,10 @@ To build the binary, run the following:
 go build
 ```
 
-If this is your first time building, first run:
+If this is your first time building, first run the following to download dependencies:
 
 ```bash
-go mod init
+go mod tidy
 ```
 
 ### General Usage
