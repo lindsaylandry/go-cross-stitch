@@ -63,13 +63,6 @@ Flags:
 make examples
 ```
 
-## References
-Color distance formulas: https://en.wikipedia.org/wiki/Color_difference
-
-Color quantization: https://en.wikipedia.org/wiki/Color_quantization
-
-CIELab color space: https://en.wikipedia.org/wiki/CIELAB_color_space
-
 ## Example Image Conversions
 
 ### Mars (reds)
@@ -80,7 +73,7 @@ CIELab color space: https://en.wikipedia.org/wiki/CIELAB_color_space
 ### Earth (blues and greens)
 | Original | RGB Distance | CIELab Distance |
 |:--:|:--:|:--:|
-| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/earth.png" height="200" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/earth-dmc-rgb.png" height="200" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/earth-dmc-lab.png" height="200" style="image-rendering: pixelated;">
+| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/earth-americas.png" height="200" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/earth-americas-dmc-rgb.png" height="200" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/earth-dmc-lab.png" height="200" style="image-rendering: pixelated;">
 
 ### Moon (greyscale)
 | Original | RGB Distance | CIELab Distance |
@@ -91,3 +84,12 @@ CIELab color space: https://en.wikipedia.org/wiki/CIELAB_color_space
 | Original | RGB Distance | CIELab Distance |
 |:--:|:--:|:--:|
 | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/colors.jpg" height="200" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/colors-dmc-rgb.png" height="200" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/colors-dmc-lab.png" height="200" style="image-rendering: pixelated;">
+
+## References
+Color distance formulas: https://en.wikipedia.org/wiki/Color_difference
+
+Color quantization: https://en.wikipedia.org/wiki/Color_quantization
+
+CIELab color space: https://en.wikipedia.org/wiki/CIELAB_color_space
+
+
