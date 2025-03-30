@@ -13,7 +13,6 @@ import (
 var flags convert.Flags
 
 func main() {
-
 	rootCmd := &cobra.Command{
 		Use:   "cross-stitch",
 		Short: "Generate cross-stitch pattern",
