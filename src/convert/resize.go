@@ -2,8 +2,8 @@ package convert
 
 import (
 	"fmt"
-	"log/slog"
 	"image"
+	"log/slog"
 
 	"golang.org/x/image/draw"
 )

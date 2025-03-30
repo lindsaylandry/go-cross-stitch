@@ -62,6 +62,7 @@ type Flags struct {
 	Color     bool
 	CSV       string
 	Width     int
+	Log       int
 }
 
 func NewConverter(filename string, flags Flags) (*Converter, error) {

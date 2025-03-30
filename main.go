@@ -36,6 +36,7 @@ func main() {
 	rootCmd.PersistentFlags().BoolVarP(&flags.Color, "colorgrid", "c", true, "include color grid instructions")
 	rootCmd.PersistentFlags().StringVarP(&flags.CSV, "csv", "s", "", "csv filename (optional)")
 	rootCmd.PersistentFlags().IntVarP(&flags.Width, "width", "w", 0, "resize image width (0 means do not resize)")
+	rootCmd.PersistentFlags().IntVarP(&flags.Log, "log", "l", 2, "set log level")
 
 	err := rootCmd.Execute()
 	if err != nil {
@@ -44,8 +45,21 @@ func main() {
 }
 
 func CrossStitch(filename string) error {
-	// for now set all logging to debug
-	slog.SetLogLoggerLevel(slog.LevelDebug)
+	// for now set all logging to info
+	switch flags.Log {
+	case 0:
+		slog.SetLogLoggerLevel(slog.Level(-8))
+	case 1:
+		slog.SetLogLoggerLevel(slog.LevelDebug)
+	case 2:
+		slog.SetLogLoggerLevel(slog.LevelInfo)
+	case 3:
+		slog.SetLogLoggerLevel(slog.LevelWarn)
+	case 4:
+		slog.SetLogLoggerLevel(slog.LevelError)
+	default:
+		slog.SetLogLoggerLevel(slog.LevelInfo)
+	}
 
 	c, err := convert.NewConverter(filename, flags)
 	if err != nil {
