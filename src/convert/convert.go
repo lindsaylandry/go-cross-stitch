@@ -9,9 +9,9 @@ import (
 	"image/gif"
 	"image/jpeg"
 	"image/png"
-	"os"
 	"log/slog"
 	"math"
+	"os"
 	"sort"
 
 	"github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
