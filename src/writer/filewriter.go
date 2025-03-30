@@ -2,6 +2,7 @@ package writer
 
 import (
 	"fmt"
+	"log/slog"
 	"image"
 	"image/color"
 	"image/png"
@@ -30,7 +31,7 @@ func (w *Writer) WriteFiles() error {
 	if imgErr != nil {
 		return imgErr
 	}
-	fmt.Printf("Wrote new PNG to %s\n", imgPath)
+	slog.Info(fmt.Sprintf("Wrote new PNG to %s\n", imgPath))
 
 	paperSizes := [3]string{"A4", "A2", "A1"}
 
@@ -40,7 +41,7 @@ func (w *Writer) WriteFiles() error {
 		if pdfErr != nil {
 			return pdfErr
 		}
-		fmt.Printf("Wrote PDF to %s\n", pdfPath)
+		slog.Info(fmt.Sprintf("Wrote PDF to %s\n", pdfPath))
 	}
 
 	return nil

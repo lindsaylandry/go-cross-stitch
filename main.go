@@ -2,7 +2,7 @@ package main
 
 import (
 	"errors"
-	"fmt"
+	"log/slog"
 
 	"github.com/spf13/cobra"
 
@@ -13,6 +13,7 @@ import (
 var flags convert.Flags
 
 func main() {
+
 	rootCmd := &cobra.Command{
 		Use:   "cross-stitch",
 		Short: "Generate cross-stitch pattern",
@@ -43,7 +44,8 @@ func main() {
 }
 
 func CrossStitch(filename string) error {
-	fmt.Println(flags.CSV)
+	// for now set all logging to debug
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 
 	c, err := convert.NewConverter(filename, flags)
 	if err != nil {
