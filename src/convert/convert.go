@@ -9,7 +9,7 @@ import (
 	"image/gif"
 	"image/jpeg"
 	"image/png"
-	"io/ioutil"
+	"os"
 	"log/slog"
 	"math"
 	"sort"
@@ -160,7 +160,7 @@ func (c *Converter) Convert() (NewData, error) {
 }
 
 func (c *Converter) getImage() error {
-	data, err := ioutil.ReadFile(c.newData.Path)
+	data, err := os.ReadFile(c.newData.Path)
 	if err != nil {
 		return err
 	}
