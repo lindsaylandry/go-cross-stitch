@@ -2,10 +2,10 @@ package writer
 
 import (
 	"fmt"
-	"log/slog"
 	"image"
 	"image/color"
 	"image/png"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -27,6 +27,7 @@ func NewWriter(d convert.NewData) *Writer {
 
 func (w *Writer) WriteFiles() error {
 	// write new image file
+	slog.Info("Writing new image file...")
 	imgPath, _, imgErr := w.writePNG()
 	if imgErr != nil {
 		return imgErr
@@ -36,6 +37,7 @@ func (w *Writer) WriteFiles() error {
 	paperSizes := [3]string{"A4", "A2", "A1"}
 
 	// write PDF instructions
+	slog.Info("Writing PDF instructions...")
 	for _, p := range paperSizes {
 		pdfPath, pdfErr := w.writePDF(imgPath, p)
 		if pdfErr != nil {
@@ -48,6 +50,7 @@ func (w *Writer) WriteFiles() error {
 }
 
 func (w *Writer) writePNG() (string, *image.RGBA, error) {
+	// TODO: use goroutines to make this faster
 	p := 12
 	bounds := w.data.Image.Bounds()
 	bounds.Max.X = bounds.Max.X * p
@@ -61,8 +64,39 @@ func (w *Writer) writePNG() (string, *image.RGBA, error) {
 	}
 	defer place.Close()
 
-	for x := 0; x < bounds.Max.X; x++ {
-		for y := 0; y < bounds.Max.Y; y++ {
+	n := 4
+	msgChan := make(chan string, n*n)
+
+	for m := 0; m < n; m++ {
+		ylow := bounds.Min.Y + m*bounds.Dy()/n
+		yhigh := (m + 1) * bounds.Dy() / n
+
+		for p := 0; p < n; p++ {
+			xlow := bounds.Min.X + p*bounds.Dx()/n
+			xhigh := (p + 1) * bounds.Dx() / n
+
+			go func() {
+				msg := w.writeImageChunk(img, xlow, xhigh, ylow, yhigh)
+				msgChan <- msg
+			}()
+		}
+	}
+
+	for i := 0; i < n*n; i++ {
+		<-msgChan
+		//slog.Debug(msgs)
+	}
+
+	slog.Info("Done")
+
+	err = png.Encode(place, img)
+	return newPath, img, err
+}
+
+func (w *Writer) writeImageChunk(img *image.RGBA, xlow, xhigh, ylow, yhigh int) string {
+	p := 12
+	for x := xlow; x < xhigh; x++ {
+		for y := ylow; y < yhigh; y++ {
 			px := w.data.Image.At(x, y)
 			for xx := 0; xx < p; xx++ {
 				for yy := 0; yy < p; yy++ {
@@ -75,9 +109,7 @@ func (w *Writer) writePNG() (string, *image.RGBA, error) {
 			}
 		}
 	}
-
-	err = png.Encode(place, img)
-	return newPath, img, err
+	return "done"
 }
 
 func getTitle(filename string) string {

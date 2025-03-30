@@ -2,13 +2,15 @@ package convert
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"image"
 	"image/color"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
 	"io/ioutil"
-	"log"
+	"log/slog"
 	"math"
 	"sort"
 
@@ -130,7 +132,7 @@ func NewConverter(filename string, flags Flags) (*Converter, error) {
 	} else if flags.Palette == "bw" {
 		c.newData.Scheme = "Black&White"
 	} else {
-		log.Fatalf("ERROR: -color not recognized")
+		return &c, errors.New("--color not recognized")
 	}
 
 	c.newData.Count = make(map[palette.Thread]int)
@@ -207,6 +209,8 @@ func (c *Converter) convertImage() error {
 	} else {
 		bounds := c.image.Bounds()
 
+		slog.Info(fmt.Sprintf("Converting image to %s palette...", c.newData.Scheme))
+		// TODO: make variable amount of chunks based on image size
 		n := 4
 		countChan := make(chan map[palette.Thread]int, n*n)
 
@@ -245,6 +249,9 @@ func (c *Converter) convertImage() error {
 	}
 
 	sort.Slice(c.newData.Legend, func(i, j int) bool { return c.newData.Legend[i].Color.ID < c.newData.Legend[j].Color.ID })
+
+	slog.Info("Done")
+
 	return nil
 }
 
