@@ -3,6 +3,13 @@ This is a project that will take an image and convert it to a png and pdf of DMC
 
 Other palettes include Anchor cross-stitch threads, simple LEGO colors, and greyscale.
 
+## Supported Image Types
+
+The following image formats are supported:
+1. PNG
+1. JPEG
+1. GIF
+
 ## How To Use
 
 ### Build From Scratch
