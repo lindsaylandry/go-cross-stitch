@@ -50,7 +50,6 @@ func (w *Writer) WriteFiles() error {
 }
 
 func (w *Writer) writePNG() (string, *image.RGBA, error) {
-	// TODO: use goroutines to make this faster
 	p := 12
 	bounds := w.data.Image.Bounds()
 	bounds.Max.X = bounds.Max.X * p
@@ -84,7 +83,6 @@ func (w *Writer) writePNG() (string, *image.RGBA, error) {
 
 	for i := 0; i < n*n; i++ {
 		<-msgChan
-		//slog.Debug(msgs)
 	}
 
 	slog.Info("Done")
