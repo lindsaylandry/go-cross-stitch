@@ -2,6 +2,7 @@ package convert
 
 import (
 	"image/color"
+	"log/slog"
 )
 
 type errorPix struct {
@@ -10,6 +11,7 @@ type errorPix struct {
 
 // Problem: pixel error can exceed 0 and 255. Need to account for big errors.
 func (c *Converter) floydSteinbergDither() {
+	slog.Info("Dithering image...")
 	bounds := c.image.Bounds()
 
 	// create an error pixel matrix
@@ -114,6 +116,8 @@ func (c *Converter) floydSteinbergDither() {
 			}
 		}
 	}
+
+	slog.Info("Done")
 }
 
 func setPixelError(e *errorPix, qR, qG, qB, diffusion float64) {
