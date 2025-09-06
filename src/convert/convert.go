@@ -117,6 +117,7 @@ func NewConverter(filename string, config *config.Config) (*Converter, error) {
 				c.pc = c.convertPalette(c.colorQuant())
 			}
 		}
+		slog.Info(fmt.Sprintf("Number of Colors: %d\n", len(c.pc)))
 	} else if config.Palette == "bw" {
 		c.newData.Scheme = "Black&White"
 	} else {

@@ -1,9 +1,7 @@
 package convert
 
 import (
-	"fmt"
 	"image/color"
-	"log/slog"
 
 	"github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
 )
@@ -28,7 +26,6 @@ func (c *Converter) pixel() []colorConverter.SRGB {
 		r, g, b, _ := k.RGBA()
 		bestColors = append(bestColors, colorConverter.SRGB{R: uint8(r), G: uint8(g), B: uint8(b)})
 	}
-	slog.Info(fmt.Sprintf("Number of Colors: %d\n", len(bestColors)))
 
 	return bestColors
 }

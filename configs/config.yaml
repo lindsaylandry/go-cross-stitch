@@ -1,10 +1,10 @@
-number: 5
+number: 7
 rgb: true
 all: false
 palette: dmc
 dither: false
 greyscale: false
-quantize: false
+quantize: true
 color_grid: true
 csv: ""
 width: 300
