@@ -15,6 +15,7 @@ import (
 	"sort"
 
 	"github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
+	"github.com/lindsaylandry/go-cross-stitch/src/config"
 	"github.com/lindsaylandry/go-cross-stitch/src/palette"
 )
 
@@ -51,21 +52,7 @@ type Converter struct {
 	colorgrid bool
 }
 
-type Flags struct {
-	Num       int
-	RGB       bool
-	All       bool
-	Palette   string
-	Dither    bool
-	Greyscale bool
-	Pixel     bool
-	Color     bool
-	CSV       string
-	Width     int
-	Log       int
-}
-
-func NewConverter(filename string, flags Flags) (*Converter, error) {
+func NewConverter(filename string, config *config.Config) (*Converter, error) {
 	c := Converter{}
 
 	c.newData.Path = filename
@@ -74,8 +61,8 @@ func NewConverter(filename string, flags Flags) (*Converter, error) {
 		return &c, err
 	}
 
-	if flags.Width > 0 {
-		dst := resize(c.image, flags.Width)
+	if config.Width > 0 {
+		dst := resize(c.image, config.Width)
 		c.image = dst
 	}
 
@@ -88,21 +75,21 @@ func NewConverter(filename string, flags Flags) (*Converter, error) {
 		c.newData.Symbols[y] = make([]ColorSymbol, bounds.Dx()-bounds.Min.X)
 	}
 
-	c.limit = flags.Num
-	c.rgb = flags.RGB
-	c.dither = flags.Dither
-	c.greyscale = flags.Greyscale
-	c.colorgrid = flags.Color
+	c.limit = config.Number
+	c.rgb = config.Rgb
+	c.dither = config.Dither
+	c.greyscale = config.Greyscale
+	c.colorgrid = config.ColorGrid
 
 	if c.rgb {
-		c.newData.Extra = "-" + flags.Palette + "-rgb"
+		c.newData.Extra = "-" + config.Palette + "-rgb"
 	} else {
-		c.newData.Extra = "-" + flags.Palette + "-lab"
+		c.newData.Extra = "-" + config.Palette + "-lab"
 	}
 
-	csvFile := flags.CSV
+	csvFile := config.CsvFile
 	if csvFile == "" {
-		csvFile = flags.Palette
+		csvFile = config.Palette
 	}
 
 	pc, err := palette.ReadCSV(csvFile)
@@ -112,17 +99,17 @@ func NewConverter(filename string, flags Flags) (*Converter, error) {
 	}
 	c.pc = pc
 
-	if flags.Palette == "lego" {
+	if config.Palette == "lego" {
 		c.newData.Scheme = "LEGO"
-	} else if flags.Palette == "dmc" || flags.Palette == "anchor" {
-		if flags.Palette == "dmc" {
+	} else if config.Palette == "dmc" || config.Palette == "anchor" {
+		if config.Palette == "dmc" {
 			c.newData.Scheme = "DMC"
 		} else {
 			c.newData.Scheme = "Anchor"
 		}
 
-		if !flags.All {
-			if !flags.Pixel {
+		if !config.All {
+			if !config.Quantize {
 				//most colors rgb
 				c.pc = c.convertPalette(c.pixel())
 			} else {
@@ -130,7 +117,7 @@ func NewConverter(filename string, flags Flags) (*Converter, error) {
 				c.pc = c.convertPalette(c.colorQuant())
 			}
 		}
-	} else if flags.Palette == "bw" {
+	} else if config.Palette == "bw" {
 		c.newData.Scheme = "Black&White"
 	} else {
 		return &c, errors.New("--color not recognized")

@@ -1,0 +1,11 @@
+number: 5
+rgb: true
+all: false
+palette: dmc
+dither: false
+greyscale: false
+quantize: false
+color_grid: true
+csv: ""
+width: 300
+log_level: 2
