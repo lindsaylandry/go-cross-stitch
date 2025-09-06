@@ -44,10 +44,8 @@ type NewData struct {
 type Converter struct {
 	image     image.Image
 	newData   NewData
-	limit     int
 	rgb       bool
 	pc        []palette.Thread
-	dither    bool
 	greyscale bool
 	colorgrid bool
 }
@@ -75,9 +73,7 @@ func NewConverter(filename string, config *config.Config) (*Converter, error) {
 		c.newData.Symbols[y] = make([]ColorSymbol, bounds.Dx()-bounds.Min.X)
 	}
 
-	c.limit = config.Number
 	c.rgb = config.Rgb
-	c.dither = config.Dither
 	c.greyscale = config.Greyscale
 	c.colorgrid = config.ColorGrid
 
@@ -108,14 +104,12 @@ func NewConverter(filename string, config *config.Config) (*Converter, error) {
 			c.newData.Scheme = "Anchor"
 		}
 
-		if !config.All {
-			if !config.Quantize {
-				//most colors rgb
-				c.pc = c.convertPalette(c.pixel())
-			} else {
-				//best colors rgb
-				c.pc = c.convertPalette(c.colorQuant())
-			}
+		if config.Quantize.Enabled {
+			// best colors
+			c.pc = c.convertPalette(c.colorQuant(config.Quantize.N))
+		} else {
+			//most colors
+			c.pc = c.convertPalette(c.pixel())
 		}
 		slog.Info(fmt.Sprintf("Number of Colors: %d\n", len(c.pc)))
 	} else if config.Palette == "bw" {
@@ -142,8 +136,8 @@ func (c *Converter) Greyscale() {
 	}
 }
 
-func (c *Converter) Convert() (NewData, error) {
-	err := c.convertImage()
+func (c *Converter) Convert(dither bool) (NewData, error) {
+	err := c.convertImage(dither)
 	return c.newData, err
 }
 
@@ -192,8 +186,8 @@ func (c *Converter) convertPalette(colors []colorConverter.SRGB) []palette.Threa
 	return legend
 }
 
-func (c *Converter) convertImage() error {
-	if c.dither {
+func (c *Converter) convertImage(dither bool) error {
+	if dither {
 		c.floydSteinbergDither()
 	} else {
 		bounds := c.image.Bounds()
@@ -295,7 +289,7 @@ func getTextColor(cc palette.Thread) string {
 }
 
 // start with 32 colors
-func (c *Converter) colorQuant() []colorConverter.SRGB {
+func (c *Converter) colorQuant(n int) []colorConverter.SRGB {
 	bounds := c.image.Bounds()
 
 	allcolors := make([]colorConverter.SRGB, (bounds.Dy()-bounds.Min.Y)*(bounds.Dx()-bounds.Min.X))
@@ -309,33 +303,33 @@ func (c *Converter) colorQuant() []colorConverter.SRGB {
 	// 1 2 4 8 16
 	slices := []int{0, len(allcolors) - 1}
 
-	for i := 0; i < c.limit; i++ {
+	for i := 0; i < n; i++ {
 		for j := 0; j < len(slices)-1; j++ {
 			// get a slice of allcolors
 			s := allcolors[slices[j]:slices[j+1]]
 
 			colorRanges := [][]uint8{{math.MaxUint8, 0}, {math.MaxUint8, 0}, {math.MaxUint8, 0}}
-			for c := 0; c < len(s); c++ {
+			for k := 0; k < len(s); k++ {
 				//R
-				if s[c].R < colorRanges[0][0] {
-					colorRanges[0][0] = s[c].R
+				if s[k].R < colorRanges[0][0] {
+					colorRanges[0][0] = s[k].R
 				}
-				if s[c].R > colorRanges[0][1] {
-					colorRanges[0][1] = s[c].R
+				if s[k].R > colorRanges[0][1] {
+					colorRanges[0][1] = s[k].R
 				}
 				//G
-				if s[c].G < colorRanges[1][0] {
-					colorRanges[1][0] = s[c].G
+				if s[k].G < colorRanges[1][0] {
+					colorRanges[1][0] = s[k].G
 				}
-				if s[c].G > colorRanges[1][1] {
-					colorRanges[1][1] = s[c].G
+				if s[k].G > colorRanges[1][1] {
+					colorRanges[1][1] = s[k].G
 				}
 				//B
-				if s[c].B < colorRanges[2][0] {
-					colorRanges[2][0] = s[c].B
+				if s[k].B < colorRanges[2][0] {
+					colorRanges[2][0] = s[k].B
 				}
-				if s[c].B > colorRanges[2][1] {
-					colorRanges[2][1] = s[c].B
+				if s[k].B > colorRanges[2][1] {
+					colorRanges[2][1] = s[k].B
 				}
 			}
 			xr := colorRanges[0][1] - colorRanges[0][0]
@@ -369,10 +363,10 @@ func (c *Converter) colorQuant() []colorConverter.SRGB {
 	for i := 0; i < len(slices)-1; i++ {
 		s := allcolors[slices[i]:slices[i+1]]
 		var avgR, avgG, avgB float64
-		for c := 0; c < len(s); c++ {
-			avgR = avgR + math.Pow(float64(s[c].R), 2)
-			avgG = avgG + math.Pow(float64(s[c].G), 2)
-			avgB = avgB + math.Pow(float64(s[c].B), 2)
+		for k := 0; k < len(s); k++ {
+			avgR = avgR + math.Pow(float64(s[k].R), 2)
+			avgG = avgG + math.Pow(float64(s[k].G), 2)
+			avgB = avgB + math.Pow(float64(s[k].B), 2)
 		}
 
 		bestColors[i] = colorConverter.SRGB{R: uint8(math.Sqrt(avgR / float64(len(s)))), G: uint8(math.Sqrt(avgG / float64(len(s)))), B: uint8(math.Sqrt(avgB / float64(len(s))))}

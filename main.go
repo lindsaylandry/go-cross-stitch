@@ -59,7 +59,7 @@ func CrossStitch(filename string) error {
 		return err
 	}
 
-	d, err := c.Convert()
+	d, err := c.Convert(conf.Dither)
 	if err != nil {
 		return err
 	}
