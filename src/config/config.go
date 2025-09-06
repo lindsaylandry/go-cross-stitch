@@ -20,7 +20,7 @@ type Config struct {
 
 type Quantize struct {
 	Enabled bool `yaml:"enabled"`
-	N int `yaml:"n"`
+	N       int  `yaml:"n"`
 }
 
 func NewConfig() (*Config, error) {
