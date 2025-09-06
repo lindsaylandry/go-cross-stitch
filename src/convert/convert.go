@@ -47,7 +47,6 @@ type Converter struct {
 	rgb       bool
 	pc        []palette.Thread
 	greyscale bool
-	colorgrid bool
 }
 
 func NewConverter(filename string, config *config.Config) (*Converter, error) {
@@ -75,7 +74,6 @@ func NewConverter(filename string, config *config.Config) (*Converter, error) {
 
 	c.rgb = config.Rgb
 	c.greyscale = config.Greyscale
-	c.colorgrid = config.ColorGrid
 
 	if c.rgb {
 		c.newData.Extra = "-" + config.Palette + "-rgb"

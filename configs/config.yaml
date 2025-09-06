@@ -5,7 +5,6 @@ greyscale: false
 quantize:
   enabled: false
   n: 7
-color_grid: true
 csv: ""
 width: 300
 log_level: 2
