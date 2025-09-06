@@ -6,17 +6,17 @@ import (
 )
 
 type Config struct {
-	Number int `yaml:"number"`
-	Rgb bool `yaml:"rgb"`
-	All bool `yaml:"all"`
-	Palette string `yaml:"palette"`
-	Dither bool `yaml:"dither"`
-	Greyscale bool `yaml:"greyscale"`
-	Quantize bool `yaml:"quantize"`
-	ColorGrid bool `yaml:"color_grid"`
-	CsvFile string `yaml:"csv_file"`
-	Width int `yaml:"width"`
-	LogLevel int`yaml:"log_level"`
+	Number    int    `yaml:"number"`
+	Rgb       bool   `yaml:"rgb"`
+	All       bool   `yaml:"all"`
+	Palette   string `yaml:"palette"`
+	Dither    bool   `yaml:"dither"`
+	Greyscale bool   `yaml:"greyscale"`
+	Quantize  bool   `yaml:"quantize"`
+	ColorGrid bool   `yaml:"color_grid"`
+	CsvFile   string `yaml:"csv_file"`
+	Width     int    `yaml:"width"`
+	LogLevel  int    `yaml:"log_level"`
 }
 
 func NewConfig() (*Config, error) {
