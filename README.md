@@ -21,7 +21,7 @@ go mod tidy
 ### General Usage
 Once the binary is compiled, use as follows:
 ```bash
-./go-cross-stitch -n 10 test_images/full-moon.png
+./go-cross-stitch test_images/full-moon.png
 ```
 This will make four files in test_images:
 ```
@@ -33,37 +33,41 @@ full-moon-dmc-rgb-A1.pdf
 the png is the image converted to cross-stitch DMC thread colors.
 the PDF is the instructions to stitch the pattern, with the DMC image included.
 
-Run the help command to see all flags available:
-```bash
-./go-cross-stitch --help
-```
+### Configuration
 
-```bash
-Generate cross-stitch pattern
+Configure this app with file `configs/config.yaml`
 
-Usage:
-  cross-stitch [flags]
+Refer to the table below for accepted values.
 
-Flags:
-  -a, --all          use all thread colors available
-  -c, --colorgrid    include color grid instructions (default true)
-  -s, --csv string   csv filename (optional)
-  -d, --dither       implement dithering
-  -g, --greyscale    convert image to greyscale
-  -h, --help         help for cross-stitch
-  -n, --number int   number of colors to attempt to match (2^n) (default 10)
-  -p, --pal string   color palette to use (OPTIONS: dmc, anchor, lego, bw) (default "dmc")
-  -x, --px           quantize pixellated image (default true)
-  -r, --rgb          use rgb color space (default true)
-  -w, --width int    resize image width (0 means do not resize)
-```
+| Key | Type | Default | Definition |
+| - | - | - | - |
+| `csv` | `string` | `""` | csv filename |
+| `dither` | `bool` | `false` | implement dithering |
+| `greyscale` | `bool` | `false` | convert image to greyscale |
+| `palette` | `string` | `dmc` | color palette to use (OPTIONS: dmc, anchor, lego, bw) |
+| `quantize` | `struct` | `-` | settings to quantize image (see below) |
+| `rgb` | `bool` | `true` | use rgb color space |
+| `width` | `int` | `300` | resize image width (0 means do not resize) |
+
+#### quantize
+
+Color quantization reduces the number of colors to match. See https://en.wikipedia.org/wiki/Color_quantization for more details.
+
+If disabled, the app will attempt to match all colors to the specified color palette.
+
+Enable this setting to reduce the number of colors in your instructions.
+
+| Key | Type | Default | Definition |
+| - | - | - | - |
+| enabled | boolean | true | whether to enable color quantization |
+| n | int | 7 | number of 
+
+## Example Image Conversions
 
 ### Render all test images
 ```bash
 make examples
 ```
-
-## Example Image Conversions
 
 ### Mars (reds)
 | Original | RGB Distance | CIELab Distance |
