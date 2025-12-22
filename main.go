@@ -6,11 +6,12 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/lindsaylandry/go-cross-stitch/src/config"
 	"github.com/lindsaylandry/go-cross-stitch/src/convert"
 	"github.com/lindsaylandry/go-cross-stitch/src/writer"
 )
 
-var flags convert.Flags
+var conf *config.Config
 
 func main() {
 	rootCmd := &cobra.Command{
@@ -25,27 +26,13 @@ func main() {
 		},
 	}
 
-	rootCmd.PersistentFlags().IntVarP(&flags.Num, "number", "n", 10, "number of colors to attempt to match (2^n)")
-	rootCmd.PersistentFlags().BoolVarP(&flags.RGB, "rgb", "r", true, "use rgb color space")
-	rootCmd.PersistentFlags().BoolVarP(&flags.All, "all", "a", false, "use all thread colors available")
-	rootCmd.PersistentFlags().StringVarP(&flags.Palette, "pal", "p", "dmc", "color palette to use (OPTIONS: dmc, anchor, lego, bw)")
-	rootCmd.PersistentFlags().BoolVarP(&flags.Dither, "dither", "d", false, "implement dithering")
-	rootCmd.PersistentFlags().BoolVarP(&flags.Greyscale, "greyscale", "g", false, "convert image to greyscale")
-	rootCmd.PersistentFlags().BoolVarP(&flags.Pixel, "px", "x", true, "quantize pixellated image")
-	rootCmd.PersistentFlags().BoolVarP(&flags.Color, "colorgrid", "c", true, "include color grid instructions")
-	rootCmd.PersistentFlags().StringVarP(&flags.CSV, "csv", "s", "", "csv filename (optional)")
-	rootCmd.PersistentFlags().IntVarP(&flags.Width, "width", "w", 0, "resize image width (0 means do not resize)")
-	rootCmd.PersistentFlags().IntVarP(&flags.Log, "log", "l", 2, "set log level")
-
-	err := rootCmd.Execute()
+	var err error
+	conf, err = config.NewConfig()
 	if err != nil {
 		panic(err)
 	}
-}
 
-func CrossStitch(filename string) error {
-	// for now set all logging to info
-	switch flags.Log {
+	switch conf.LogLevel {
 	case 0:
 		slog.SetLogLoggerLevel(slog.Level(-8))
 	case 1:
@@ -60,12 +47,19 @@ func CrossStitch(filename string) error {
 		slog.SetLogLoggerLevel(slog.LevelInfo)
 	}
 
-	c, err := convert.NewConverter(filename, flags)
+	err = rootCmd.Execute()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func CrossStitch(filename string) error {
+	c, err := convert.NewConverter(filename, conf)
 	if err != nil {
 		return err
 	}
 
-	d, err := c.Convert()
+	d, err := c.Convert(conf.Dither)
 	if err != nil {
 		return err
 	}

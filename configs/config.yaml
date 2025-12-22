@@ -1,0 +1,10 @@
+rgb: true
+palette: dmc
+dither: false
+greyscale: false
+quantize:
+  enabled: false
+  n: 7
+csv: ""
+width: 300
+log_level: 2
