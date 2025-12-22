@@ -60,7 +60,7 @@ Enable this setting to reduce the number of colors in your instructions.
 | Key | Type | Default | Definition |
 | - | - | - | - |
 | enabled | boolean | true | whether to enable color quantization |
-| n | int | 7 | number of 
+| n | int | 7 | number of bisects for color quantization (2^n total) |
 
 ## Example Image Conversions
 
