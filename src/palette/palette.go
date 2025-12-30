@@ -9,7 +9,7 @@ import (
 	"github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
 )
 
-type Thread struct {
+type Color struct {
 	ID       int
 	StringID string                `csv:"id"`
 	Name     string                `csv:"name"`
@@ -20,8 +20,8 @@ type Thread struct {
 	LAB      colorConverter.CIELab `csv:"-"`
 }
 
-func ReadCSV(filename string) ([]Thread, error) {
-	dmcColors := []Thread{}
+func ReadCSV(filename string) ([]Color, error) {
+	dmcColors := []Color{}
 
 	path := fmt.Sprintf("palette/%s.csv", filename)
 
@@ -48,4 +48,20 @@ func ReadCSV(filename string) ([]Thread, error) {
 	}
 
 	return dmcColors, nil
+}
+
+func ConvertOriginal(colors []colorConverter.SRGB) []Color {
+  var legend []Color
+	for _, c := range(colors) {
+		col := Color{
+			R: c.R,
+			G: c.G,
+			B: c.B,
+			RGB: c,
+		}
+
+		legend = append(legend, col)
+  }
+
+  return legend
 }
