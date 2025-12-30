@@ -74,22 +74,24 @@ func NewConverter(filename string, config *config.Config) (*Converter, error) {
 
 	c.newData.Count = make(map[palette.Color]int)
 
+	c.rgb = config.Rgb
+  c.greyscale = config.Greyscale
+
+	if c.rgb {
+    c.newData.Extra = "-" + config.Palette + "-rgb"
+  } else {
+    c.newData.Extra = "-" + config.Palette + "-lab"
+  }
+
 	if config.Palette == "original" {
     if !config.Quantize.Enabled {
       slog.Error(fmt.Sprintf("Cannot use %s palette without enabling convertPalette. Check config settings and try again.", config.Palette))
     }
+		c.newData.Scheme = "Quantize"
 
     c.pc = palette.ConvertOriginal(c.colorQuant(config.Quantize.N))
 		return &c, nil
   }
-	c.rgb = config.Rgb
-	c.greyscale = config.Greyscale
-
-	if c.rgb {
-		c.newData.Extra = "-" + config.Palette + "-rgb"
-	} else {
-		c.newData.Extra = "-" + config.Palette + "-lab"
-	}
 
 	csvFile := config.CsvFile
 	if csvFile == "" {
@@ -104,14 +106,8 @@ func NewConverter(filename string, config *config.Config) (*Converter, error) {
 	c.pc = pc
 
 
-	// only convertPalette image, do not convert to a different palette
-	if config.Palette == "original" {
-		if !config.Quantize.Enabled {
-			slog.Error(fmt.Sprintf("Cannot use %s palette without enabling convertPalette. Check config settings and try again.", config.Palette))
-		}
-		c.pc = palette.ConvertOriginal(c.colorQuant(config.Quantize.N))
 
-	} else if config.Palette == "lego" {
+	if config.Palette == "lego" {
 		c.newData.Scheme = "LEGO"
 	} else if config.Palette == "dmc" || config.Palette == "anchor" {
 		if config.Palette == "dmc" {
