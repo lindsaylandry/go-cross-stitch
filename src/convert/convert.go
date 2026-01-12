@@ -39,6 +39,7 @@ type NewData struct {
 	Path    string
 	Extra   string
 	Scheme  string
+	Type    config.Type
 }
 
 type Converter struct {
@@ -109,11 +110,14 @@ func NewConverter(filename string, config *config.Config) (*Converter, error) {
 
 	if config.Palette == "lego" {
 		c.newData.Scheme = "LEGO"
+		c.newData.Type = config.Lego
 	} else if config.Palette == "dmc" || config.Palette == "anchor" {
 		if config.Palette == "dmc" {
 			c.newData.Scheme = "DMC"
+			c.newData.Type = config.DMC
 		} else {
 			c.newData.Scheme = "Anchor"
+			c.newData.Type = config.Anchor
 		}
 
 		if config.Quantize.Enabled {
