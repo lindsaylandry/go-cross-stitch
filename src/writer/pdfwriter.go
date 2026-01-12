@@ -75,9 +75,9 @@ func (w *Writer) writePDF(imgPath string, paperSize string, typ config.Type) (st
 	}
 
 	pdf.SetFont("Arial", "B", 12*mult)
-  pdf.CellFormat(90.0*mult, 5.5*mult, "Dimensions:", "", 0, "LM", false, 0, "")
-  pdf.SetFont("Arial", "", 12*mult)
-  pdf.CellFormat(100.0*mult, 5.5*mult, fmt.Sprintf("%dx%d pixels", bounds.Max.X, bounds.Max.Y), "", 1, "RM", false, 0, "")
+	pdf.CellFormat(90.0*mult, 5.5*mult, "Dimensions:", "", 0, "LM", false, 0, "")
+	pdf.SetFont("Arial", "", 12*mult)
+	pdf.CellFormat(100.0*mult, 5.5*mult, fmt.Sprintf("%dx%d pixels", bounds.Max.X, bounds.Max.Y), "", 1, "RM", false, 0, "")
 
 	pdf.SetFont("Arial", "B", 12*mult)
 	pdf.CellFormat(90.0*mult, 5.5*mult, "Size:", "", 0, "LM", false, 0, "")

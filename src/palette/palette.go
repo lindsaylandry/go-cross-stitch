@@ -51,17 +51,17 @@ func ReadCSV(filename string) ([]Color, error) {
 }
 
 func ConvertOriginal(colors []colorConverter.SRGB) []Color {
-  var legend []Color
-	for _, c := range(colors) {
+	var legend []Color
+	for _, c := range colors {
 		col := Color{
-			R: c.R,
-			G: c.G,
-			B: c.B,
+			R:   c.R,
+			G:   c.G,
+			B:   c.B,
 			RGB: c,
 		}
 
 		legend = append(legend, col)
-  }
+	}
 
-  return legend
+	return legend
 }

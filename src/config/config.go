@@ -19,7 +19,7 @@ type Config struct {
 	Metric    bool   `yaml:"metric"`
 	DMC       Type   `yaml:"dmc"`
 	Anchor    Type   `yaml:"anchor"`
-	Lego			Type   `yaml:"lego"`
+	Lego      Type   `yaml:"lego"`
 }
 
 type Quantize struct {
@@ -33,9 +33,9 @@ type Type struct {
 }
 
 type Fabric struct {
-	Enabled bool `yaml:"enabled"`
-	Name string `yaml:"name"`
-	Color string `yaml:"color"`
+	Enabled bool   `yaml:"enabled"`
+	Name    string `yaml:"name"`
+	Color   string `yaml:"color"`
 }
 
 func NewConfig() (*Config, error) {
