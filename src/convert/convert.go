@@ -20,32 +20,33 @@ import (
 )
 
 type Legend struct {
-	Color  palette.Thread
+	Color  palette.Color
 	Count  int
 	Symbol rune
 }
 
 type ColorSymbol struct {
 	Symbol palette.SymbolRune
-	Color  palette.Thread
+	Color  palette.Color
 	Text   string
 }
 
 type NewData struct {
 	Image   *image.RGBA
-	Count   map[palette.Thread]int
+	Count   map[palette.Color]int
 	Legend  []Legend
 	Symbols [][]ColorSymbol
 	Path    string
 	Extra   string
 	Scheme  string
+	Type    config.Type
 }
 
 type Converter struct {
 	image     image.Image
 	newData   NewData
 	rgb       bool
-	pc        []palette.Thread
+	pc        []palette.Color
 	greyscale bool
 }
 
@@ -72,6 +73,8 @@ func NewConverter(filename string, config *config.Config) (*Converter, error) {
 		c.newData.Symbols[y] = make([]ColorSymbol, bounds.Dx()-bounds.Min.X)
 	}
 
+	c.newData.Count = make(map[palette.Color]int)
+
 	c.rgb = config.Rgb
 	c.greyscale = config.Greyscale
 
@@ -79,6 +82,16 @@ func NewConverter(filename string, config *config.Config) (*Converter, error) {
 		c.newData.Extra = "-" + config.Palette + "-rgb"
 	} else {
 		c.newData.Extra = "-" + config.Palette + "-lab"
+	}
+
+	if config.Palette == "original" {
+		if !config.Quantize.Enabled {
+			slog.Error(fmt.Sprintf("Cannot use %s palette without enabling convertPalette. Check config settings and try again.", config.Palette))
+		}
+		c.newData.Scheme = "Quantize"
+
+		c.pc = palette.ConvertOriginal(c.colorQuant(config.Quantize.N))
+		return &c, nil
 	}
 
 	csvFile := config.CsvFile
@@ -95,11 +108,14 @@ func NewConverter(filename string, config *config.Config) (*Converter, error) {
 
 	if config.Palette == "lego" {
 		c.newData.Scheme = "LEGO"
+		c.newData.Type = config.Lego
 	} else if config.Palette == "dmc" || config.Palette == "anchor" {
 		if config.Palette == "dmc" {
 			c.newData.Scheme = "DMC"
+			c.newData.Type = config.DMC
 		} else {
 			c.newData.Scheme = "Anchor"
+			c.newData.Type = config.Anchor
 		}
 
 		if config.Quantize.Enabled {
@@ -115,8 +131,6 @@ func NewConverter(filename string, config *config.Config) (*Converter, error) {
 	} else {
 		return &c, errors.New("--color not recognized")
 	}
-
-	c.newData.Count = make(map[palette.Thread]int)
 
 	return &c, nil
 }
@@ -154,9 +168,9 @@ func (c *Converter) getImage() error {
 }
 
 // convert best-color palette to match available threads
-func (c *Converter) convertPalette(colors []colorConverter.SRGB) []palette.Thread {
-	dict := make(map[palette.Thread]int)
-	var legend []palette.Thread
+func (c *Converter) convertPalette(colors []colorConverter.SRGB) []palette.Color {
+	dict := make(map[palette.Color]int)
+	var legend []palette.Color
 	for i := 0; i < len(colors); i++ {
 		minLen := math.MaxFloat64
 		minIndex := 0
@@ -193,7 +207,7 @@ func (c *Converter) convertImage(dither bool) error {
 		slog.Info(fmt.Sprintf("Converting image to %s palette...", c.newData.Scheme))
 		// TODO: make variable amount of chunks based on image size
 		n := 4
-		countChan := make(chan map[palette.Thread]int, n*n)
+		countChan := make(chan map[palette.Color]int, n*n)
 
 		// goroutines
 		for m := 0; m < n; m++ {
@@ -236,8 +250,8 @@ func (c *Converter) convertImage(dither bool) error {
 	return nil
 }
 
-func (c *Converter) convertImageChunk(xlow, xhigh, ylow, yhigh int) map[palette.Thread]int {
-	count := make(map[palette.Thread]int)
+func (c *Converter) convertImageChunk(xlow, xhigh, ylow, yhigh int) map[palette.Color]int {
+	count := make(map[palette.Color]int)
 	for y := ylow; y < yhigh; y++ {
 		for x := xlow; x < xhigh; x++ {
 			minIndex := c.setNewPixel(x, y)
@@ -277,7 +291,7 @@ func (c *Converter) setNewPixel(x, y int) int {
 	return minIndex
 }
 
-func getTextColor(cc palette.Thread) string {
+func getTextColor(cc palette.Color) string {
 	gg := colorConverter.Greyscale(cc.RGB.R, cc.RGB.G, cc.RGB.B)
 
 	if gg < 100 {
@@ -368,6 +382,11 @@ func (c *Converter) colorQuant(n int) []colorConverter.SRGB {
 		}
 
 		bestColors[i] = colorConverter.SRGB{R: uint8(math.Sqrt(avgR / float64(len(s)))), G: uint8(math.Sqrt(avgG / float64(len(s)))), B: uint8(math.Sqrt(avgB / float64(len(s))))}
+	}
+
+	slog.Debug("Best Colors RGB Values:")
+	for _, b := range bestColors {
+		slog.Debug(fmt.Sprintf("R: %v, G: %v, B: %v", b.R, b.G, b.B))
 	}
 
 	return bestColors

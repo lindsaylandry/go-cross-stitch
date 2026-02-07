@@ -39,7 +39,7 @@ func (w *Writer) WriteFiles() error {
 	// write PDF instructions
 	slog.Info("Writing PDF instructions...")
 	for _, p := range paperSizes {
-		pdfPath, pdfErr := w.writePDF(imgPath, p)
+		pdfPath, pdfErr := w.writePDF(imgPath, p, w.data.Type)
 		if pdfErr != nil {
 			return pdfErr
 		}
