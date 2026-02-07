@@ -93,10 +93,18 @@ func NewConverter(filename string, config *config.Config) (*Converter, error) {
 	}
 	c.pc = pc
 
+<<<<<<< Updated upstream
 	if config.Palette == "lego" {
 		c.newData.Scheme = "LEGO"
 	} else if config.Palette == "dmc" || config.Palette == "anchor" {
 		if config.Palette == "dmc" {
+=======
+	if config.Palette == "dmc" || config.Palette == "anchor" || config.Palette == "lego" {
+		if config.Palette == "lego" {
+			c.newData.Scheme = "LEGO"
+			c.newData.Type = config.Lego
+		} else if config.Palette == "dmc" {
+>>>>>>> Stashed changes
 			c.newData.Scheme = "DMC"
 		} else {
 			c.newData.Scheme = "Anchor"
