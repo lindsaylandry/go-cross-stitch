@@ -57,7 +57,6 @@ func ReadCSV(filename string, excludes []string) ([]Color, error) {
 			dmcColors[i].ID = maxID
 			maxID += 1
 		}
-		i++
 	}
 
 	return dmcColors, nil

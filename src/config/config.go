@@ -29,12 +29,13 @@ type Quantize struct {
 }
 
 type Type struct {
-	PixelSizeMM float32 `yaml:"pixel_size_mm"`
-	Fabric      Fabric  `yaml:"fabric"`
+	PixelSizeMM float32    `yaml:"pixel_size_mm"`
+	Background  Background `yaml:"background"`
 }
 
-type Fabric struct {
+type Background struct {
 	Enabled bool   `yaml:"enabled"`
+	Label   string `yaml:"label"`
 	Name    string `yaml:"name"`
 	Color   string `yaml:"color"`
 }

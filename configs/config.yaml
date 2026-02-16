@@ -3,8 +3,8 @@ palette: dmc
 dither: false
 greyscale: false
 quantize:
-  enabled: false
-  n: 7
+  enabled: true
+  n: 8
 csv: ""
 width: 150
 log_level: 1
@@ -15,14 +15,16 @@ metric: false
 # Information about modes
 dmc:
   pixel_size_mm: 1.8
-  fabric:
+  background:
     enabled: true
+    label: Fabric
     name: Aida 14ct
     color: black
 anchor:
   pixel_size_mm: 1.8
-  fabric:
+  background:
     enabled: true
+    label: Fabric
     name: Aida 14ct
     color: black
 lego:
