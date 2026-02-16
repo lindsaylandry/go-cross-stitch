@@ -2,6 +2,7 @@ package palette
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strconv"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/lindsaylandry/go-cross-stitch/src/colorConverter"
 )
 
-type Thread struct {
+type Color struct {
 	ID       int
 	StringID string                `csv:"id"`
 	Name     string                `csv:"name"`
@@ -20,8 +21,8 @@ type Thread struct {
 	LAB      colorConverter.CIELab `csv:"-"`
 }
 
-func ReadCSV(filename string) ([]Thread, error) {
-	dmcColors := []Thread{}
+func ReadCSV(filename string, excludes []string) ([]Color, error) {
+	dmcColors := []Color{}
 
 	path := fmt.Sprintf("palette/%s.csv", filename)
 
@@ -35,7 +36,18 @@ func ReadCSV(filename string) ([]Thread, error) {
 		return nil, err
 	}
 
-	maxID := 10000
+	for _, d := range excludes {
+		for i, c := range dmcColors {
+			if c.StringID == d {
+				slog.Debug(fmt.Sprintf("Excluding color %s (%s)", c.StringID, c.Name))
+				dmcColors = append(dmcColors[:i], dmcColors[i+1:]...)
+			}
+			continue
+		}
+	}
+
+	maxID := 100000
+
 	for i, c := range dmcColors {
 		dmcColors[i].RGB = colorConverter.SRGB{R: c.R, G: c.G, B: c.B}
 		dmcColors[i].LAB = colorConverter.SRGBToCIELab(dmcColors[i].RGB)
@@ -48,4 +60,20 @@ func ReadCSV(filename string) ([]Thread, error) {
 	}
 
 	return dmcColors, nil
+}
+
+func ConvertOriginal(colors []colorConverter.SRGB) []Color {
+	var legend []Color
+	for _, c := range colors {
+		col := Color{
+			R:   c.R,
+			G:   c.G,
+			B:   c.B,
+			RGB: c,
+		}
+
+		legend = append(legend, col)
+	}
+
+	return legend
 }

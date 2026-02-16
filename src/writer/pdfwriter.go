@@ -5,6 +5,8 @@ import (
 
 	"fmt"
 	"strconv"
+
+	"github.com/lindsaylandry/go-cross-stitch/src/config"
 )
 
 type Grid struct {
@@ -12,13 +14,16 @@ type Grid struct {
 	Xend, Yend     int
 }
 
+// Unit math
+const mmInInches = 25.4
+
 const margin = 10.0
 const cell = 2.8
 const legendColor = 10.0
 const legendSymbol = 15.0
 const legendDesc = 35.0
 
-func (w *Writer) writePDF(imgPath string, paperSize string) (string, error) {
+func (w *Writer) writePDF(imgPath string, paperSize string, typ config.Type) (string, error) {
 	var mult float64
 	var maxChunkX, maxChunkY int
 
@@ -56,20 +61,24 @@ func (w *Writer) writePDF(imgPath string, paperSize string) (string, error) {
 	// Image
 	pdf.Image(imgPath, 10, 20, 190.0*mult, 0, true, "", 0, "")
 
+	widthInches := float64(bounds.Max.X) * float64(typ.PixelSizeMM) / mmInInches
+	heightInches := float64(bounds.Max.Y) * float64(typ.PixelSizeMM) / mmInInches
+
 	// Info
-	aida := 14
-	aidaColor := "Black"
-
-	widthInches := float64(bounds.Max.X) / float64(aida)
-	heightInches := float64(bounds.Max.Y) / float64(aida)
-
 	pdf.SetFont("Arial", "B", 18*mult)
 	pdf.CellFormat(100.0*mult, 20.0*mult, "INFO", "", 1, "LM", false, 0, "")
 
+	if typ.Background.Enabled {
+		pdf.SetFont("Arial", "B", 12*mult)
+		pdf.CellFormat(90.0*mult, 5.5*mult, typ.Background.Label+":", "", 0, "LM", false, 0, "")
+		pdf.SetFont("Arial", "", 12*mult)
+		pdf.CellFormat(100.0*mult, 5.5*mult, fmt.Sprintf("%s %s", typ.Background.Name, typ.Background.Color), "", 1, "RM", false, 0, "")
+	}
+
 	pdf.SetFont("Arial", "B", 12*mult)
-	pdf.CellFormat(90.0*mult, 5.5*mult, "Fabric:", "", 0, "LM", false, 0, "")
+	pdf.CellFormat(90.0*mult, 5.5*mult, "Dimensions:", "", 0, "LM", false, 0, "")
 	pdf.SetFont("Arial", "", 12*mult)
-	pdf.CellFormat(100.0*mult, 5.5*mult, fmt.Sprintf("%dct Aida %s", aida, aidaColor), "", 1, "RM", false, 0, "")
+	pdf.CellFormat(100.0*mult, 5.5*mult, fmt.Sprintf("%dx%d pixels", bounds.Max.X, bounds.Max.Y), "", 1, "RM", false, 0, "")
 
 	pdf.SetFont("Arial", "B", 12*mult)
 	pdf.CellFormat(90.0*mult, 5.5*mult, "Size:", "", 0, "LM", false, 0, "")
@@ -87,7 +96,7 @@ func (w *Writer) writePDF(imgPath string, paperSize string) (string, error) {
 	pdf.CellFormat(100.0*mult, 5.5*mult, strconv.Itoa(len(w.data.Legend)), "", 1, "RM", false, 0, "")
 
 	ratio := 190 * mult * float64(bounds.Max.Y) / float64(bounds.Max.X)
-	pdf.Rect(margin, 10+(ratio+20+25)*mult, 190*mult, 30*mult, "D")
+	pdf.Rect(margin, 10+(ratio+20+30)*mult, 190*mult, 30*mult, "D")
 
 	// Legend
 	pdf.AddPage()
@@ -98,7 +107,7 @@ func (w *Writer) writePDF(imgPath string, paperSize string) (string, error) {
 	pdf.CellFormat(legendColor*mult, 4.5*mult, "Color", "", 0, "CM", false, 0, "")
 	pdf.CellFormat(legendSymbol*mult, 4.5*mult, "Symbol", "", 0, "CM", false, 0, "")
 	pdf.CellFormat(legendSymbol*mult, 4.5*mult, "Color ID", "", 0, "CM", false, 0, "")
-	pdf.CellFormat(legendSymbol*mult, 4.5*mult, "Stitches", "", 0, "CM", false, 0, "")
+	pdf.CellFormat(legendSymbol*mult, 4.5*mult, "Num Pixels", "", 0, "CM", false, 0, "")
 	pdf.CellFormat(legendDesc*mult, 4.5*mult, "Color Description", "", 1, "LM", false, 0, "")
 
 	// body cells

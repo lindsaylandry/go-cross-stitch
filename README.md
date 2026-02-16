@@ -12,10 +12,16 @@ To build the binary, run the following:
 go build
 ```
 
+If this is your first time building, first run the following to download dependencies:
+
+```bash
+go mod tidy
+```
+
 ### General Usage
 Once the binary is compiled, use as follows:
 ```bash
-./go-cross-stitch -n 10 test_images/full-moon.png
+./go-cross-stitch test_images/full-moon.png
 ```
 This will make four files in test_images:
 ```
@@ -27,24 +33,64 @@ full-moon-dmc-rgb-A1.pdf
 the png is the image converted to cross-stitch DMC thread colors.
 the PDF is the instructions to stitch the pattern, with the DMC image included.
 
-Run the help command to see all flags available:
-```bash
-./go-cross-stitch --help
-```
+### Configuration
+
+Configure this app with file `configs/config.yaml`
+
+Refer to the table below for accepted values.
+
+| Key | Type | Default | Definition |
+| - | - | - | - |
+| `csv` | `string` | `""` | csv filename |
+| `dither` | `bool` | `false` | implement dithering |
+| `greyscale` | `bool` | `false` | convert image to greyscale |
+| `palette` | `string` | `dmc` | color palette to use (OPTIONS: dmc, anchor, lego, bw) |
+| `quantize` | `struct` | `{}` | settings to quantize image (see below) |
+| `rgb` | `bool` | `true` | use rgb color space |
+| `width` | `int` | `300` | resize image width (0 means do not resize) |
+| `excludes` | `[]string` | `[]` | list of stringIDs of palette to exclude |
+| `dmc` | `"type" struct` | `{}` | info settings on DMC palette |
+| `anchor` | `"type" struct` | `{}` | info settings on Anchor palette |
+| `lego` | `"type" struct` | `{}` | info settings on Lego palette |
+#### `quantize`
+
+Color quantization reduces the number of colors to match. See https://en.wikipedia.org/wiki/Color_quantization for more details.
+
+If disabled, the app will attempt to match all colors to the specified color palette.
+
+Enable this setting to reduce the number of colors in your instructions.
+
+| Key | Type | Default | Definition |
+| - | - | - | - |
+| enabled | boolean | true | whether to enable color quantization |
+| n | int | 7 | number of bisects for color quantization (2^n total) |
+
+#### `type`
+
+Type represents information on the front page of the instructions PDF
+
+| Key | Type | Definition |
+| - | - | - |
+| `pixel_size_mm` | `float32` | Size of each pixel |
+| `background` | `"background" struct` | additional background properties |
+
+#### `background`
+
+Background represents optional information about the background for the instructions PDF
+
+| Key | Type | Definition |
+| - | - | - |
+| `enabled` | `bool` | Whether there is background info |
+| `label` | `string` | name of left-side label under INFO |
+| `name` | `string` | name of right-side label undr INFO |
+| `color` | `string` | color for background |
+
+## Example Image Conversions
 
 ### Render all test images
 ```bash
 make examples
 ```
-
-## References
-Color distance formulas: https://en.wikipedia.org/wiki/Color_difference
-
-Color quantization: https://en.wikipedia.org/wiki/Color_quantization
-
-CIELab color space: https://en.wikipedia.org/wiki/CIELAB_color_space
-
-## Example Image Conversions
 
 ### Mars (reds)
 | Original | RGB Distance | CIELab Distance |
@@ -54,7 +100,7 @@ CIELab color space: https://en.wikipedia.org/wiki/CIELAB_color_space
 ### Earth (blues and greens)
 | Original | RGB Distance | CIELab Distance |
 |:--:|:--:|:--:|
-| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/earth.png" height="200" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/earth-dmc-rgb.png" height="200" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/earth-dmc-lab.png" height="200" style="image-rendering: pixelated;">
+| <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/earth-americas.png" height="200" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/earth-americas-dmc-rgb.png" height="200" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/earth-dmc-lab.png" height="200" style="image-rendering: pixelated;">
 
 ### Moon (greyscale)
 | Original | RGB Distance | CIELab Distance |
@@ -65,3 +111,12 @@ CIELab color space: https://en.wikipedia.org/wiki/CIELAB_color_space
 | Original | RGB Distance | CIELab Distance |
 |:--:|:--:|:--:|
 | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/colors.jpg" height="200" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/colors-dmc-rgb.png" height="200" style="image-rendering: pixelated;"> | <img src="https://github.com/lindsaylandry/go-cross-stitch/blob/main/test_images/colors-dmc-lab.png" height="200" style="image-rendering: pixelated;">
+
+## References
+Color distance formulas: https://en.wikipedia.org/wiki/Color_difference
+
+Color quantization: https://en.wikipedia.org/wiki/Color_quantization
+
+CIELab color space: https://en.wikipedia.org/wiki/CIELAB_color_space
+
+
