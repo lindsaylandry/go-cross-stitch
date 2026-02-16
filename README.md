@@ -52,7 +52,7 @@ Refer to the table below for accepted values.
 | `dmc` | `"type" struct` | `{}` | info settings on DMC palette |
 | `anchor` | `"type" struct` | `{}` | info settings on Anchor palette |
 | `lego` | `"type" struct` | `{}` | info settings on Lego palette |
-#### quantize
+#### `quantize`
 
 Color quantization reduces the number of colors to match. See https://en.wikipedia.org/wiki/Color_quantization for more details.
 
@@ -65,9 +65,25 @@ Enable this setting to reduce the number of colors in your instructions.
 | enabled | boolean | true | whether to enable color quantization |
 | n | int | 7 | number of bisects for color quantization (2^n total) |
 
-#### type
-| Key | Type | Default | Definition |
-| - | - | - | - |
+#### `type`
+
+Type represents information on the front page of the instructions PDF
+
+| Key | Type | Definition |
+| - | - | - |
+| `pixel_size_mm` | `float32` | Size of each pixel |
+| `background` | `"background" struct` | additional background properties |
+
+#### `background`
+
+Background represents optional information about the background for the instructions PDF
+
+| Key | Type | Definition |
+| - | - | - |
+| `enabled` | `bool` | Whether there is background info |
+| `label` | `string` | name of left-side label under INFO |
+| `name` | `string` | name of right-side label undr INFO |
+| `color` | `string` | color for background |
 
 ## Example Image Conversions
 
