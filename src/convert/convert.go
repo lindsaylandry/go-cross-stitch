@@ -99,7 +99,7 @@ func NewConverter(filename string, config *config.Config) (*Converter, error) {
 		csvFile = config.Palette
 	}
 
-	pc, err := palette.ReadCSV(csvFile)
+	pc, err := palette.ReadCSV(csvFile, config.Excludes)
 
 	if err != nil {
 		return &c, err
@@ -167,7 +167,7 @@ func (c *Converter) getImage() error {
 	return err
 }
 
-// convert best-color palette to match available threads
+// convert image best-colors to match available palette
 func (c *Converter) convertPalette(colors []colorConverter.SRGB) []palette.Color {
 	dict := make(map[palette.Color]int)
 	var legend []palette.Color
@@ -383,6 +383,8 @@ func (c *Converter) colorQuant(n int) []colorConverter.SRGB {
 
 		bestColors[i] = colorConverter.SRGB{R: uint8(math.Sqrt(avgR / float64(len(s)))), G: uint8(math.Sqrt(avgG / float64(len(s)))), B: uint8(math.Sqrt(avgB / float64(len(s))))}
 	}
+
+	// TODO: filter out any duplicates
 
 	slog.Debug("Best Colors RGB Values:")
 	for _, b := range bestColors {

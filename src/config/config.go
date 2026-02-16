@@ -12,14 +12,15 @@ type Config struct {
 	Dither    bool   `yaml:"dither"`
 	Greyscale bool   `yaml:"greyscale"`
 	Quantize  `yaml:"quantize"`
-	ColorGrid bool   `yaml:"color_grid"`
-	CsvFile   string `yaml:"csv_file"`
-	Width     int    `yaml:"width"`
-	LogLevel  int    `yaml:"log_level"`
-	Metric    bool   `yaml:"metric"`
-	DMC       Type   `yaml:"dmc"`
-	Anchor    Type   `yaml:"anchor"`
-	Lego      Type   `yaml:"lego"`
+	ColorGrid bool     `yaml:"color_grid"`
+	CsvFile   string   `yaml:"csv_file"`
+	Width     int      `yaml:"width"`
+	LogLevel  int      `yaml:"log_level"`
+	Metric    bool     `yaml:"metric"`
+	Excludes  []string `yaml:"excludes"`
+	DMC       Type     `yaml:"dmc"`
+	Anchor    Type     `yaml:"anchor"`
+	Lego      Type     `yaml:"lego"`
 }
 
 type Quantize struct {
