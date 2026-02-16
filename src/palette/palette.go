@@ -11,7 +11,7 @@ import (
 )
 
 type Color struct {
-	ID       int									 
+	ID       int
 	StringID string                `csv:"id"`
 	Name     string                `csv:"name"`
 	R        uint8                 `csv:"r"`
@@ -36,7 +36,6 @@ func ReadCSV(filename string, excludes []string) ([]Color, error) {
 		return nil, err
 	}
 
-
 	for _, d := range excludes {
 		for i, c := range dmcColors {
 			if c.StringID == d {
@@ -45,7 +44,7 @@ func ReadCSV(filename string, excludes []string) ([]Color, error) {
 			}
 			continue
 		}
-  }
+	}
 
 	maxID := 100000
 
