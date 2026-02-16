@@ -6,8 +6,8 @@ require (
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
 	github.com/jung-kurt/gofpdf v1.16.2
 	github.com/spf13/cobra v1.8.1
-	golang.org/x/image v0.0.0-20190910094157-69e4b8554b2a
-	gopkg.in/yaml.v2 v2.4.0
+	go.yaml.in/yaml/v4 v4.0.0-rc.4
+	golang.org/x/image v0.18.0
 )
 
 require (
