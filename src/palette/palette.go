@@ -2,6 +2,7 @@ package palette
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strconv"
 
@@ -20,7 +21,7 @@ type Color struct {
 	LAB      colorConverter.CIELab `csv:"-"`
 }
 
-func ReadCSV(filename string) ([]Color, error) {
+func ReadCSV(filename string, excludes []string) ([]Color, error) {
 	dmcColors := []Color{}
 
 	path := fmt.Sprintf("palette/%s.csv", filename)
@@ -35,7 +36,18 @@ func ReadCSV(filename string) ([]Color, error) {
 		return nil, err
 	}
 
-	maxID := 10000
+	for _, d := range excludes {
+		for i, c := range dmcColors {
+			if c.StringID == d {
+				slog.Debug(fmt.Sprintf("Excluding color %s (%s)", c.StringID, c.Name))
+				dmcColors = append(dmcColors[:i], dmcColors[i+1:]...)
+			}
+			continue
+		}
+	}
+
+	maxID := 100000
+
 	for i, c := range dmcColors {
 		dmcColors[i].RGB = colorConverter.SRGB{R: c.R, G: c.G, B: c.B}
 		dmcColors[i].LAB = colorConverter.SRGBToCIELab(dmcColors[i].RGB)

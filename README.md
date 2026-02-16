@@ -45,11 +45,14 @@ Refer to the table below for accepted values.
 | `dither` | `bool` | `false` | implement dithering |
 | `greyscale` | `bool` | `false` | convert image to greyscale |
 | `palette` | `string` | `dmc` | color palette to use (OPTIONS: dmc, anchor, lego, bw) |
-| `quantize` | `struct` | `-` | settings to quantize image (see below) |
+| `quantize` | `struct` | `{}` | settings to quantize image (see below) |
 | `rgb` | `bool` | `true` | use rgb color space |
 | `width` | `int` | `300` | resize image width (0 means do not resize) |
-
-#### quantize
+| `excludes` | `[]string` | `[]` | list of stringIDs of palette to exclude |
+| `dmc` | `"type" struct` | `{}` | info settings on DMC palette |
+| `anchor` | `"type" struct` | `{}` | info settings on Anchor palette |
+| `lego` | `"type" struct` | `{}` | info settings on Lego palette |
+#### `quantize`
 
 Color quantization reduces the number of colors to match. See https://en.wikipedia.org/wiki/Color_quantization for more details.
 
@@ -61,6 +64,26 @@ Enable this setting to reduce the number of colors in your instructions.
 | - | - | - | - |
 | enabled | boolean | true | whether to enable color quantization |
 | n | int | 7 | number of bisects for color quantization (2^n total) |
+
+#### `type`
+
+Type represents information on the front page of the instructions PDF
+
+| Key | Type | Definition |
+| - | - | - |
+| `pixel_size_mm` | `float32` | Size of each pixel |
+| `background` | `"background" struct` | additional background properties |
+
+#### `background`
+
+Background represents optional information about the background for the instructions PDF
+
+| Key | Type | Definition |
+| - | - | - |
+| `enabled` | `bool` | Whether there is background info |
+| `label` | `string` | name of left-side label under INFO |
+| `name` | `string` | name of right-side label undr INFO |
+| `color` | `string` | color for background |
 
 ## Example Image Conversions
 

@@ -64,14 +64,15 @@ func (w *Writer) writePDF(imgPath string, paperSize string, typ config.Type) (st
 	widthInches := float64(bounds.Max.X) * float64(typ.PixelSizeMM) / mmInInches
 	heightInches := float64(bounds.Max.Y) * float64(typ.PixelSizeMM) / mmInInches
 
+	// Info
 	pdf.SetFont("Arial", "B", 18*mult)
 	pdf.CellFormat(100.0*mult, 20.0*mult, "INFO", "", 1, "LM", false, 0, "")
 
-	if typ.Fabric.Enabled {
+	if typ.Background.Enabled {
 		pdf.SetFont("Arial", "B", 12*mult)
-		pdf.CellFormat(90.0*mult, 5.5*mult, "Fabric:", "", 0, "LM", false, 0, "")
+		pdf.CellFormat(90.0*mult, 5.5*mult, typ.Background.Label+":", "", 0, "LM", false, 0, "")
 		pdf.SetFont("Arial", "", 12*mult)
-		pdf.CellFormat(100.0*mult, 5.5*mult, fmt.Sprintf("%s %s", typ.Fabric.Name, typ.Fabric.Color), "", 1, "RM", false, 0, "")
+		pdf.CellFormat(100.0*mult, 5.5*mult, fmt.Sprintf("%s %s", typ.Background.Name, typ.Background.Color), "", 1, "RM", false, 0, "")
 	}
 
 	pdf.SetFont("Arial", "B", 12*mult)
@@ -95,7 +96,7 @@ func (w *Writer) writePDF(imgPath string, paperSize string, typ config.Type) (st
 	pdf.CellFormat(100.0*mult, 5.5*mult, strconv.Itoa(len(w.data.Legend)), "", 1, "RM", false, 0, "")
 
 	ratio := 190 * mult * float64(bounds.Max.Y) / float64(bounds.Max.X)
-	pdf.Rect(margin, 10+(ratio+20+25)*mult, 190*mult, 30*mult, "D")
+	pdf.Rect(margin, 10+(ratio+20+30)*mult, 190*mult, 30*mult, "D")
 
 	// Legend
 	pdf.AddPage()
