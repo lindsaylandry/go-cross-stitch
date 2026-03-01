@@ -32,14 +32,15 @@ type ColorSymbol struct {
 }
 
 type NewData struct {
-	Image   *image.RGBA
-	Count   map[palette.Color]int
-	Legend  []Legend
-	Symbols [][]ColorSymbol
-	Path    string
-	Extra   string
-	Scheme  string
-	Type    config.Type
+	Image       *image.RGBA
+	Count       map[palette.Color]int
+	Legend      []Legend
+	Symbols     [][]ColorSymbol
+	Path        string
+	PaletteName string
+	Extra       string
+	Scheme      string
+	Type        config.Type
 }
 
 type Converter struct {
@@ -77,6 +78,7 @@ func NewConverter(filename string, config *config.Config) (*Converter, error) {
 
 	c.rgb = config.Rgb
 	c.greyscale = config.Greyscale
+	c.newData.PaletteName = config.Palette
 
 	if c.rgb {
 		c.newData.Extra = "-" + config.Palette + "-rgb"
