@@ -80,10 +80,12 @@ func (w *Writer) writePDF(imgPath string, paperSize string, typ config.Type) (st
 	pdf.SetFont("Arial", "", 12*mult)
 	pdf.CellFormat(100.0*mult, 5.5*mult, fmt.Sprintf("%dx%d pixels", bounds.Max.X, bounds.Max.Y), "", 1, "RM", false, 0, "")
 
-	pdf.SetFont("Arial", "B", 12*mult)
-	pdf.CellFormat(90.0*mult, 5.5*mult, "Size:", "", 0, "LM", false, 0, "")
-	pdf.SetFont("Arial", "", 12*mult)
-	pdf.CellFormat(100.0*mult, 5.5*mult, fmt.Sprintf("%.1fx%.1fin", widthInches, heightInches), "", 1, "RM", false, 0, "")
+	if typ.PixelSizeMM > 0 {
+		pdf.SetFont("Arial", "B", 12*mult)
+		pdf.CellFormat(90.0*mult, 5.5*mult, "Size:", "", 0, "LM", false, 0, "")
+		pdf.SetFont("Arial", "", 12*mult)
+		pdf.CellFormat(100.0*mult, 5.5*mult, fmt.Sprintf("%.1fx%.1fin", widthInches, heightInches), "", 1, "RM", false, 0, "")
+	}
 
 	pdf.SetFont("Arial", "B", 12*mult)
 	pdf.CellFormat(90.0*mult, 5.5*mult, "Color Scheme:", "", 0, "LM", false, 0, "")
@@ -104,18 +106,24 @@ func (w *Writer) writePDF(imgPath string, paperSize string, typ config.Type) (st
 	pdf.CellFormat(100.0*mult, 20.0*mult, "Legend", "", 1, "LM", false, 0, "")
 	pdf.SetFont("Arial", "B", 8*mult)
 	// header cells
+	lineW := legendColor + legendSymbol*2 + legendDesc
 	pdf.CellFormat(legendColor*mult, 4.5*mult, "Color", "", 0, "CM", false, 0, "")
 	pdf.CellFormat(legendSymbol*mult, 4.5*mult, "Symbol", "", 0, "CM", false, 0, "")
-	if w.data.PaletteName == "original" {
-		pdf.CellFormat(legendSymbol*mult, 4.5*mult, "RGB", "", 0, "CM", false, 0, "")
-	} else {
+	if w.data.PaletteName != "original" {
+		lineW += legendSymbol
 		pdf.CellFormat(legendSymbol*mult, 4.5*mult, "Color ID", "", 0, "CM", false, 0, "")
 	}
 	pdf.CellFormat(legendSymbol*mult, 4.5*mult, "Num Pixels", "", 0, "CM", false, 0, "")
-	pdf.CellFormat(legendDesc*mult, 4.5*mult, "Color Description", "", 1, "LM", false, 0, "")
+	if w.data.PaletteName == "original" {
+		pdf.CellFormat(legendDesc*mult, 4.5*mult, "RGB", "", 1, "CM", false, 0, "")
+	} else {
+		pdf.CellFormat(legendDesc*mult, 4.5*mult, "Color Description", "", 1, "LM", false, 0, "")
+	}
 
 	// body cells
 	pdf.SetFont("aaa", "", 8*mult)
+	pdf.SetLineWidth(0.4)
+	pdf.Line(margin, 10+mult*(20.0+4.5), 10+mult*lineW, 10+mult*(20.0+4.5))
 	for i := 0; i < len(w.data.Legend); i++ {
 		fill := false
 		pdf.SetFillColor(int(w.data.Legend[i].Color.RGB.R), int(w.data.Legend[i].Color.RGB.G), int(w.data.Legend[i].Color.RGB.B))
@@ -126,18 +134,15 @@ func (w *Writer) writePDF(imgPath string, paperSize string, typ config.Type) (st
 			fill = true
 		}
 		pdf.CellFormat(legendSymbol*mult, 4.5*mult, string(w.data.Legend[i].Symbol), "", 0, "CM", fill, 0, "")
-		if w.data.PaletteName == "original" {
-			str := fmt.Sprintf("%d,%d,%d", int(w.data.Legend[i].Color.RGB.R), int(w.data.Legend[i].Color.RGB.G), int(w.data.Legend[i].Color.RGB.B))
-			pdf.CellFormat(legendSymbol*mult, 4.5*mult, str, "", 0, "RM", fill, 0, "")
-		} else {
+		if w.data.PaletteName != "original" {
 			pdf.CellFormat(legendSymbol*mult, 4.5*mult, w.data.Legend[i].Color.StringID, "", 0, "RM", fill, 0, "")
 		}
 		pdf.CellFormat(legendSymbol*mult, 4.5*mult, strconv.Itoa(w.data.Legend[i].Count), "", 0, "RM", fill, 0, "")
-		pdf.CellFormat(legendDesc*mult, 4.5*mult, w.data.Legend[i].Color.Name, "", 1, "LM", fill, 0, "")
-
-		if i == 0 {
-			pdf.SetLineWidth(0.4)
-			pdf.Line(margin, 10+mult*(20.0+4.5), 10+mult*(10.0+15.0+15.0+15.0+35.0), 10+mult*(20.0+4.5))
+		if w.data.PaletteName == "original" {
+			str := fmt.Sprintf("%d,%d,%d", int(w.data.Legend[i].Color.RGB.R), int(w.data.Legend[i].Color.RGB.G), int(w.data.Legend[i].Color.RGB.B))
+			pdf.CellFormat(legendDesc*mult, 4.5*mult, str, "", 1, "RM", fill, 0, "")
+		} else {
+			pdf.CellFormat(legendDesc*mult, 4.5*mult, w.data.Legend[i].Color.Name, "", 1, "LM", fill, 0, "")
 		}
 	}
 
