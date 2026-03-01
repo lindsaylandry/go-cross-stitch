@@ -106,7 +106,11 @@ func (w *Writer) writePDF(imgPath string, paperSize string, typ config.Type) (st
 	// header cells
 	pdf.CellFormat(legendColor*mult, 4.5*mult, "Color", "", 0, "CM", false, 0, "")
 	pdf.CellFormat(legendSymbol*mult, 4.5*mult, "Symbol", "", 0, "CM", false, 0, "")
-	pdf.CellFormat(legendSymbol*mult, 4.5*mult, "Color ID", "", 0, "CM", false, 0, "")
+	if w.data.PaletteName == "original" {
+		pdf.CellFormat(legendSymbol*mult, 4.5*mult, "RGB", "", 0, "CM", false, 0, "")
+	} else {
+		pdf.CellFormat(legendSymbol*mult, 4.5*mult, "Color ID", "", 0, "CM", false, 0, "")
+	}
 	pdf.CellFormat(legendSymbol*mult, 4.5*mult, "Num Pixels", "", 0, "CM", false, 0, "")
 	pdf.CellFormat(legendDesc*mult, 4.5*mult, "Color Description", "", 1, "LM", false, 0, "")
 
@@ -122,7 +126,12 @@ func (w *Writer) writePDF(imgPath string, paperSize string, typ config.Type) (st
 			fill = true
 		}
 		pdf.CellFormat(legendSymbol*mult, 4.5*mult, string(w.data.Legend[i].Symbol), "", 0, "CM", fill, 0, "")
-		pdf.CellFormat(legendSymbol*mult, 4.5*mult, w.data.Legend[i].Color.StringID, "", 0, "RM", fill, 0, "")
+		if w.data.PaletteName == "original" {
+			str := fmt.Sprintf("%d,%d,%d", int(w.data.Legend[i].Color.RGB.R), int(w.data.Legend[i].Color.RGB.G), int(w.data.Legend[i].Color.RGB.B))
+			pdf.CellFormat(legendSymbol*mult, 4.5*mult, str, "", 0, "RM", fill, 0, "")
+		} else {
+			pdf.CellFormat(legendSymbol*mult, 4.5*mult, w.data.Legend[i].Color.StringID, "", 0, "RM", fill, 0, "")
+		}
 		pdf.CellFormat(legendSymbol*mult, 4.5*mult, strconv.Itoa(w.data.Legend[i].Count), "", 0, "RM", fill, 0, "")
 		pdf.CellFormat(legendDesc*mult, 4.5*mult, w.data.Legend[i].Color.Name, "", 1, "LM", fill, 0, "")
 
